@@ -1,0 +1,5 @@
+﻿  main.c
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(56,2): warning C4013: 'ConsoleShowScreen' undefined; assuming extern returning int
+  main_d.c
+  Generating Code...
+  Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe
