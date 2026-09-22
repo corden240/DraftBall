@@ -16,6 +16,8 @@ struct response {
 	int team_started_with_possession; // 1 if team 1, 2 if team 2
 	char team_1_name[32];
 	char team_2_name[32];
+	int team_1_direction; // 1 if team 1 is going left to right, 2 if team 1 is going right to left
+	int team_2_direction; // 1 if team 2 is going left to right, 2 if team 2 is going right to left
 };
 
 struct table_weight {

@@ -5,6 +5,159 @@
 #include "main_d.c"
 
 /*
+* NAME:        DrawCard
+* DESCRIPTION: pick an available card from the deck 
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void DrawCard(struct response* res, int deck)
+{
+
+}
+
+/*
+* NAME:        Interception
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void Interception(struct response* res)
+{
+
+}
+
+/*
+* NAME:        Fumble
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void Fumble(struct response* res)
+{
+
+}
+
+/*
+* NAME:        OpenFieldRun
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void OpenFieldRun(struct response* res, int Offence1, int Defence1)
+{
+
+}
+
+/*
+* NAME:        PlayPass
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayPass(struct response* res, int Offence1, int Defence1)
+{
+
+}
+
+/*
+* NAME:        PlayRun
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayRun(struct response* res, int Offence1, int Defence1)
+{
+
+}
+
+/*
+* NAME:        PlayNormal
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayNormal(struct response* res)
+{
+	// pick layout
+	// O: pick card positions
+	// D: pick card positions
+	// Reveal 1 by 1
+	// O: pick which match up to play
+
+	// PlayRun(res, O1, D1);
+	// PlayPass(res, O1, D1);
+}
+
+/*
+* NAME:        PlayPunt
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayPunt(struct response* res)
+{
+	// draw 1-5 cards
+	// can replace 0-2
+	// find total yards
+	// resolve where it is caught
+	// do punt return here? // TODO: should it be here?
+}
+
+/*
+* NAME:        PlayFieldGoal
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayFieldGoal(struct response* res)
+{
+	// find target yards, distance to end zone + 18
+	// draw 1-6 cards
+	// can replace 0-2
+	// find total yards
+	// resolve, scored, missed, turnover at line of scrimmage, leave room for it we want block to be possible?
+}
+
+/*
+* NAME:        PlayKneel
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayKneel(struct response* res)
+{
+	ConsoleShowScreen(res, "QB Kneel executed. Play over.", 1000);
+}
+
+/*
+* NAME:        PlayTimeout
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayTimeout(struct response* res)
+{
+	res->plays_remaining_in_quarter += 2; //add 2 plays back to the clock but then 1 will be deleted as this counts as a play
+}
+
+/*
+* NAME:        GetPlayType
+* DESCRIPTION: get input from player for play type
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+int GetPlayType(struct response* res)
+{
+	int play_type = 0;
+	ConsoleShowScreen(res, "Pick game type (1 - 5): ", 100);
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		play_type = atoi(input);
+	}
+	return play_type;
+}
+
+/*
 * NAME:        DoPlay
 * DESCRIPTION: find and then action each play
 * INPUTS:      response
@@ -12,9 +165,84 @@
 */
 void DoPlay(struct response* res)
 {
-	// player picks what to do: normal play, punt, field goal, spike, kneel, timeout
+	int play_type = 0;
+	
+	if ((res->quarter == 1 || res->quarter == 3) && (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER))
+	{
+		play_type = 2; // always punt on first play of each half
+	}
+	//else if (1) // TODO: if touchdown just scored automatically go for extra point
+	//{
+	//	// play extra point or 2?
+	//}
+	else
+	{
+		play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
+	}
 
-	// dont allow time out unless less than 9 plays left
+	bool retry = false;
+	do {
+		retry = false;
+		switch (play_type) {
+		case 1:
+		{
+			PlayNormal(res);
+			break;
+		}
+		case 2:
+		{
+			PlayPunt(res);
+			break;
+		}
+		case 3:
+		{
+			PlayFieldGoal(res);
+			break;
+		}
+		case 4:
+		{
+			PlayKneel(res);
+			break;
+		}
+		case 5:
+		{
+			if(res->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
+				retry = true;
+			else
+				PlayTimeout(res);
+			break;
+		}
+		default:
+		{
+			ConsoleShowScreen(res, "Invalid play type. Please pick a number between 1 and 5. (you cannot timeout unless 2 plays have already happened this quarter)", 1000);
+			retry = true;
+			break;
+		}
+		}
+
+	} while (retry);
+	
+	// TODO: assess whether we made first down? otherwise go to the next down? unless it was a timeout? If it was 4th down resolve
+}
+
+/*
+* NAME:        SwitchEnds
+* DESCRIPTION: switch direction of play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void SwitchEnds(struct response* res)
+{
+	if (res->team_1_direction == 1)
+	{
+		res->team_1_direction = 2;
+		res->team_2_direction = 1;
+	}
+	else
+	{
+		res->team_1_direction = 1;
+		res->team_2_direction = 2;
+	}
 }
 
 /*
@@ -38,11 +266,13 @@ void Play(struct response* res)
 			}
 
 			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER) {
-				; // TODO: switch ends
+				SwitchEnds(res);
+				//TODO: announce switching of ends 
 			}
 
 			DoPlay(res);	
 		}
+		//TODO: announce end of quarter, announce who will have the ball / punt
 	}
 }
 
@@ -79,6 +309,17 @@ void CoinToss(struct response* res)
 			res->team_started_with_possession = team_that_won_cointoss;
 		else
 			res->team_started_with_possession = team_that_won_cointoss - 1 ? team_that_won_cointoss - 1 : team_that_won_cointoss + 1;
+
+		if (res->team_started_with_possession == 1)
+		{
+			res->team_1_direction = 1;
+			res->team_2_direction = 2;
+		}
+		else
+		{
+			res->team_1_direction = 2;
+			res->team_2_direction = 1;
+		}
 	}
 }
 
@@ -96,7 +337,6 @@ void GetTeamNames(struct response* res)
 	ConsoleShowScreen(res, "Enter name for Team 2: ", 0);
 	fgets(res->team_2_name, sizeof(res->team_2_name), stdin);
 	res->team_2_name[strcspn(res->team_2_name, "\n")] = '\0';
-	
 	ConsoleShowScreen(res, 0, 0);
 }
 
@@ -112,7 +352,7 @@ void SetupGame(struct response* res)
 
 	GetTeamNames(res);
 
-	CoinToss(res);  
+	CoinToss(res);
 }
 
 /*
@@ -140,6 +380,8 @@ void ResponseConstructor(struct response* res)
 	res->team_started_with_possession = 0;
 	strcpy(res->team_1_name, "Team 1");
 	strcpy(res->team_2_name, "Team 2");
+	res->team_1_direction = 1; // default direction
+	res->team_2_direction = 2; // default direction
 }
 
 /*
@@ -150,8 +392,23 @@ void ResponseConstructor(struct response* res)
 */
 void EndOfGame(struct response* res)
 {
-	// display final score and winner
-	// replay game?
+	ConsoleShowScreen(res, "Game Over!", 1000);
+	if (res->score_team_1 > res->score_team_2)
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s wins!", res->team_1_name);
+		ConsoleShowScreen(res, buf, 1000);
+	}
+	else if (res->score_team_2 > res->score_team_1)
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s wins!", res->team_2_name);
+		ConsoleShowScreen(res, buf, 1000);
+	}
+	else
+	{
+		ConsoleShowScreen(res, "It's a tie!", 1000);
+	}
 }
 
 /*

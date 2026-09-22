@@ -127,7 +127,7 @@ void ShowText(struct response* res, char txt[1000])
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-	printf("\n\r\n\r                                                               ");
+	printf("\n\r\n\r                                                                                             ");
 	printf("\r                                 ");
 	for (int i = 0; i < 1000 && txt[i] != '\0'; i++)
 	{
