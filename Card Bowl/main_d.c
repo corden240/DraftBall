@@ -2,6 +2,7 @@
 
 struct response {
 	int line_of_scrimmage;
+	int line_of_first_down;
 	int down;
 	int team_in_possession;
 	int score_team_1;
@@ -13,8 +14,8 @@ struct response {
 	int team_1_timeouts_remaining;
 	int team_2_timeouts_remaining;
 	int team_started_with_possession; // 1 if team 1, 2 if team 2
-	char team_1_name[20];
-	char team_2_name[20];
+	char team_1_name[32];
+	char team_2_name[32];
 };
 
 struct table_weight {

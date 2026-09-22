@@ -1,5 +1,7 @@
 ﻿  main.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(56,2): warning C4013: 'ConsoleShowScreen' undefined; assuming extern returning int
-  main_d.c
-  Generating Code...
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(32,2): warning C4013: 'ConsoleShowScreen' undefined; assuming extern returning int
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(55,11): warning C4047: 'function': 'char *' differs in levels of indirection from 'int'
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(55,11): warning C4024: 'fgets': different types for formal and actual parameter 1
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(85,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(86,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe
