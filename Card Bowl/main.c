@@ -5,6 +5,19 @@
 #include "main_d.c"
 
 /*
+* NAME:        DoPlay
+* DESCRIPTION: find and then action each play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void DoPlay(struct response* res)
+{
+	// player picks what to do: normal play, punt, field goal, spike, kneel, timeout
+
+	// dont allow time out unless less than 9 plays left
+}
+
+/*
 * NAME:        Play
 * DESCRIPTION: plays out the gameplay
 * INPUTS:      response
@@ -12,13 +25,79 @@
 */
 void Play(struct response* res)
 {
-    // game loop for each quarter
+	for (res->quarter = 1; res->quarter <= NUMBER_OF_QUARTERS; res->quarter++)
+	{
+		for (res->plays_remaining_in_quarter = PLAYS_PER_QUARTER; res->plays_remaining_in_quarter > 0; res->plays_remaining_in_quarter--)
+		{
+			if (res->quarter == 1 || res->quarter == 3)
+			{
+				if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER) {
+					res->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+					res->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+				}
+			}
 
-	// if quarter 1 or 3, do punt
-	// if quarter 3 reset timeouts etc
-	// do punt return
+			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER) {
+				; // TODO: switch ends
+			}
 
-	// do play
+			DoPlay(res);	
+		}
+	}
+}
+
+/*
+* NAME:        CoinToss
+* DESCRIPTION: do coin toss
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void CoinToss(struct response* res)
+{
+	ConsoleShowScreen(res, "Coin toss:", 500);
+	for (int i = 0; i < 4; i++)
+	{
+		ConsoleShowScreen(res, "\\", 50);
+		ConsoleShowScreen(res, "|", 50);
+		ConsoleShowScreen(res, "/", 50);
+		ConsoleShowScreen(res, "-", 50);
+	}
+
+	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
+
+	char buf[256];
+	snprintf(buf, sizeof(buf), "%s won the coin toss! Pick to punt or receive (1 or 2): ",
+		(team_that_won_cointoss == 1) ? res->team_1_name : res->team_2_name);
+	ConsoleShowScreen(res, buf, 500);
+
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		int pick = atoi(input);
+		if (pick < 1 || pick > 2) pick = 1; // validate / default
+
+		if (pick == 2)
+			res->team_started_with_possession = team_that_won_cointoss;
+		else
+			res->team_started_with_possession = team_that_won_cointoss - 1 ? team_that_won_cointoss - 1 : team_that_won_cointoss + 1;
+	}
+}
+
+/*
+* NAME:        GetTeamNames
+* DESCRIPTION: setup game names
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void GetTeamNames(struct response* res)
+{
+	ConsoleShowScreen(res, "Enter name for Team 1: ", 0);
+	fgets(res->team_1_name, sizeof(res->team_1_name), stdin);
+	res->team_1_name[strcspn(res->team_1_name, "\n")] = '\0';
+	ConsoleShowScreen(res, "Enter name for Team 2: ", 0);
+	fgets(res->team_2_name, sizeof(res->team_2_name), stdin);
+	res->team_2_name[strcspn(res->team_2_name, "\n")] = '\0';
+	
+	ConsoleShowScreen(res, 0, 0);
 }
 
 /*
@@ -29,31 +108,11 @@ void Play(struct response* res)
 */
 void SetupGame(struct response* res)
 {
-	ConsoleShowScreen(res, "Enter name for Team 1: ", 0);
-	fgets(res->team_1_name, sizeof(res->team_1_name), stdin);
-	res->team_1_name[strcspn(res->team_1_name, "\n")] = '\0';
+	srand((unsigned)time(NULL));
 
-	ConsoleShowScreen(res, "Enter name for Team 2: ", 0);
-	fgets(res->team_2_name, sizeof(res->team_2_name), stdin);
-	res->team_2_name[strcspn(res->team_2_name, "\n")] = '\0';
+	GetTeamNames(res);
 
-	ConsoleShowScreen(res, 0, 0);
-
-    // Coin toss for start, res->team_started_with_possession = 0;
-	ConsoleShowScreen(res, "Coin toss:", 500);
-	for (int i = 0; i < 4; i++)
-	{
-		ConsoleShowScreen(res, "\\", 50);
-		ConsoleShowScreen(res, "|",  50);
-		ConsoleShowScreen(res, "/",  50);
-		ConsoleShowScreen(res, "-",  50);	
-	}
-
-	res->team_started_with_possession = rand() % 2 + 1; // 1 or 2
-
-	ConsoleShowScreen(res, "- %c won the coin toss! Pick to punt or receive (1 or 2):", res->team_started_with_possession ? res->team_1_name : res->team_2_name, 500);
-	fgets(res->team_started_with_possession, sizeof(res->team_started_with_possession), stdin);
-	res->team_started_with_possession = '\0';
+	CoinToss(res);  
 }
 
 /*
@@ -72,8 +131,7 @@ void ResponseConstructor(struct response* res)
 	res->score_team_2 = 0;
 	res->quarter = 1;
 	res->plays_remaining_in_quarter = PLAYS_PER_QUARTER;
-	int i;
-	for (i = 0; i < NUMBER_OF_DECKS; i++) {
+	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		res->shuffle_deck_needed[i] = 0;
 	}
 	res->replay_game = false;

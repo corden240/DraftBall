@@ -75,7 +75,7 @@ void DrawField(struct response* res)
 	printf("\n\r");
 
 	PrintSideline();
-
+	// TODO: print different colour on line of scrimmage and line of first down
 	for (int j = 0; j < FIELD_HEIGHT; j++)
 	{
 		printf("\n\r");
