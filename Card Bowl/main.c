@@ -4,6 +4,11 @@
 #include <stdlib.h>   /* srand, rand, atoi */
 #include <time.h>     /* time() */
 #include "main.h"
+
+void SwitchPossession(struct response* res);
+void ResetLineOfFirstDown(struct response* res);
+void ResetLineOfScrimmage(struct response* res);
+
 /*
 * NAME:        DrawOneCard
 * DESCRIPTION: pick an available card from the deck 
@@ -12,7 +17,10 @@
 */
 int DrawOneCard(struct table_weight* deck)
 {
-	return TableWeightDecision(deck, false);
+	// TODO: if deck is empty, enable all and then draw?
+	
+	return (KING | CLUBS);
+	//return TableWeightDecision(deck, false);
 }
 
 /*
@@ -29,6 +37,8 @@ void DrawCards(struct response* res, int team_to_draw, int num)
 			res->o_cards[i] = DrawOneCard(shared_deck);
 		else
 			res->d_cards[i] = DrawOneCard(shared_deck);
+
+		ConsoleShowScreen(res, 0, 400); // show cards drawn
 	}
 }
 
@@ -40,15 +50,74 @@ void DrawCards(struct response* res, int team_to_draw, int num)
 */
 void RedrawCards(struct response* res, int team_to_draw, int num)
 {
-	// TODO: finish this
-	for (int i = 0; i < num; i++)
-	{
-		if (team_to_draw == res->team_in_possession)
-			res->o_cards[i] = DrawOneCard(shared_deck);
-		else
-			res->d_cards[i] = DrawOneCard(shared_deck);
+	if (!num)
+		return;
+
+	char buf[256];
+	snprintf(buf, sizeof(buf), "Replace the lowest or highest cards (1-2): ");
+	ConsoleShowScreen(res, buf, 100);
+
+	int hilo = 0;
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		hilo = atoi(input);
 	}
 
+	if (hilo == 1 || hilo == 2)
+	{
+		/* find how many real cards are actually in the hand;
+		   an empty slot has VALUE == 0, which no real card can have */
+		int hand_size = 0;
+		while (hand_size < CARDS_IN_A_DECK && (res->o_cards[hand_size] & VALUE) != 0)
+			hand_size++;
+
+		if (hand_size == 0)
+			return;
+
+		/* build an index array over just the real cards in the HAND */
+		int indices[CARDS_IN_A_DECK];
+		for (int i = 0; i < hand_size; i++)
+			indices[i] = i;
+
+		/* sort indices ascending by card rank (mask off suit/flag bits) */
+		for (int i = 0; i < hand_size - 1; i++)
+		{
+			for (int j = 0; j < hand_size - 1 - i; j++)
+			{
+				int rank_a = res->o_cards[indices[j]] & VALUE;
+				int rank_b = res->o_cards[indices[j + 1]] & VALUE;
+				if (rank_a > rank_b)
+				{
+					int tmp = indices[j];
+					indices[j] = indices[j + 1];
+					indices[j + 1] = tmp;
+				}
+			}
+		}
+
+		int num_to_replace = (num > hand_size) ? hand_size : num;
+
+		if (hilo == 1)
+		{
+			// lowest "num" cards -> front of sorted indices
+			for (int k = 0; k < num_to_replace; k++)
+			{
+				int idx = indices[k];
+				res->o_cards[idx] = DrawOneCard(shared_deck);
+				ConsoleShowScreen(res, 0, 400); // show cards drawn
+			}
+		}
+		else /* hilo == 2 */
+		{
+			// highest "num" cards -> back of sorted indices
+			for (int k = 0; k < num_to_replace; k++)
+			{
+				int idx = indices[hand_size - 1 - k];
+				res->o_cards[idx] = DrawOneCard(shared_deck);
+				ConsoleShowScreen(res, 0, 400); // show cards drawn
+			}
+		}
+	}
 }
 
 /*
@@ -149,10 +218,8 @@ void PlayNormal(struct response* res)
 */
 int GetPuntCardsToRedraw(struct response* res) {
 
-	// TODO: tell player where ball would land currently
-
 	char buf[256];
-	snprintf(buf, sizeof(buf), "How many cards do you want to redraw? (0 - %d): ", MAX_CARDS_PUNT_REDRAW);
+	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYards(res), MAX_CARDS_PUNT_REDRAW);
 	ConsoleShowScreen(res, buf, 100);
 
 	int num = 0;
@@ -195,6 +262,48 @@ int GetPuntCardsToDraw(struct response* res) {
 }
 
 /*
+* NAME:        TouchBack
+* DESCRIPTION: ask for touchback
+* INPUTS:      response
+* OUTPUTS:     bool
+*/
+bool TouchBack(struct response* res)
+{
+	ConsoleShowScreen(res, "Would you like to action a touchback? y/n ", 0);
+	char input[16];
+	fgets(input, sizeof(input), stdin);
+
+	if (input[0] == 'N' || input[0] == 'n')
+		return false;
+
+	return true;
+}
+
+/*
+* NAME:        PlayPuntReturn
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayPuntReturn(struct response* res)
+{
+	// if the kick is received in the endzone, the receiver can declare a touchback
+	if (res->line_of_scrimmage <= END_ZONE_WIDTH || res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH))
+	{
+		if (TouchBack(res))
+		{
+			ResetLineOfScrimmage(res);
+			ResetLineOfFirstDown(res);
+			return;
+		}
+	}
+	
+	// Receiver draws two cards and the punter draws one card from the shared deck
+	// (two received draws - one punter draw) = (O1 + O2) - D1 = yardage returned
+	// If O2 is a face card and larger than D1 the go to Open field run
+}
+
+/*
 * NAME:        PlayPunt
 * DESCRIPTION: execute the play
 * INPUTS:      response
@@ -206,15 +315,27 @@ void PlayPunt(struct response* res)
 
 	DrawCards(res, res->team_in_possession, GetPuntCardsToDraw(res));// draw 1-5 cards
 
-	ConsoleShowScreen(res, 0, 1000); // show cards drawn
-
 	RedrawCards(res, res->team_in_possession, GetPuntCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
 	
-	int yards = TotalYards(res); // find total yards
+	int total_yards = TotalYards(res);
+	char buf[256];
+	snprintf(buf, sizeof(buf), "Total Yards: %d", total_yards);
+	ConsoleShowScreen(res, buf, 500);
 
-	Sleep(0);
-	// resolve where it is caught
-	// do punt return here? // TODO: should it be here?
+	int yards_moved = -total_yards;
+
+	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	{
+		yards_moved = total_yards;
+	}
+
+	res->line_of_scrimmage += yards_moved;
+
+	SwitchPossession(res);
+
+	ConsoleShowScreen(res, buf, 500);
+
+	PlayPuntReturn(res);
 }
 
 /*
@@ -252,6 +373,11 @@ void PlayKneel(struct response* res)
 void PlayTimeout(struct response* res)
 {
 	res->plays_remaining_in_quarter += 2; //add 2 plays back to the clock but then 1 will be deleted as this counts as a play
+
+	if(res->team_in_possession == 1)
+		res->team_1_timeouts_remaining--;
+	else
+		res->team_2_timeouts_remaining--;
 }
 
 /*
@@ -280,7 +406,7 @@ int GetPlayType(struct response* res)
 void DoPlay(struct response* res)
 {
 	int play_type = 0;
-	
+
 	if ((res->quarter == 1 || res->quarter == 3) && (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER))
 	{
 		play_type = 2; // always punt on first play of each half
@@ -289,13 +415,13 @@ void DoPlay(struct response* res)
 	//{
 	//	// play extra point or 2?
 	//}
-	else
-	{
-		play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
-	}
 
 	bool retry = false;
 	do {
+
+		if(!play_type)
+			play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
+
 		retry = false;
 		switch (play_type) {
 		case PLAY_TYPE_NORMAL:
@@ -320,7 +446,11 @@ void DoPlay(struct response* res)
 		}
 		case PLAY_TYPE_TIMEOUT:
 		{
-			if(res->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
+			if (res->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
+				retry = true;
+			else if (res->team_in_possession == 1 && !res->team_1_timeouts_remaining)
+				retry = true;
+			else if (res->team_in_possession == 2 && !res->team_2_timeouts_remaining)
 				retry = true;
 			else
 				PlayTimeout(res);
@@ -328,16 +458,66 @@ void DoPlay(struct response* res)
 		}
 		default:
 		{
-			ConsoleShowScreen(res, "Invalid play type. Please pick a number between 1 and 5. (you cannot timeout unless 2 plays have already happened this quarter)", 1000);
+			ConsoleShowScreen(res, "Invalid play type. Please pick a number between 1 and 5. (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)", 1000);
 			retry = true;
 			break;
 		}
 		}
 
 	} while (retry);
-	
+
+
+	// ResetLineOfFirstDown(res);
 	// TODO: assess whether we made first down? otherwise go to the next down? unless it was a timeout? If it was 4th down resolve
 	// clear drawn cards, shuffle decks etc?
+}
+
+/*
+* NAME:        ResetLineOfScrimmage
+* DESCRIPTION: make line of scrimmage to starting for team in possession
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void ResetLineOfScrimmage(struct response* res)
+{
+	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	{
+		res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+	}
+	else
+	{
+		res->line_of_scrimmage = FIELD_WIDTH - STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+	}
+}
+
+/*
+* NAME:        ResetLineOfFirstDown
+* DESCRIPTION: make line of first down 10 yards ahead of current LoS
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void ResetLineOfFirstDown(struct response* res)
+{
+	int first_down = -YARDS_PER_FIRST_DOWN;
+
+	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	{
+		first_down = YARDS_PER_FIRST_DOWN;
+	}
+
+	res->line_of_first_down = res->line_of_scrimmage + first_down;
+}
+
+/*
+* NAME:        SwitchPossession
+* DESCRIPTION: switch team with possession
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void SwitchPossession(struct response* res)
+{
+	res->team_in_possession = res->team_in_possession - 1 ? res->team_in_possession - 1 : res->team_in_possession + 1;
+	return;
 }
 
 /*
@@ -358,6 +538,9 @@ void SwitchEnds(struct response* res)
 		res->team_1_direction = 1;
 		res->team_2_direction = 2;
 	}
+
+	ResetLineOfScrimmage(res);
+	ResetLineOfFirstDown(res);
 }
 
 /*
@@ -378,11 +561,14 @@ void Play(struct response* res)
 					res->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
 					res->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
 				}
+
+				if(res->quarter == 3)
+					res->team_in_possession = res->team_started_with_possession - 1 ? res->team_started_with_possession - 1 : res->team_started_with_possession + 1;				
 			}
 
-			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER) {
+			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER && res->quarter != 1) {
 				SwitchEnds(res);
-				//TODO: announce switching of ends 
+				ConsoleShowScreen(res, "Switching ends...", 500);
 			}
 
 			DoPlay(res);
@@ -423,20 +609,27 @@ void CoinToss(struct response* res)
 		if (pick < 1 || pick > 2) pick = 1; // validate / default
 
 		if (pick == 2)
-			res->team_started_with_possession = team_that_won_cointoss;
-		else
 			res->team_started_with_possession = team_that_won_cointoss - 1 ? team_that_won_cointoss - 1 : team_that_won_cointoss + 1;
+		else
+			res->team_started_with_possession = team_that_won_cointoss;
+
+		res->team_in_possession = res->team_started_with_possession;
 
 		if (res->team_started_with_possession == 1)
 		{
 			res->team_1_direction = 1;
 			res->team_2_direction = 2;
+			res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+			res->line_of_first_down = res->line_of_scrimmage + YARDS_PER_FIRST_DOWN;
 		}
 		else
 		{
 			res->team_1_direction = 2;
 			res->team_2_direction = 1;
+			res->line_of_scrimmage = FIELD_WIDTH - STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+			res->line_of_first_down = res->line_of_scrimmage - YARDS_PER_FIRST_DOWN;
 		}
+		ConsoleShowScreen(res, 0, 50);
 	}
 }
 
@@ -465,7 +658,7 @@ void GetTeamNames(struct response* res)
 */
 void GetPlayerNames(struct response* res)
 {
-	ConsoleShowScreen(res, "Would you like to name your players? Y/N ", 0);
+	ConsoleShowScreen(res, "Would you like to name your players? y/n ", 0);
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 
@@ -541,7 +734,7 @@ void SetupGame(struct response* res)
 */
 void ResponseConstructor(struct response* res)
 {
-	res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE;
+	res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	res->line_of_first_down = 0;
 	res->down = 1;
 	res->team_in_possession = 0;

@@ -4,6 +4,7 @@
 
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
+#define YARDS_PER_FIRST_DOWN (10)
 #define PLAYS_PER_QUARTER (20)
 #define NUMBER_OF_QUARTERS (4)
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
@@ -64,6 +65,15 @@
 #define CONSOLE_TEXT_YELLOW    (6)
 #define CONSOLE_TEXT_WHITE     (7)
 #define CONSOLE_TEXT_GREY      (8)
+
+#define CONSOLE_BG_BLUE	     (0x10)
+#define CONSOLE_BG_GREEN	 (0x20)
+#define CONSOLE_BG_LIGHTBLUE (0x30)
+#define CONSOLE_BG_RED       (0x40)
+#define CONSOLE_BG_PURPLE    (0x50)
+#define CONSOLE_BG_YELLOW    (0x60)
+#define CONSOLE_BG_WHITE     (0x70)
+#define CONSOLE_BG_GREY      (0x80)
 
 enum play_types {
 	PLAY_TYPE_NORMAL = 1,

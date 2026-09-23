@@ -47,6 +47,8 @@ void ShowTopInfo(struct response* res)
 	int center = (width / 2) - 6;     /* index where '|' should appear (0-based) */
 	if (center < 0) center = 0;
 
+	// TODO: show timouts remaining for each time with 3 blocks of grey next to team name?
+
 	/* Build left and right raw strings (local buffers, no accumulation across calls) */
 	char left_raw[256];
 	char right_raw[128];
@@ -185,21 +187,29 @@ void DrawField(struct response* res)
 	for (int j = 0; j < FIELD_HEIGHT; j++)
 	{
 		printf("\n\r");
-		for (int i = 1; i <= (END_ZONE_WIDTH + FIELD_WIDTH + END_ZONE_WIDTH - 1); i++) {
+		for (int i = 1; i <= (PITCH_WIDTH - 1); i++) {
 			if (i < END_ZONE_WIDTH || i > (PITCH_WIDTH - END_ZONE_WIDTH))
 			{
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_RED);
 				printf("/");
 			}
-			else if ((i - 5) % 10 == 0)
-			{
+			else {
+				if (i == res->line_of_scrimmage)
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
+				else if (i == res->line_of_first_down)
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
+				else
+					SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+				if ((i - END_ZONE_WIDTH) % YARDS_PER_FIRST_DOWN == 0)
+				{
+					printf("|");
+				}
+				else
+				{
+					printf(" ");
+				}
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-				printf("|");
-			}
-			else
-			{
-				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-				printf(" ");
 			}
 		}
 	}
@@ -237,9 +247,22 @@ void ShowCards(struct response* res)
 	printf("\r                                 ");
 	for (int i = 0; i < CARDS_IN_A_DECK && res->o_cards[i] != '\0'; i++)
 	{
-		printf("%c", CardName(res->o_cards[i]));
-		Sleep(10);
-		printf("\n\r");
+		if (!res->o_cards[i])
+			break;
+		printf("%s", CardName(res->o_cards[i]));
+		if(res->o_cards[i+1])
+			printf(", ");
+	}
+
+	printf("\n\r                                 ");
+
+	for (int i = 0; i < CARDS_IN_A_DECK && res->d_cards[i] != '\0'; i++)
+	{
+		if (!res->d_cards[i])
+			break;
+		printf("%s", CardName(res->d_cards[i]));
+		if (res->d_cards[i + 1])
+			printf(", ");
 	}
 }
 
@@ -274,7 +297,7 @@ void ConsoleShowScreen(struct response* res, char txt[1000], int pause) // if ca
 	ShowTopInfo(res);  // draw score at top of screen with play clock
 	DrawField(res);    // draw field with line of scrimmage and down and distance lines
 	ShowGameInfo(res); // then write down and distance numbers
-	ShowCards(res);    //card drawn info?
+	ShowCards(res);    // card drawn info?
 	if(txt)
 		ShowText(res, txt);// then draw text sent to function
 	if(pause)

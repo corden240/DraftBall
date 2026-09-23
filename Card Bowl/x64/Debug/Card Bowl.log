@@ -1,9 +1,1 @@
-﻿  console.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(74,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(79,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(98,3): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(102,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(126,4): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(240,10): warning C4477: 'printf' : format string '%c' requires an argument of type 'int', but variadic argument 1 has type 'const char *'
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(240,10): warning C4313: 'printf': '%c' in format string conflicts with argument 1 of type 'const char *'
-  Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe
+﻿  Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe
