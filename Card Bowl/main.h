@@ -18,8 +18,13 @@
 #define PITCH_WIDTH    (END_ZONE_WIDTH + END_ZONE_WIDTH + FIELD_WIDTH)
 #define FIELD_HEIGHT   (5)
 
+#define MAX_CARDS_PUNT (5)
+#define MAX_CARDS_PUNT_REDRAW (2)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
+
+#define MAX_WEIGHTS_IN_TABLE (1000)
 
 #define VALUE       (0x00000f)
 #define SUIT        (0x0000f0)
@@ -101,7 +106,20 @@ struct table_weight {
 	bool on_off;
 };
 
+struct card_name {
+	int val;
+	const char* name;
+};
+extern struct card_name card_names[];
+
 /* Prototypes */
 void ConsoleShowScreen(struct response* res, char txt[1000], int pause);
 void TableWeightEnableAll(struct table_weight* table);
 int TableWeightDecision(struct table_weight* table, bool enable_all);
+const char* CardName(int card);
+
+extern struct table_weight shared_deck[];
+extern struct table_weight player_1_deck[];
+extern struct table_weight player_2_deck[];
+extern struct table_weight* player_decks[];
+

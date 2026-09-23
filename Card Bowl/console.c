@@ -15,6 +15,22 @@ void ResetScreen()
 }
 
 /*
+* NAME:        CardName
+* DESCRIPTION: look up the display text for a card
+* INPUTS:      card (full card value; FACE/color/DECK bits ignored)
+* OUTPUTS:     pointer to static name string, or "??" if not found
+*/
+const char* CardName(int card)
+{
+	const int key = card & (VALUE | SUIT);
+	for (size_t i = 0; i < CARDS_IN_A_DECK; i++) {
+		if (card_names[i].val == key)
+			return card_names[i].name;
+	}
+	return "??";
+}
+
+/*
 * NAME:        ShowTopInfo
 * DESCRIPTION: displays teams, scores, and clock
 * INPUTS:      None
@@ -25,6 +41,13 @@ void ShowTopInfo(struct response* res)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
 
+	const int SIDE_GAP = 10;          /* exactly 10 spaces on each side of '|' */
+	const char DIV = '|';
+	int width = WINDOW_WIDTH;
+	int center = (width / 2) - 6;     /* index where '|' should appear (0-based) */
+	if (center < 0) center = 0;
+
+	/* Build left and right raw strings (local buffers, no accumulation across calls) */
 	char left_raw[256];
 	char right_raw[128];
 	snprintf(left_raw, sizeof(left_raw), "%s  %d : %d  %s",
@@ -32,18 +55,13 @@ void ShowTopInfo(struct response* res)
 	snprintf(right_raw, sizeof(right_raw), "Quarter: %d  Plays Left: %d",
 		res->quarter, res->plays_remaining_in_quarter);
 
-	const int SIDE_GAP = 10;          /* exactly 10 spaces on each side of '|' */
-	const char DIV = '|';
-	int width = WINDOW_WIDTH;
-	int center = (width / 2) - 6;          /* index where '|' should appear (0-based) */
-
-	/* left gap starts SIDE_GAP chars left of center */
+	/* left gap must start SIDE_GAP chars left of center */
 	int left_gap_start = center - SIDE_GAP;
 	if (left_gap_start < 0) left_gap_start = 0;
 
 	/* Determine left display that must end immediately before the left gap.
 	   If too long, keep the rightmost characters so scores remain visible. */
-	int left_max_len = left_gap_start; /* number of chars allowed before left gap */
+	int left_max_len = left_gap_start;
 	size_t left_raw_len = strlen(left_raw);
 	char left_display[256];
 	if ((int)left_raw_len > left_max_len) {
@@ -51,7 +69,9 @@ void ShowTopInfo(struct response* res)
 			left_display[0] = '\0';
 		}
 		else {
-			strncpy(left_display, left_raw + left_raw_len - left_max_len, left_max_len);
+			/* keep the rightmost characters */
+			size_t start = left_raw_len - (size_t)left_max_len;
+			strncpy(left_display, left_raw + start, left_max_len);
 			left_display[left_max_len] = '\0';
 		}
 	}
@@ -81,10 +101,8 @@ void ShowTopInfo(struct response* res)
 	else {
 		strcpy(right_display, right_raw);
 	}
-	int right_display_len = (int)strlen(right_display);
 
-	/* Build components: leading spaces, left_display, left gap (10 spaces), '|',
-	   right gap (10 spaces), right_display, trailing fill if needed. */
+	/* Prepare component strings */
 	char left_pad_str[512];
 	memset(left_pad_str, ' ', leading_spaces);
 	left_pad_str[leading_spaces] = '\0';
@@ -93,12 +111,11 @@ void ShowTopInfo(struct response* res)
 	memset(gapStr, ' ', SIDE_GAP);
 	gapStr[SIDE_GAP] = '\0';
 
+	/* Compose final line and ensure it's exactly 'width' chars (pad or truncate) */
 	char line[1024];
-	/* Compose without trailing fill first */
 	snprintf(line, sizeof(line), "%s%s%s%c%s%s",
 		left_pad_str, left_display, gapStr, DIV, gapStr, right_display);
 
-	/* Ensure total length == width: pad or truncate as needed */
 	int line_len = (int)strlen(line);
 	if (line_len < width) {
 		int trailing = width - line_len;
@@ -110,7 +127,7 @@ void ShowTopInfo(struct response* res)
 		}
 	}
 	else if (line_len > width) {
-		line[width] = '\0'; /* truncate to fit */
+		line[width] = '\0';
 	}
 
 	printf("%s", line);
@@ -207,6 +224,26 @@ void ShowGameInfo(struct response* res)
 }
 
 /*
+* NAME:        ShowCards
+* DESCRIPTION: prints cards
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void ShowCards(struct response* res)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	printf("\n\r\n\r                                                                                             ");
+	printf("\r                                 ");
+	for (int i = 0; i < CARDS_IN_A_DECK && res->o_cards[i] != '\0'; i++)
+	{
+		printf("%c", CardName(res->o_cards[i]));
+		Sleep(10);
+		printf("\n\r");
+	}
+}
+
+/*
 * NAME:        ShowText
 * DESCRIPTION: prints text given to function
 * INPUTS:      response, text to display
@@ -237,7 +274,7 @@ void ConsoleShowScreen(struct response* res, char txt[1000], int pause) // if ca
 	ShowTopInfo(res);  // draw score at top of screen with play clock
 	DrawField(res);    // draw field with line of scrimmage and down and distance lines
 	ShowGameInfo(res); // then write down and distance numbers
-	//card drawn info?
+	ShowCards(res);    //card drawn info?
 	if(txt)
 		ShowText(res, txt);// then draw text sent to function
 	if(pause)

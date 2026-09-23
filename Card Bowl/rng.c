@@ -12,7 +12,7 @@ void TableWeightSet(struct table_weight* table, int val, bool on_off)
 
 void TableWeightEnableAll(struct table_weight* table)
 {
-	for (int i = 0; i++;)
+	for (int i = 0; i < MAX_WEIGHTS_IN_TABLE; i++)
 	{
 		if (table[i].weight < 0)
 			break;
@@ -25,7 +25,7 @@ int TableWeightDecision(struct table_weight* table, bool enable_all)
 	if (enable_all)
 		TableWeightEnableAll(table);
 	int total_weight = 0;
-	for (int i = 0; i++;)
+	for (int i = 0; i < MAX_WEIGHTS_IN_TABLE; i++)
 	{
 		if (table[i].weight < 0)
 			break;
@@ -34,7 +34,7 @@ int TableWeightDecision(struct table_weight* table, bool enable_all)
 	}
 	int random_value = rand() % total_weight;
 	int cumulative_weight = 0;
-	for (int i = 0; i++;)
+	for (int i = 0; i < MAX_WEIGHTS_IN_TABLE; i++)
 	{
 		if (table[i].weight < 0)
 			break;

@@ -5,14 +5,67 @@
 #include <time.h>     /* time() */
 #include "main.h"
 /*
-* NAME:        DrawCard
+* NAME:        DrawOneCard
 * DESCRIPTION: pick an available card from the deck 
+* INPUTS:      response
+* OUTPUTS:     card
+*/
+int DrawOneCard(struct table_weight* deck)
+{
+	return TableWeightDecision(deck, false);
+}
+
+/*
+* NAME:        DrawCards
+* DESCRIPTION: draw and assign x cards
 * INPUTS:      response
 * OUTPUTS:     None
 */
-void DrawCard(struct response* res, int deck)
+void DrawCards(struct response* res, int team_to_draw, int num)
 {
+	for (int i = 0; i < num; i++)
+	{
+		if (team_to_draw == res->team_in_possession)
+			res->o_cards[i] = DrawOneCard(shared_deck);
+		else
+			res->d_cards[i] = DrawOneCard(shared_deck);
+	}
+}
 
+/*
+* NAME:        RedrawCards
+* DESCRIPTION: draw and assign x cards
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void RedrawCards(struct response* res, int team_to_draw, int num)
+{
+	// TODO: finish this
+	for (int i = 0; i < num; i++)
+	{
+		if (team_to_draw == res->team_in_possession)
+			res->o_cards[i] = DrawOneCard(shared_deck);
+		else
+			res->d_cards[i] = DrawOneCard(shared_deck);
+	}
+
+}
+
+/*
+* NAME:        TotalYards
+* DESCRIPTION: add up total yards gained
+* INPUTS:      response
+* OUTPUTS:     int
+*/
+int TotalYards(struct response* res)
+{
+	// TODO: finish this
+	int sum_value = 0;
+	for (int i = 0; i < CARDS_IN_A_DECK; i++)
+	{
+		sum_value += (res->o_cards[i] & VALUE);
+	}
+	return sum_value;
 }
 
 /*
@@ -89,6 +142,59 @@ void PlayNormal(struct response* res)
 }
 
 /*
+* NAME:        GetPuntCardsToRedraw
+* DESCRIPTION: ask and return how many cards to draw in the punt redraw
+* INPUTS:      response
+* OUTPUTS:     int
+*/
+int GetPuntCardsToRedraw(struct response* res) {
+
+	// TODO: tell player where ball would land currently
+
+	char buf[256];
+	snprintf(buf, sizeof(buf), "How many cards do you want to redraw? (0 - %d): ", MAX_CARDS_PUNT_REDRAW);
+	ConsoleShowScreen(res, buf, 100);
+
+	int num = 0;
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		num = atoi(input);
+	}
+
+	if (num > MAX_CARDS_PUNT_REDRAW)
+		num = MAX_CARDS_PUNT_REDRAW;
+	else if (num < 0)
+		num = 0;
+
+	return num;
+}
+
+/*
+* NAME:        GetPuntCardsToDraw
+* DESCRIPTION: ask and return how many cards to draw in the punt
+* INPUTS:      response
+* OUTPUTS:     int
+*/
+int GetPuntCardsToDraw(struct response* res) {
+	char buf[256];
+	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", MAX_CARDS_PUNT);
+	ConsoleShowScreen(res, buf, 100);
+
+	int num = 0;
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		num = atoi(input);
+	}
+
+	if (num > MAX_CARDS_PUNT)
+		num = MAX_CARDS_PUNT;
+	else if (num < 0)
+		num = 0;
+
+	return num;
+}
+
+/*
 * NAME:        PlayPunt
 * DESCRIPTION: execute the play
 * INPUTS:      response
@@ -96,10 +202,17 @@ void PlayNormal(struct response* res)
 */
 void PlayPunt(struct response* res)
 {
-	// announce punt
-	// draw 1-5 cards
-	// can replace 0-2
-	// find total yards
+	ConsoleShowScreen(res, "Punting...", 1000); // announce punt
+
+	DrawCards(res, res->team_in_possession, GetPuntCardsToDraw(res));// draw 1-5 cards
+
+	ConsoleShowScreen(res, 0, 1000); // show cards drawn
+
+	RedrawCards(res, res->team_in_possession, GetPuntCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
+	
+	int yards = TotalYards(res); // find total yards
+
+	Sleep(0);
 	// resolve where it is caught
 	// do punt return here? // TODO: should it be here?
 }
@@ -224,6 +337,7 @@ void DoPlay(struct response* res)
 	} while (retry);
 	
 	// TODO: assess whether we made first down? otherwise go to the next down? unless it was a timeout? If it was 4th down resolve
+	// clear drawn cards, shuffle decks etc?
 }
 
 /*
@@ -271,7 +385,7 @@ void Play(struct response* res)
 				//TODO: announce switching of ends 
 			}
 
-			DoPlay(res);	
+			DoPlay(res);
 		}
 		//TODO: announce end of quarter, announce who will have the ball / punt
 	}
@@ -293,6 +407,8 @@ void CoinToss(struct response* res)
 		ConsoleShowScreen(res, "/", 50);
 		ConsoleShowScreen(res, "-", 50);
 	}
+
+	ConsoleShowScreen(res, 0, 1000);
 
 	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
 
@@ -460,6 +576,11 @@ void ResponseConstructor(struct response* res)
 	strcpy(res->team_2_wr_names[3], "Team 2 WR4");
 
 	res->players_named = false;
+	
+	for (int i = 0; i < CARDS_IN_A_DECK; i++) {
+		res->o_cards[i] = 0;
+		res->d_cards[i] = 0;
+	}
 }
 
 /*

@@ -1,0 +1,4 @@
+struct table_weight player_1_deck[];
+struct table_weight player_2_deck[];
+struct table_weight* player_decks[];
+struct table_weight shared_deck[];
