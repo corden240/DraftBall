@@ -1,7 +1,7 @@
-#include "main_d.c"
 #include "main.h"
 #include <stdio.h>
 #include <windows.h>
+#include <string.h>
 
 /*
 * NAME:        ResetScreen
@@ -14,17 +14,106 @@ void ResetScreen()
 	printf("\033[H");
 }
 
-/* 
-* NAME:			ShowTopInfo
-* DESCRIPTION:  Displays the top information on the screen
-* INPUTS:       response
-* OUTPUTS:      None
+/*
+* NAME:        ShowTopInfo
+* DESCRIPTION: displays teams, scores, and clock
+* INPUTS:      None
+* OUTPUTS:     None
 */
 void ShowTopInfo(struct response* res)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
-	printf("                         %s  %d : %d  %s        |        Quarter: %d      Plays Left: %d                      ", res->team_1_name, res->score_team_1, res->score_team_2, res->team_2_name, res->quarter, res->plays_remaining_in_quarter);
+
+	char left_raw[256];
+	char right_raw[128];
+	snprintf(left_raw, sizeof(left_raw), "%s  %d : %d  %s",
+		res->team_1_name, res->score_team_1, res->score_team_2, res->team_2_name);
+	snprintf(right_raw, sizeof(right_raw), "Quarter: %d  Plays Left: %d",
+		res->quarter, res->plays_remaining_in_quarter);
+
+	const int SIDE_GAP = 10;          /* exactly 10 spaces on each side of '|' */
+	const char DIV = '|';
+	int width = WINDOW_WIDTH;
+	int center = (width / 2) - 6;          /* index where '|' should appear (0-based) */
+
+	/* left gap starts SIDE_GAP chars left of center */
+	int left_gap_start = center - SIDE_GAP;
+	if (left_gap_start < 0) left_gap_start = 0;
+
+	/* Determine left display that must end immediately before the left gap.
+	   If too long, keep the rightmost characters so scores remain visible. */
+	int left_max_len = left_gap_start; /* number of chars allowed before left gap */
+	size_t left_raw_len = strlen(left_raw);
+	char left_display[256];
+	if ((int)left_raw_len > left_max_len) {
+		if (left_max_len <= 0) {
+			left_display[0] = '\0';
+		}
+		else {
+			strncpy(left_display, left_raw + left_raw_len - left_max_len, left_max_len);
+			left_display[left_max_len] = '\0';
+		}
+	}
+	else {
+		strcpy(left_display, left_raw);
+	}
+	int left_display_len = (int)strlen(left_display);
+
+	/* Leading padding so left_display ends at left_gap_start-1 */
+	int leading_spaces = left_gap_start - left_display_len;
+	if (leading_spaces < 0) leading_spaces = 0;
+
+	/* Right display must start after the right gap (center + SIDE_GAP + 1).
+	   Truncate if it won't fit to the right edge. */
+	int right_start = center + SIDE_GAP + 1;
+	if (right_start < 0) right_start = 0;
+	int right_max_len = width - right_start;
+	size_t right_raw_len = strlen(right_raw);
+	char right_display[128];
+	if (right_max_len <= 0) {
+		right_display[0] = '\0';
+	}
+	else if ((int)right_raw_len > right_max_len) {
+		strncpy(right_display, right_raw, right_max_len);
+		right_display[right_max_len] = '\0';
+	}
+	else {
+		strcpy(right_display, right_raw);
+	}
+	int right_display_len = (int)strlen(right_display);
+
+	/* Build components: leading spaces, left_display, left gap (10 spaces), '|',
+	   right gap (10 spaces), right_display, trailing fill if needed. */
+	char left_pad_str[512];
+	memset(left_pad_str, ' ', leading_spaces);
+	left_pad_str[leading_spaces] = '\0';
+
+	char gapStr[11];
+	memset(gapStr, ' ', SIDE_GAP);
+	gapStr[SIDE_GAP] = '\0';
+
+	char line[1024];
+	/* Compose without trailing fill first */
+	snprintf(line, sizeof(line), "%s%s%s%c%s%s",
+		left_pad_str, left_display, gapStr, DIV, gapStr, right_display);
+
+	/* Ensure total length == width: pad or truncate as needed */
+	int line_len = (int)strlen(line);
+	if (line_len < width) {
+		int trailing = width - line_len;
+		if (trailing > 0) {
+			char trail[512];
+			memset(trail, ' ', trailing);
+			trail[trailing] = '\0';
+			strncat(line, trail, trailing);
+		}
+	}
+	else if (line_len > width) {
+		line[width] = '\0'; /* truncate to fit */
+	}
+
+	printf("%s", line);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 }
 

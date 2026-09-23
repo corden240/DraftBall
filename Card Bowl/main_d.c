@@ -1,27 +1,188 @@
 #include "main.h"
 
-struct response {
-	int line_of_scrimmage;
-	int line_of_first_down;
-	int down;
-	int team_in_possession;
-	int score_team_1;
-	int score_team_2;
-	int quarter;
-	int plays_remaining_in_quarter;
-	int shuffle_deck_needed[NUMBER_OF_DECKS]; // int 1 if that deck needs to be shuffled, 0 if not
-	bool replay_game;
-	int team_1_timeouts_remaining;
-	int team_2_timeouts_remaining;
-	int team_started_with_possession; // 1 if team 1, 2 if team 2
-	char team_1_name[32];
-	char team_2_name[32];
-	int team_1_direction; // 1 if team 1 is going left to right, 2 if team 1 is going right to left
-	int team_2_direction; // 1 if team 2 is going left to right, 2 if team 2 is going right to left
+/* per-player decks (terminated by entry with weight < 0) */
+struct table_weight player_1_deck[] = {
+	{(ACE   |    CLUBS | BLACK        | DECK1), 100, true},
+	{(TWO   |    CLUBS | BLACK        | DECK1), 100, true},
+	{(THREE |    CLUBS | BLACK        | DECK1), 100, true},
+	{(FOUR  |    CLUBS | BLACK        | DECK1), 100, true},
+	{(FIVE  |    CLUBS | BLACK        | DECK1), 100, true},
+	{(SIX   |    CLUBS | BLACK        | DECK1), 100, true},
+	{(SEVEN |    CLUBS | BLACK        | DECK1), 100, true},
+	{(EIGHT |    CLUBS | BLACK        | DECK1), 100, true},
+	{(NINE  |    CLUBS | BLACK        | DECK1), 100, true},
+	{(TEN   |    CLUBS | BLACK        | DECK1), 100, true},
+	{(JACK  |    CLUBS | BLACK | FACE | DECK1), 100, true},
+	{(QUEEN |    CLUBS | BLACK | FACE | DECK1), 100, true},
+	{(KING  |    CLUBS | BLACK | FACE | DECK1), 100, true},
+
+	{(ACE   | DIAMONDS |   RED        | DECK1), 100, true},
+	{(TWO   | DIAMONDS |   RED        | DECK1), 100, true},
+	{(THREE | DIAMONDS |   RED        | DECK1), 100, true},
+	{(FOUR  | DIAMONDS |   RED        | DECK1), 100, true},
+	{(FIVE  | DIAMONDS |   RED        | DECK1), 100, true},
+	{(SIX   | DIAMONDS |   RED        | DECK1), 100, true},
+	{(SEVEN | DIAMONDS |   RED        | DECK1), 100, true},
+	{(EIGHT | DIAMONDS |   RED        | DECK1), 100, true},
+	{(NINE  | DIAMONDS |   RED        | DECK1), 100, true},
+	{(TEN   | DIAMONDS |   RED        | DECK1), 100, true},
+	{(JACK  | DIAMONDS |   RED | FACE | DECK1), 100, true},
+	{(QUEEN | DIAMONDS |   RED | FACE | DECK1), 100, true},
+	{(KING  | DIAMONDS |   RED | FACE | DECK1), 100, true},
+
+	{(ACE   |   HEARTS |   RED        | DECK1), 100, true},
+	{(TWO   |   HEARTS |   RED        | DECK1), 100, true},
+	{(THREE |   HEARTS |   RED        | DECK1), 100, true},
+	{(FOUR  |   HEARTS |   RED        | DECK1), 100, true},
+	{(FIVE  |   HEARTS |   RED        | DECK1), 100, true},
+	{(SIX   |   HEARTS |   RED        | DECK1), 100, true},
+	{(SEVEN |   HEARTS |   RED        | DECK1), 100, true},
+	{(EIGHT |   HEARTS |   RED        | DECK1), 100, true},
+	{(NINE  |   HEARTS |   RED        | DECK1), 100, true},
+	{(TEN   |   HEARTS |   RED        | DECK1), 100, true},
+	{(JACK  |   HEARTS |   RED | FACE | DECK1), 100, true},
+	{(QUEEN |   HEARTS |   RED | FACE | DECK1), 100, true},
+	{(KING  |   HEARTS |   RED | FACE | DECK1), 100, true},
+
+	{(ACE   |   SPADES | BLACK        | DECK1), 100, true},
+	{(TWO   |   SPADES | BLACK        | DECK1), 100, true},
+	{(THREE |   SPADES | BLACK        | DECK1), 100, true},
+	{(FOUR  |   SPADES | BLACK        | DECK1), 100, true},
+	{(FIVE  |   SPADES | BLACK        | DECK1), 100, true},
+	{(SIX   |   SPADES | BLACK        | DECK1), 100, true},
+	{(SEVEN |   SPADES | BLACK        | DECK1), 100, true},
+	{(EIGHT |   SPADES | BLACK        | DECK1), 100, true},
+	{(NINE  |   SPADES | BLACK        | DECK1), 100, true},
+	{(TEN   |   SPADES | BLACK        | DECK1), 100, true},
+	{(JACK  |   SPADES | BLACK | FACE | DECK1), 100, true},
+	{(QUEEN |   SPADES | BLACK | FACE | DECK1), 100, true},
+	{(KING  |   SPADES | BLACK | FACE | DECK1), 100, true},
+
+	{0, -1, false}
 };
 
-struct table_weight {
-	int val;
-	int weight;
-	bool on_off;
+struct table_weight player_2_deck[] = {
+	{(ACE   |    CLUBS | BLACK        | DECK2), 100, true},
+	{(TWO   |    CLUBS | BLACK        | DECK2), 100, true},
+	{(THREE |    CLUBS | BLACK        | DECK2), 100, true},
+	{(FOUR  |    CLUBS | BLACK        | DECK2), 100, true},
+	{(FIVE  |    CLUBS | BLACK        | DECK2), 100, true},
+	{(SIX   |    CLUBS | BLACK        | DECK2), 100, true},
+	{(SEVEN |    CLUBS | BLACK        | DECK2), 100, true},
+	{(EIGHT |    CLUBS | BLACK        | DECK2), 100, true},
+	{(NINE  |    CLUBS | BLACK        | DECK2), 100, true},
+	{(TEN   |    CLUBS | BLACK        | DECK2), 100, true},
+	{(JACK  |    CLUBS | BLACK | FACE | DECK2), 100, true},
+	{(QUEEN |    CLUBS | BLACK | FACE | DECK2), 100, true},
+	{(KING  |    CLUBS | BLACK | FACE | DECK2), 100, true},
+
+	{(ACE   | DIAMONDS |   RED        | DECK2), 100, true},
+	{(TWO   | DIAMONDS |   RED        | DECK2), 100, true},
+	{(THREE | DIAMONDS |   RED        | DECK2), 100, true},
+	{(FOUR  | DIAMONDS |   RED        | DECK2), 100, true},
+	{(FIVE  | DIAMONDS |   RED        | DECK2), 100, true},
+	{(SIX   | DIAMONDS |   RED        | DECK2), 100, true},
+	{(SEVEN | DIAMONDS |   RED        | DECK2), 100, true},
+	{(EIGHT | DIAMONDS |   RED        | DECK2), 100, true},
+	{(NINE  | DIAMONDS |   RED        | DECK2), 100, true},
+	{(TEN   | DIAMONDS |   RED        | DECK2), 100, true},
+	{(JACK  | DIAMONDS |   RED | FACE | DECK2), 100, true},
+	{(QUEEN | DIAMONDS |   RED | FACE | DECK2), 100, true},
+	{(KING  | DIAMONDS |   RED | FACE | DECK2), 100, true},
+
+	{(ACE   |   HEARTS |   RED        | DECK2), 100, true},
+	{(TWO   |   HEARTS |   RED        | DECK2), 100, true},
+	{(THREE |   HEARTS |   RED        | DECK2), 100, true},
+	{(FOUR  |   HEARTS |   RED        | DECK2), 100, true},
+	{(FIVE  |   HEARTS |   RED        | DECK2), 100, true},
+	{(SIX   |   HEARTS |   RED        | DECK2), 100, true},
+	{(SEVEN |   HEARTS |   RED        | DECK2), 100, true},
+	{(EIGHT |   HEARTS |   RED        | DECK2), 100, true},
+	{(NINE  |   HEARTS |   RED        | DECK2), 100, true},
+	{(TEN   |   HEARTS |   RED        | DECK2), 100, true},
+	{(JACK  |   HEARTS |   RED | FACE | DECK2), 100, true},
+	{(QUEEN |   HEARTS |   RED | FACE | DECK2), 100, true},
+	{(KING  |   HEARTS |   RED | FACE | DECK2), 100, true},
+
+	{(ACE   |   SPADES | BLACK        | DECK2), 100, true},
+	{(TWO   |   SPADES | BLACK        | DECK2), 100, true},
+	{(THREE |   SPADES | BLACK        | DECK2), 100, true},
+	{(FOUR  |   SPADES | BLACK        | DECK2), 100, true},
+	{(FIVE  |   SPADES | BLACK        | DECK2), 100, true},
+	{(SIX   |   SPADES | BLACK        | DECK2), 100, true},
+	{(SEVEN |   SPADES | BLACK        | DECK2), 100, true},
+	{(EIGHT |   SPADES | BLACK        | DECK2), 100, true},
+	{(NINE  |   SPADES | BLACK        | DECK2), 100, true},
+	{(TEN   |   SPADES | BLACK        | DECK2), 100, true},
+	{(JACK  |   SPADES | BLACK | FACE | DECK2), 100, true},
+	{(QUEEN |   SPADES | BLACK | FACE | DECK2), 100, true},
+	{(KING  |   SPADES | BLACK | FACE | DECK2), 100, true},
+
+	{0, -1, false}
+};
+
+/* array of pointers to player decks */
+struct table_weight* player_decks[] = {
+	player_1_deck,
+	player_2_deck
+};
+
+struct table_weight shared_deck[] = {
+	{(ACE   |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(TWO   |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(THREE |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(FOUR  |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(FIVE  |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(SIX   |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(SEVEN |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(EIGHT |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(NINE  |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(TEN   |    CLUBS | BLACK        | DECK_SHARED), 100, true},
+	{(JACK  |    CLUBS | BLACK | FACE | DECK_SHARED), 100, true},
+	{(QUEEN |    CLUBS | BLACK | FACE | DECK_SHARED), 100, true},
+	{(KING  |    CLUBS | BLACK | FACE | DECK_SHARED), 100, true},
+
+	{(ACE   | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(TWO   | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(THREE | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(FOUR  | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(FIVE  | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(SIX   | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(SEVEN | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(EIGHT | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(NINE  | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(TEN   | DIAMONDS |   RED        | DECK_SHARED), 100, true},
+	{(JACK  | DIAMONDS |   RED | FACE | DECK_SHARED), 100, true},
+	{(QUEEN | DIAMONDS |   RED | FACE | DECK_SHARED), 100, true},
+	{(KING  | DIAMONDS |   RED | FACE | DECK_SHARED), 100, true},
+
+	{(ACE   |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(TWO   |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(THREE |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(FOUR  |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(FIVE  |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(SIX   |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(SEVEN |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(EIGHT |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(NINE  |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(TEN   |   HEARTS |   RED        | DECK_SHARED), 100, true},
+	{(JACK  |   HEARTS |   RED | FACE | DECK_SHARED), 100, true},
+	{(QUEEN |   HEARTS |   RED | FACE | DECK_SHARED), 100, true},
+	{(KING  |   HEARTS |   RED | FACE | DECK_SHARED), 100, true},
+
+	{(ACE   |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(TWO   |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(THREE |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(FOUR  |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(FIVE  |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(SIX   |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(SEVEN |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(EIGHT |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(NINE  |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(TEN   |   SPADES | BLACK        | DECK_SHARED), 100, true},
+	{(JACK  |   SPADES | BLACK | FACE | DECK_SHARED), 100, true},
+	{(QUEEN |   SPADES | BLACK | FACE | DECK_SHARED), 100, true},
+	{(KING  |   SPADES | BLACK | FACE | DECK_SHARED), 100, true},
+
+	{0, -1, false}
 };

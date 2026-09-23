@@ -1,0 +1,105 @@
+﻿## From full 'Build' logs:
+Rebuild started at 09:26...
+1>------ Rebuild All started: Project: Card Bowl, Configuration: Debug x64 ------
+1>  console.c
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2079: 'player_1_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(9,1): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2079: 'player_2_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(16,1): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2087: 'player_3_deck': missing subscript
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2079: 'player_3_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(21,1): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2099: initializer is not a constant
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2079: 'shared_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(28,1): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2078: too many initializers
+1>  (compiling source file 'console.c')
+1>  main.c
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2079: 'player_1_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(9,1): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2079: 'player_2_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(16,1): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2087: 'player_3_deck': missing subscript
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2079: 'player_3_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(21,1): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2099: initializer is not a constant
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2079: 'shared_deck' uses undefined struct 'table_weight'
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(28,1): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2078: too many initializers
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(21,3): error C2198: 'void TableWeightEnableAll(table_weight *)': too few arguments for call
+1>  (compiling source file 'main.c')
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(130,2): warning C4013: 'ConsoleShowScreen' undefined; assuming extern returning int
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(411,18): warning C4013: 'time' undefined; assuming extern returning int
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(443,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(444,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(448,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(449,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(450,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(451,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(453,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(454,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(455,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(456,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(457,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(458,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(459,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(460,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+1>  main_d.c
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2079: 'player_1_deck' uses undefined struct 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(9,1): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(4,21): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2079: 'player_2_deck' uses undefined struct 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(16,1): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(11,21): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2087: 'player_3_deck': missing subscript
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2079: 'player_3_deck' uses undefined struct 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(21,1): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(18,21): error C2099: initializer is not a constant
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2079: 'shared_deck' uses undefined struct 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(28,1): error C2078: too many initializers
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\main_d.c(23,21): error C2078: too many initializers
+1>  rng.c
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(12,12): error C2037: left of 'weight' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(14,8): error C2037: left of 'on_off' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(21,3): error C2198: 'void TableWeightEnableAll(table_weight *)': too few arguments for call
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(25,12): error C2037: left of 'weight' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(27,12): error C2037: left of 'on_off' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(28,25): error C2037: left of 'weight' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(30,21): warning C4013: 'rand' undefined; assuming extern returning int
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(34,12): error C2037: left of 'weight' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(36,12): error C2037: left of 'on_off' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(37,30): error C2037: left of 'weight' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(39,16): error C2037: left of 'val' specifies undefined struct/union 'table_weight'
+1>C:\Users\charl\source\repos\CardBowl\Card Bowl\rng.c(39,4): warning C4033: 'TableWeightDecision' must return a value
+1>  Generating Code...
+========== Rebuild All: 0 succeeded, 1 failed, 0 skipped ==========
+========== Rebuild completed at 09:26 and took 01.297 seconds ==========

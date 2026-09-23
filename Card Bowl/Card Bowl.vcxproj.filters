@@ -24,6 +24,9 @@
     <ClCompile Include="main_d.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rng.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

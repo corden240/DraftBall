@@ -1,9 +1,9 @@
 #include <math.h>
 #include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>   /* srand, rand, atoi */
+#include <time.h>     /* time() */
 #include "main.h"
-#include "main_d.c"
-
 /*
 * NAME:        DrawCard
 * DESCRIPTION: pick an available card from the deck 
@@ -96,6 +96,7 @@ void PlayNormal(struct response* res)
 */
 void PlayPunt(struct response* res)
 {
+	// announce punt
 	// draw 1-5 cards
 	// can replace 0-2
 	// find total yards
@@ -171,7 +172,7 @@ void DoPlay(struct response* res)
 	{
 		play_type = 2; // always punt on first play of each half
 	}
-	//else if (1) // TODO: if touchdown just scored automatically go for extra point
+	//else if (1) // TODO: if touchdown just scored, automatically go for extra point
 	//{
 	//	// play extra point or 2?
 	//}
@@ -184,27 +185,27 @@ void DoPlay(struct response* res)
 	do {
 		retry = false;
 		switch (play_type) {
-		case 1:
+		case PLAY_TYPE_NORMAL:
 		{
 			PlayNormal(res);
 			break;
 		}
-		case 2:
+		case PLAY_TYPE_PUNT:
 		{
 			PlayPunt(res);
 			break;
 		}
-		case 3:
+		case PLAY_TYPE_FIELD_GOAL:
 		{
 			PlayFieldGoal(res);
 			break;
 		}
-		case 4:
+		case PLAY_TYPE_KNEEL:
 		{
 			PlayKneel(res);
 			break;
 		}
-		case 5:
+		case PLAY_TYPE_TIMEOUT:
 		{
 			if(res->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
 				retry = true;
@@ -341,6 +342,65 @@ void GetTeamNames(struct response* res)
 }
 
 /*
+* NAME:        GetPlayerNames
+* DESCRIPTION: setup player names
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void GetPlayerNames(struct response* res)
+{
+	ConsoleShowScreen(res, "Would you like to name your players? Y/N ", 0);
+	char input[16];
+	fgets(input, sizeof(input), stdin);
+
+	if (input[0] == 'N' || input[0] == 'n')
+		res->players_named = false;
+	else
+	{
+		res->players_named = true;
+		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
+		{
+			if(i < NUMBER_OF_RB_NAMES_PER_TEAM)
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 1 RB Player %d: ", i + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_1_rb_names[i], sizeof(res->team_1_rb_names[i]), stdin);
+				res->team_1_rb_names[i][strcspn(res->team_1_rb_names[i], "\n")] = '\0';
+			}
+			else
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 1 WR Player %d: ", i - NUMBER_OF_RB_NAMES_PER_TEAM + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_1_wr_names[i], sizeof(res->team_1_wr_names[i]), stdin);
+				res->team_1_wr_names[i][strcspn(res->team_1_wr_names[i], "\n")] = '\0';
+			}
+		}
+		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
+		{
+			if (i < NUMBER_OF_RB_NAMES_PER_TEAM)
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 2 RB Player %d: ", i + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_2_rb_names[i], sizeof(res->team_2_rb_names[i]), stdin);
+				res->team_2_rb_names[i][strcspn(res->team_2_rb_names[i], "\n")] = '\0';
+			}
+			else
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 2 WR Player %d: ", i - NUMBER_OF_RB_NAMES_PER_TEAM + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_2_wr_names[i], sizeof(res->team_2_wr_names[i]), stdin);
+				res->team_2_wr_names[i][strcspn(res->team_2_wr_names[i], "\n")] = '\0';
+			}
+		}
+	}
+	ConsoleShowScreen(res, 0, 0);
+}
+
+/*
 * NAME:        SetupGame
 * DESCRIPTION: initialises data such as team names, coin toss, starting possession etc
 * INPUTS:      response
@@ -351,6 +411,8 @@ void SetupGame(struct response* res)
 	srand((unsigned)time(NULL));
 
 	GetTeamNames(res);
+
+	GetPlayerNames(res);
 
 	CoinToss(res);
 }
@@ -382,6 +444,22 @@ void ResponseConstructor(struct response* res)
 	strcpy(res->team_2_name, "Team 2");
 	res->team_1_direction = 1; // default direction
 	res->team_2_direction = 2; // default direction
+
+	strcpy(res->team_1_rb_names[0], "Team 1 RB1");
+	strcpy(res->team_2_rb_names[0], "Team 2 RB1");
+	strcpy(res->team_1_rb_names[1], "Team 1 RB2");
+	strcpy(res->team_2_rb_names[1], "Team 2 RB2");
+
+	strcpy(res->team_1_wr_names[0], "Team 1 WR1");
+	strcpy(res->team_2_wr_names[0], "Team 2 WR1");
+	strcpy(res->team_1_wr_names[1], "Team 1 WR2");
+	strcpy(res->team_2_wr_names[1], "Team 2 WR2");
+	strcpy(res->team_1_wr_names[2], "Team 1 WR3");
+	strcpy(res->team_2_wr_names[2], "Team 2 WR3");
+	strcpy(res->team_1_wr_names[3], "Team 1 WR4");
+	strcpy(res->team_2_wr_names[3], "Team 2 WR4");
+
+	res->players_named = false;
 }
 
 /*
@@ -409,6 +487,8 @@ void EndOfGame(struct response* res)
 	{
 		ConsoleShowScreen(res, "It's a tie!", 1000);
 	}
+	
+	// print all the game stats? TODO: player stats, quarter stats, yards, downs etc
 }
 
 /*
