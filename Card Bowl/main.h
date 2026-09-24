@@ -11,6 +11,8 @@
 #define NUMBER_OF_WR_NAMES_PER_TEAM (4)
 #define NUMBER_OF_PLAYER_NAMES_PER_TEAM (NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM)
 
+#define GAME_SPEED    (50) // must be divisible by 5
+#define ANIMATE_SPEED (50)
 #define WINDOW_WIDTH  (120)
 #define WINDOW_HEIGHT (50)
 
@@ -19,8 +21,19 @@
 #define PITCH_WIDTH    (END_ZONE_WIDTH + END_ZONE_WIDTH + FIELD_WIDTH)
 #define FIELD_HEIGHT   (5)
 
-#define MAX_CARDS_PUNT (5)
-#define MAX_CARDS_PUNT_REDRAW (2)
+#define PUNT_MAX_CARDS (6)
+#define PUNT_REDRAW_MAX_CARDS (2)
+
+#define FIELD_GOAL_POINTS (3)
+#define FIELD_GOAL_MAX_CARDS (6)
+#define FIELD_GOAL_REDRAW_MAX_CARDS (2)
+#define FIELD_GOAL_YARDS_AFTER_END_ZONE (18)
+#define FIELD_GOAL_MISS_PENALTY_YARDS (10)
+
+#define EXTRA_POINT_YARDAGE_FROM_END_ZONE (15)
+#define EXTRA_POINT_POINTS (1)
+
+#define TOUCHDOWN_POINTS (6)
 
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
@@ -88,8 +101,9 @@ struct response {
 	int line_of_first_down;
 	int down;
 	int team_in_possession;
-	int score_team_1;
-	int score_team_2;
+	int team_not_in_possession;
+	int team_1_score;
+	int team_2_score;
 	int quarter;
 	int plays_remaining_in_quarter;
 	int shuffle_deck_needed[NUMBER_OF_DECKS]; // int 1 if that deck needs to be shuffled, 0 if not
@@ -108,6 +122,8 @@ struct response {
 	bool players_named;
 	int o_cards[CARDS_IN_A_DECK];
 	int d_cards[CARDS_IN_A_DECK];
+	bool kickoff_needed;
+	bool extra_point_needed;
 };
 
 struct table_weight {
@@ -132,4 +148,3 @@ extern struct table_weight shared_deck[];
 extern struct table_weight player_1_deck[];
 extern struct table_weight player_2_deck[];
 extern struct table_weight* player_decks[];
-

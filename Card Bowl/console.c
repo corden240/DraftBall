@@ -31,8 +31,40 @@ const char* CardName(int card)
 }
 
 /*
+* NAME:        ShowTimeoutBlocks
+* DESCRIPTION: prints one team's timeout pips as spaces; grey background =
+*              timeout remaining, black = used. Remaining pips sit closest
+*              to the team name so the count reads inward.
+* INPUTS:      hConsole         - console output handle
+*              remaining        - timeouts left (0..TIMEOUTS_PER_TEAM_PER_HALF)
+*              pips_before_name - 1 if pips print before the team name (team 1),
+*                                 0 if they print after it (team 2)
+* OUTPUTS:     None
+*/
+static void ShowTimeoutBlocks(HANDLE hConsole, int remaining, int pips_before_name)
+{
+	if (remaining < 0) remaining = 0;
+	if (remaining > TIMEOUTS_PER_TEAM_PER_HALF) remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+
+	for (int i = 0; i < TIMEOUTS_PER_TEAM_PER_HALF; i++) {
+		int is_remaining = pips_before_name
+			? (i >= TIMEOUTS_PER_TEAM_PER_HALF - remaining)
+			: (i < remaining);
+		if (is_remaining) {
+			SetConsoleTextAttribute(hConsole, CONSOLE_BG_LIGHTBLUE);
+			putchar(' ');
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
+		}
+		else {
+			putchar(' ');
+		}
+		putchar(' ');
+	}
+}
+
+/*
 * NAME:        ShowTopInfo
-* DESCRIPTION: displays teams, scores, and clock
+* DESCRIPTION: displays timeouts, teams, scores, and clock
 * INPUTS:      None
 * OUTPUTS:     None
 */
@@ -43,17 +75,16 @@ void ShowTopInfo(struct response* res)
 
 	const int SIDE_GAP = 10;          /* exactly 10 spaces on each side of '|' */
 	const char DIV = '|';
+	const int BLOCKS_WIDTH = (TIMEOUTS_PER_TEAM_PER_HALF * 2) + 1; /* pips + 1 space by the name */
 	int width = WINDOW_WIDTH;
 	int center = (width / 2) - 6;     /* index where '|' should appear (0-based) */
 	if (center < 0) center = 0;
-
-	// TODO: show timouts remaining for each time with 3 blocks of grey next to team name?
 
 	/* Build left and right raw strings (local buffers, no accumulation across calls) */
 	char left_raw[256];
 	char right_raw[128];
 	snprintf(left_raw, sizeof(left_raw), "%s  %d : %d  %s",
-		res->team_1_name, res->score_team_1, res->score_team_2, res->team_2_name);
+		res->team_1_name, res->team_1_score, res->team_2_score, res->team_2_name);
 	snprintf(right_raw, sizeof(right_raw), "Quarter: %d  Plays Left: %d",
 		res->quarter, res->plays_remaining_in_quarter);
 
@@ -61,28 +92,38 @@ void ShowTopInfo(struct response* res)
 	int left_gap_start = center - SIDE_GAP;
 	if (left_gap_start < 0) left_gap_start = 0;
 
-	/* Determine left display that must end immediately before the left gap.
-	   If too long, keep the rightmost characters so scores remain visible. */
+	/* Left side layout: [team1 pips] names/scores [team2 pips].
+	   Pips print with color changes, so only the core string is truncated;
+	   keep the rightmost characters so scores remain visible. */
 	int left_max_len = left_gap_start;
 	size_t left_raw_len = strlen(left_raw);
 	char left_display[256];
-	if ((int)left_raw_len > left_max_len) {
-		if (left_max_len <= 0) {
-			left_display[0] = '\0';
+	int show_blocks = 1;
+	int core_max_len = left_max_len - (2 * BLOCKS_WIDTH);
+	if ((int)left_raw_len > core_max_len) {
+		if (core_max_len > 0) {
+			size_t start = left_raw_len - (size_t)core_max_len;
+			strncpy(left_display, left_raw + start, core_max_len);
+			left_display[core_max_len] = '\0';
 		}
-		else {
-			/* keep the rightmost characters */
+		else if (left_max_len > 0) {
+			/* too narrow for pips; drop them and keep rightmost core chars */
 			size_t start = left_raw_len - (size_t)left_max_len;
 			strncpy(left_display, left_raw + start, left_max_len);
 			left_display[left_max_len] = '\0';
+			show_blocks = 0;
+		}
+		else {
+			left_display[0] = '\0';
+			show_blocks = 0;
 		}
 	}
 	else {
 		strcpy(left_display, left_raw);
 	}
-	int left_display_len = (int)strlen(left_display);
+	int left_display_len = (int)strlen(left_display) + (show_blocks ? 2 * BLOCKS_WIDTH : 0);
 
-	/* Leading padding so left_display ends at left_gap_start-1 */
+	/* Leading padding so the left display ends at left_gap_start-1 */
 	int leading_spaces = left_gap_start - left_display_len;
 	if (leading_spaces < 0) leading_spaces = 0;
 
@@ -104,35 +145,26 @@ void ShowTopInfo(struct response* res)
 		strcpy(right_display, right_raw);
 	}
 
-	/* Prepare component strings */
-	char left_pad_str[512];
-	memset(left_pad_str, ' ', leading_spaces);
-	left_pad_str[leading_spaces] = '\0';
-
-	char gapStr[11];
-	memset(gapStr, ' ', SIDE_GAP);
-	gapStr[SIDE_GAP] = '\0';
-
-	/* Compose final line and ensure it's exactly 'width' chars (pad or truncate) */
-	char line[1024];
-	snprintf(line, sizeof(line), "%s%s%s%c%s%s",
-		left_pad_str, left_display, gapStr, DIV, gapStr, right_display);
-
-	int line_len = (int)strlen(line);
-	if (line_len < width) {
-		int trailing = width - line_len;
-		if (trailing > 0) {
-			char trail[512];
-			memset(trail, ' ', trailing);
-			trail[trailing] = '\0';
-			strncat(line, trail, trailing);
-		}
+	/* Print in segments so the pips can use a grey background */
+	for (int i = 0; i < leading_spaces; i++) putchar(' ');
+	if (show_blocks) {
+		ShowTimeoutBlocks(hConsole, res->team_1_timeouts_remaining, 1);
+		putchar(' ');
 	}
-	else if (line_len > width) {
-		line[width] = '\0';
+	printf("%s", left_display);
+	if (show_blocks) {
+		putchar(' ');
+		ShowTimeoutBlocks(hConsole, res->team_2_timeouts_remaining, 0);
 	}
+	for (int i = 0; i < SIDE_GAP; i++) putchar(' ');
+	putchar(DIV);
+	for (int i = 0; i < SIDE_GAP; i++) putchar(' ');
+	printf("%s", right_display);
 
-	printf("%s", line);
+	/* Pad the rest of the line out to the window width */
+	int line_len = left_gap_start + SIDE_GAP + 1 + SIDE_GAP + (int)strlen(right_display);
+	for (int i = line_len; i < width; i++) putchar(' ');
+
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 }
 
@@ -183,7 +215,6 @@ void DrawField(struct response* res)
 	printf("\n\r");
 
 	PrintSideline();
-	// TODO: print different colour on line of scrimmage and line of first down
 	for (int j = 0; j < FIELD_HEIGHT; j++)
 	{
 		printf("\n\r");
@@ -230,7 +261,28 @@ void ShowGameInfo(struct response* res)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("\n\r\n\r");
-	printf("                                 Down: %d  Distance: %d  Line of Scrimmage: %d                                   ", res->down, res->line_of_scrimmage - res->line_of_first_down, res->line_of_scrimmage);
+	printf("                                 Down: %d  Distance: %d  Line of Scrimmage: %d                                   ", res->down, abs(res->line_of_scrimmage - res->line_of_first_down), ConvertLosToYardLine(res));
+}
+
+/*
+* NAME:        PrintCard
+* DESCRIPTION: prints 1 card in correct colour
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PrintCard(int card)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	if((card & SUIT) == CLUBS)
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_GREEN);
+	else if ((card & SUIT) == DIAMONDS)
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
+	else if ((card & SUIT) == HEARTS)
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_RED);
+	else if ((card & SUIT) == SPADES)
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	printf("%s", CardName(card));
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 }
 
 /*
@@ -247,9 +299,11 @@ void ShowCards(struct response* res)
 	printf("\r                                 ");
 	for (int i = 0; i < CARDS_IN_A_DECK && res->o_cards[i] != '\0'; i++)
 	{
+		if (i == 0)
+			printf("O: ");
 		if (!res->o_cards[i])
 			break;
-		printf("%s", CardName(res->o_cards[i]));
+		PrintCard(res->o_cards[i]);
 		if(res->o_cards[i+1])
 			printf(", ");
 	}
@@ -258,12 +312,15 @@ void ShowCards(struct response* res)
 
 	for (int i = 0; i < CARDS_IN_A_DECK && res->d_cards[i] != '\0'; i++)
 	{
+		if (i == 0)
+			printf("D: ");
 		if (!res->d_cards[i])
 			break;
-		printf("%s", CardName(res->d_cards[i]));
+		PrintCard(res->d_cards[i]);
 		if (res->d_cards[i + 1])
 			printf(", ");
 	}
+	printf("                                 ");
 }
 
 /*
@@ -281,7 +338,7 @@ void ShowText(struct response* res, char txt[1000])
 	for (int i = 0; i < 1000 && txt[i] != '\0'; i++)
 	{
 		printf("%c", txt[i]);
-		Sleep(10);
+		Sleep(GAME_SPEED / 5);
 	}
 }
 
