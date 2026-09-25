@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\charl\\source\\repos\\CardBowl\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\Play.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\Play.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\play.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\play.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main_d.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -21,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\console.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\console.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|Card Bowl\\Card Bowl.vcxproj|solutionrelative:Card Bowl\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt\\stdio.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
@@ -51,15 +51,14 @@
               "RelativeDocumentMoniker": "Card Bowl\\main.c",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.c",
               "RelativeToolTip": "Card Bowl\\main.c",
-              "ViewState": "AgIAAP4AAAAAAAAAAAAjwAoBAAAYAAAAAAAAAA==",
+              "ViewState": "AgIAAGgBAAAAAAAAAAAnwHkBAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-21T20:13:10.236Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "main_d.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main_d.c",
               "RelativeDocumentMoniker": "Card Bowl\\main_d.c",
@@ -68,12 +67,11 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-21T20:13:10.938Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "console.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\console.c",
               "RelativeDocumentMoniker": "Card Bowl\\console.c",
@@ -82,26 +80,24 @@
               "ViewState": "AgIAACMAAAAAAAAAAADwvzMAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-21T20:13:11.416Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "main.h",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.h",
               "RelativeDocumentMoniker": "Card Bowl\\main.h",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\main.h",
               "RelativeToolTip": "Card Bowl\\main.h",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAACMAAAAYAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAACUAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-09-21T20:33:56.993Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "rng.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\rng.c",
               "RelativeDocumentMoniker": "Card Bowl\\rng.c",
@@ -110,8 +106,7 @@
               "ViewState": "AgIAABYAAAAAAAAAAAD4vykAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-23T08:16:20.278Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -121,7 +116,7 @@
               "RelativeDocumentMoniker": "Card Bowl\\play.c",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\CardBowl\\Card Bowl\\play.c",
               "RelativeToolTip": "Card Bowl\\play.c",
-              "ViewState": "AgIAAFoDAAAAAAAAAAAjwHgDAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAH8DAAAAAAAAAAAIwJgDAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-24T11:37:48.76Z",
               "IsPinned": true,
@@ -138,8 +133,7 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-09-23T09:58:12.166Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -151,8 +145,7 @@
               "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt\\stdio.h",
               "ViewState": "AgIAAI8FAAAAAAAAAAD4v54FAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-09-24T17:42:19.104Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-24T17:42:19.104Z"
             }
           ]
         }

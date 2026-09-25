@@ -302,6 +302,17 @@ void PlayNormal(struct response* res)
 	messaging, moving lines, metering, gaining a new first down, scoring, end of quarter, end of game */
 
 	/* Then get working as 1 v 1 card O1 v D1 pure maths O1 - D1 calculation */
+	
+	int yards = rand() % 10 - 2;
+
+	int total_yards = TotalYardsOffence(res);
+	char buf[256];
+	snprintf(buf, sizeof(buf), "Yards Gained: %d", yards);
+	ConsoleShowScreen(res, buf, GAME_SPEED * 10);
+
+	MoveLineOfScrimmage(res, yards);
+
+	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
 
 	// What the function will do when actually working:
 	// ask player on offence to pick layout
@@ -608,7 +619,8 @@ void TurnoverOnDowns(struct response* res, bool field_goal)
 	if (res->plays_remaining_in_quarter > 1) // dont change possession if 1 play left because end of quarter could take possession off this team when it shouldn't
 	{
 		SwitchPossession(res);
-		MoveLineOfScrimmage(res, FIELD_GOAL_MISS_PENALTY_YARDS);
+		if(field_goal)
+			MoveLineOfScrimmage(res, FIELD_GOAL_MISS_PENALTY_YARDS);
 		ResetLineOfFirstDown(res);
 	}
 	res->down = 0;
@@ -749,7 +761,7 @@ void PlayTimeout(struct response* res)
 		ConsoleShowScreen(res, 0, ANIMATE_SPEED);
 	}
 
-	ConsoleShowScreen(res, "Timeout Used", GAME_SPEED * 20);
+	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
 }
 
 /*
@@ -807,7 +819,7 @@ void AnnounceDown(struct response* res)
 
 	len += snprintf(buf + len, sizeof(buf) - len, "%s down", down_str);
 
-	ConsoleShowScreen(res, buf, GAME_SPEED * 10);
+	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 }
 
 /*
@@ -819,7 +831,37 @@ void AnnounceDown(struct response* res)
 bool TouchdownScored(struct response* res)
 {
 	// check if touchdown, make sure not a safety
-	return true;
+	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	{
+		return true;
+	}
+	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+/*
+* NAME:        SafetyScored
+* DESCRIPTION: check if we need to award a safety
+* INPUTS:      response
+* OUTPUTS:     bool
+*/
+bool SafetyScored(struct response* res)
+{
+	// check if safety
+	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	{
+		return true;
+	}
+	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	{
+		return true;
+	}
+	else
+		return false;
 }
 
 /*
@@ -830,7 +872,16 @@ bool TouchdownScored(struct response* res)
 */
 bool FirstDownScored(struct response* res)
 {
-	// check if on or past first down line
+	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage >= res->line_of_first_down))
+	{
+		return true;
+	}
+	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage <= res->line_of_first_down))
+	{
+		return true;
+	}
+	else
+		return false;
 	return true;
 }
 
@@ -848,6 +899,8 @@ void AwardTouchdown(struct response* res)
 		res->team_2_score += TOUCHDOWN_POINTS;
 
 	res->extra_point_needed = true;
+
+	ConsoleShowScreen(res, "Touch Down Scored!", GAME_SPEED * 50);
 }
 
 /*
@@ -858,7 +911,14 @@ void AwardTouchdown(struct response* res)
 */
 void AwardSafety(struct response* res)
 {
+	if (res->team_in_possession == 1)
+		res->team_2_score += SAFETY_POINTS;
+	else if (res->team_in_possession == 2)
+		res->team_1_score += SAFETY_POINTS;
 
+	ConsoleShowScreen(res, "Safety Scored!", GAME_SPEED * 50);
+	
+	ResetForKickoff(res);
 }
 
 /*
@@ -867,7 +927,7 @@ void AwardSafety(struct response* res)
 * INPUTS:      response
 * OUTPUTS:     None
 */
-void ResolveEndOfPlay(struct response* res, int play_type) // TODO: all of these functions, check that these work when having just dont a punt, field goal attempt, extra point etc
+void ResolveEndOfPlay(struct response* res, int play_type)
 {
 	if (play_type == PLAY_TYPE_TIMEOUT) // if a timeout was just played successfully, do nothing
 		;
@@ -879,9 +939,10 @@ void ResolveEndOfPlay(struct response* res, int play_type) // TODO: all of these
 	{
 		AwardSafety(res);
 	}
-	else if (FirstDownScored(res))
+	else if ((play_type != PLAY_TYPE_FIELD_GOAL) && (play_type != PLAY_TYPE_PUNT) && (FirstDownScored(res)))
 	{
-		ResetLineOfFirstDown(res); 
+		ConsoleShowScreen(res, "First down achieved", GAME_SPEED * 30);
+		ResetLineOfFirstDown(res);
 		res->down = 0;
 	}
 	else if (res->down == 4)

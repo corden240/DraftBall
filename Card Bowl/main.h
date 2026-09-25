@@ -35,6 +35,8 @@
 
 #define TOUCHDOWN_POINTS (6)
 
+#define SAFETY_POINTS (2)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
 

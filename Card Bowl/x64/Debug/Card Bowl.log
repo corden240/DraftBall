@@ -1,36 +1,10 @@
-﻿  console.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(106,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(112,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(122,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(141,3): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(145,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(264,192): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-  main.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(285,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(286,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(290,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(291,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(292,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(293,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(295,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(296,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(297,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(298,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(299,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(300,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(301,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(302,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(385,5): warning C4013: 'Play' undefined; assuming extern returning int
-  main_d.c
-  play.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(546,6): warning C4101: 'distance': unreferenced local variable
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(628,56): warning C4474: 'snprintf' : too many arguments passed for format string
-      C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(628,56):
+﻿  play.c
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(557,6): warning C4101: 'distance': unreferenced local variable
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(640,56): warning C4474: 'snprintf' : too many arguments passed for format string
+      C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(640,56):
       placeholders and their parameters expect 0 variadic arguments, but 1 were provided
   
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(942,5): warning C4013: 'SwitchEnds' undefined; assuming extern returning int
-  rng.c
-  Generating Code...
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(556,1): warning C4716: 'SetLosExtraPoint': must return a value
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(576,1): warning C4716: 'GetFieldGoalDistance': must return a value
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(1063,5): warning C4013: 'SwitchEnds' undefined; assuming extern returning int
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(567,1): warning C4716: 'SetLosExtraPoint': must return a value
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(587,1): warning C4716: 'GetFieldGoalDistance': must return a value
   Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe
