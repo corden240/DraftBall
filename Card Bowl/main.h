@@ -10,6 +10,7 @@
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
 #define NUMBER_OF_WR_NAMES_PER_TEAM (4)
 #define NUMBER_OF_PLAYER_NAMES_PER_TEAM (NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM)
+#define NUMER_OF_COIN_TOSSES (6)
 
 #define GAME_SPEED    (50) // must be divisible by 5
 #define ANIMATE_SPEED (50)
@@ -24,6 +25,9 @@
 #define PUNT_MAX_CARDS (6)
 #define PUNT_REDRAW_MAX_CARDS (2)
 
+#define PUNT_RETURN_OFFENCE_CARDS_TO_DRAW (3)
+#define PUNT_RETURN_DEFENCE_CARDS_TO_DRAW (1)
+
 #define FIELD_GOAL_POINTS (3)
 #define FIELD_GOAL_MAX_CARDS (6)
 #define FIELD_GOAL_REDRAW_MAX_CARDS (2)
@@ -32,15 +36,20 @@
 
 #define EXTRA_POINT_YARDAGE_FROM_END_ZONE (15)
 #define EXTRA_POINT_POINTS (1)
+#define TWO_POINT_CONVERSION_POINTS (2)
+#define TWO_POINT_CONVERSION_YARDS (2)
 
 #define TOUCHDOWN_POINTS (6)
 
 #define SAFETY_POINTS (2)
 
+#define NORMAL_PLAY_CARDS_TO_DRAW (4)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
 
 #define MAX_WEIGHTS_IN_TABLE (1000)
+#define MAX_STRING_lENGTH (1000)
 
 #define VALUE       (0x00000f)
 #define SUIT        (0x0000f0)
@@ -126,6 +135,12 @@ struct response {
 	int d_cards[CARDS_IN_A_DECK];
 	bool kickoff_needed;
 	bool extra_point_needed;
+	int play_type;
+	int formation;
+	int o_cards_in_position[NORMAL_PLAY_CARDS_TO_DRAW];
+	int d_cards_in_position[NORMAL_PLAY_CARDS_TO_DRAW];
+	int show_O_D_Both;
+	int matchup_number;
 };
 
 struct table_weight {

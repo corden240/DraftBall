@@ -8,6 +8,7 @@
 void SwitchPossession(struct response* res);
 void ResetLineOfFirstDown(struct response* res);
 void ResetLineOfScrimmage(struct response* res);
+void Play(struct response* res);
 
 /*
 * NAME:        ResetLineOfScrimmage
@@ -17,7 +18,7 @@ void ResetLineOfScrimmage(struct response* res);
 */
 void ResetLineOfScrimmage(struct response* res)
 {
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	}
@@ -37,7 +38,7 @@ void MoveLineOfScrimmage(struct response* res, int yards)
 {
 	int yards_moved = -yards;
 
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		yards_moved = yards;
 	}
@@ -55,7 +56,7 @@ void ResetLineOfFirstDown(struct response* res)
 {
 	int first_down = -YARDS_PER_FIRST_DOWN;
 
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		first_down = YARDS_PER_FIRST_DOWN;
 	}
@@ -113,7 +114,7 @@ void SwitchPossession(struct response* res)
 void CoinToss(struct response* res)
 {
 	ConsoleShowScreen(res, "Coin toss: ", GAME_SPEED * 10);
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < NUMER_OF_COIN_TOSSES; i++)
 	{
 		ConsoleShowScreen(res, "\\", GAME_SPEED / 5);
 		ConsoleShowScreen(res, "|", GAME_SPEED / 5);
@@ -308,8 +309,17 @@ void ResponseConstructor(struct response* res)
 		res->d_cards[i] = 0;
 	}
 
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++) {
+		res->o_cards_in_position[i] = 0;
+		res->d_cards_in_position[i] = 0;
+	}
+
 	res->kickoff_needed = true;
 	res->extra_point_needed = false;
+	res->play_type = 0;
+	res->formation = 0;
+	res->show_O_D_Both = 0;
+	res->matchup_number = 0;
 }
 
 /*
@@ -338,7 +348,7 @@ void EndOfGame(struct response* res)
 		ConsoleShowScreen(res, "It's a tie!", GAME_SPEED * 20);
 	}
 	
-	// print all the game stats? TODO: player stats, quarter stats, yards, downs etc
+	// print all the game stats? player stats, quarter stats, yards, downs etc
 }
 
 /*
@@ -373,9 +383,9 @@ void SetupWindow()
 */
 void main()
 {
-	// TODO: Be able to play a season / career / playoffs etc 
+	// Be able to play a season / career / playoffs etc 
 
-	// TODO: start of game settings and info page, red line = LoS, purple line = first down, plays 1-5 = normal, punt etc
+	// start of game settings and info page, red line = LoS, purple line = first down, plays 1-5 = normal, punt etc
 
 	SetupWindow();	
     struct response res;

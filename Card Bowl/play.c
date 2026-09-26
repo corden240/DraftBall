@@ -11,6 +11,11 @@ void ResetLineOfScrimmage(struct response* res);
 int TableWeightTotalWeight(struct table_weight* table);
 void TableWeightSet(struct table_weight* table, int val, bool on_off);
 void MoveLineOfScrimmage(struct response* res, int yards);
+void PlayNormal(struct response* res);
+bool TouchdownScored(struct response* res);
+void ResetForKickoff(struct response* res);
+void SwitchEnds(struct response* res);
+int GetDirectionOfPlay(struct response* res);
 
 /*
 * NAME:        ClearAllCards
@@ -23,6 +28,40 @@ void ClearAllCards(struct response* res)
 	for (int i = 0; i < CARDS_IN_A_DECK; i++)
 	{
 		res->o_cards[i] = 0;
+		res->d_cards[i] = 0;
+	}
+
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
+	{
+		res->o_cards_in_position[i] = 0;
+		res->d_cards_in_position[i] = 0;
+	}
+}
+
+/*
+* NAME:        ClearOCards
+* DESCRIPTION: clear o_cards
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void ClearOCards(struct response* res)
+{
+	for (int i = 0; i < CARDS_IN_A_DECK; i++)
+	{
+		res->o_cards[i] = 0;
+	}
+}
+
+/*
+* NAME:        ClearDCards
+* DESCRIPTION: clear d_cards
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void ClearDCards(struct response* res)
+{
+	for (int i = 0; i < CARDS_IN_A_DECK; i++)
+	{
 		res->d_cards[i] = 0;
 	}
 }
@@ -291,6 +330,121 @@ void PlayRun(struct response* res, int offence_1, int defence_1)
 }
 
 /*
+* NAME:        PlayTwoPointConversion
+* DESCRIPTION: execute the play
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void PlayTwoPointConversion(struct response* res)
+{
+	if (GetDirectionOfPlay(res) == 1)
+	{
+		res->line_of_scrimmage = END_ZONE_WIDTH + FIELD_WIDTH - TWO_POINT_CONVERSION_YARDS;
+	}
+	else
+	{
+		res->line_of_scrimmage = END_ZONE_WIDTH + TWO_POINT_CONVERSION_YARDS;
+	}
+
+	PlayNormal(res); // not right as in conversion a pick 6 cant happen but it can in PlayNormal, need to guard for this
+
+	if (TouchdownScored(res)) // if in the end zone
+	{
+		ConsoleShowScreen(res, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
+		res->team_1_score += TWO_POINT_CONVERSION_POINTS;
+	}
+	else
+	{
+		ConsoleShowScreen(res, "Missed Extra Points", GAME_SPEED * 20);
+	}
+
+	ResetForKickoff(res);
+	SwitchPossession(res);
+
+	res->down = 0;
+	res->plays_remaining_in_quarter++; // should not take a play clock play so add one back
+	res->extra_point_needed = false;
+}
+
+/*
+* NAME:        GetFormation
+* DESCRIPTION: ask for and set the formation for the play
+* INPUTS:      response
+* OUTPUTS:     int
+*/
+int GetFormation(struct response* res)
+{
+	// []       []  []       []
+	// 
+	// []         []     []  []
+	// 
+	// []  []            []  []
+	ConsoleShowScreen(res, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1 - 3): ", GAME_SPEED * 10);
+
+	char input[16];
+	fgets(input, sizeof(input), stdin);
+	int pick = atoi(input);
+	if (pick < 1 || pick > 3)
+		pick = 1;
+	return pick;
+}
+
+/*
+* NAME:        GetMatchupNumber
+* DESCRIPTION: ask for and set the matchup in play 1-4
+* INPUTS:      response
+* OUTPUTS:     int
+*/
+int GetMatchupNumber(struct response* res)
+{
+	ConsoleShowScreen(res, "O pick matchup to play (1 - 4): ", GAME_SPEED * 10);
+
+	char input[16];
+	fgets(input, sizeof(input), stdin);
+	int pick = atoi(input);
+	if (pick < 1 || pick > 4)
+		pick = 1;
+	return pick;
+}
+
+/*
+* NAME:        PutCardsInFormation
+* DESCRIPTION: asks and then places the 4 cards into their formation
+* INPUTS:      response, offence_or_defence (1-2)
+* OUTPUTS:     None
+*/
+void PutCardsInFormation(struct response* res, int offence_or_defence)
+{
+	int pick = 0;
+	bool retry = false;
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
+	{	
+		do {
+			retry = false;
+			char buf[256];
+			snprintf(buf, sizeof(buf), "What position (1 - %d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
+			ConsoleShowScreen(res, buf, GAME_SPEED * 1);
+
+			char input[16];
+			fgets(input, sizeof(input), stdin);
+			pick = atoi(input);
+
+			if (pick < 1 || pick > NORMAL_PLAY_CARDS_TO_DRAW || (offence_or_defence == 1 && res->o_cards_in_position[pick - 1]) || (offence_or_defence == 2 && res->d_cards_in_position[pick - 1]))
+			{
+				retry = true;
+				ConsoleShowScreen(res, "Invalid position chosen, choose again.", GAME_SPEED * 20);
+			}
+
+		} while (retry);
+		if(offence_or_defence == 1)
+			res->o_cards_in_position[pick - 1] = res->o_cards[i];
+		else if (offence_or_defence == 2)
+			res->d_cards_in_position[pick - 1] = res->d_cards[i];
+		ConsoleShowScreen(res, 0, GAME_SPEED * 1);
+	}
+}
+
+/*
 * NAME:        PlayNormal
 * DESCRIPTION: execute the play
 * INPUTS:      response
@@ -298,31 +452,50 @@ void PlayRun(struct response* res, int offence_1, int defence_1)
 */
 void PlayNormal(struct response* res)
 {
-	/* start with forcing a 4 yard gain assigned to a random RB or WR, get working like that first, 
-	messaging, moving lines, metering, gaining a new first down, scoring, end of quarter, end of game */
+	ConsoleShowScreen(res, "Offence, press enter to draw", GAME_SPEED * 20);
+	char input[16];
+	fgets(input, sizeof(input), stdin);
 
-	/* Then get working as 1 v 1 card O1 v D1 pure maths O1 - D1 calculation */
+	DrawCards(res, res->team_in_possession, NORMAL_PLAY_CARDS_TO_DRAW); // O: draw 4 cards
+
+	res->formation = GetFormation(res); // O: pick layout/formation/personnel
+	res->show_O_D_Both = 1;
+
+	ConsoleShowScreen(res, 0, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
+
+	PutCardsInFormation(res, 1); // Offence place cards in positions, send 1 for offence
 	
-	int yards = rand() % 10 - 2;
+	res->show_O_D_Both = 0; // Cover offence cards
+	ConsoleShowScreen(res, "Defence, press enter to draw", GAME_SPEED * 20);
+	char input2[16];
+	fgets(input2, sizeof(input2), stdin);
 
-	int total_yards = TotalYardsOffence(res);
-	char buf[256];
-	snprintf(buf, sizeof(buf), "Yards Gained: %d", yards);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 10);
+	int save_formation = res->formation;
+	res->formation = 0;
+	ClearOCards(res);
 
-	MoveLineOfScrimmage(res, yards);
+	res->show_O_D_Both = 2; // show D cards
+	DrawCards(res, res->team_not_in_possession, NORMAL_PLAY_CARDS_TO_DRAW); // D: draw 4 cards
 
+	res->formation = save_formation;
+	PutCardsInFormation(res, 2); // Defence place cards in positions, send 1 for Defence
+	
+	res->show_O_D_Both = 0; // cover both sets of cards
 	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
 
-	// What the function will do when actually working:
-	// ask player on offence to pick layout
-	// O: pick 4 cards then place into desired player positions within chosen layout
-	// D: pick 4 cards then place into desired player positions
-	// Reveal all 8 cards 1 by 1
-	// O: pick which of the 4 match ups to play
-
+	res->show_O_D_Both = 3;
+	
+	res->matchup_number = GetMatchupNumber(res); // Show all 8 cards and "O: pick which of the 4 match ups to play"
+	
+	res->formation = 0; // stop showing full formation layout in console
+	// save played id for who is being targetted? need formation and matchup number for this
+	
+	// store 2 head to head cards and whether its run or pass, how to show these? Where to store these?
+	// ClearAllCards(res);
 	// PlayRun(res, O1, D1);
 	// PlayPass(res, O1, D1);
+
+	res->show_O_D_Both = 0;
 }
 
 /*
@@ -469,8 +642,8 @@ void PlayPuntReturn(struct response* res)
 	ConsoleShowScreen(res, "Punt return...", GAME_SPEED * 20);
 
 	// Receiver draws two cards and the punter draws one card from the shared deck
-	DrawCards(res, res->team_in_possession, 2);
-	DrawCards(res, res->team_not_in_possession, 1);
+	DrawCards(res, res->team_in_possession, PUNT_RETURN_OFFENCE_CARDS_TO_DRAW);
+	DrawCards(res, res->team_not_in_possession, PUNT_RETURN_DEFENCE_CARDS_TO_DRAW);
 	
 	// (two received draws - one punter draw) = (O1 + O2) - D1 = yardage returned
 	int yards = TotalYardsOffence(res) - TotalYardsDefence(res);
@@ -486,9 +659,9 @@ void PlayPuntReturn(struct response* res)
 	ConsoleShowScreen(res, 0, GAME_SPEED * 20);
 
 	// if O2 is a face card and larger than D1 the go to Open field run
-	if ((res->o_cards[1] & FACE) && ((res->o_cards[1] & VALUE) > (res->d_cards[0] & VALUE)))
+	if ((res->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & FACE) && ((res->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & VALUE) > (res->d_cards[PUNT_RETURN_DEFENCE_CARDS_TO_DRAW - 1] & VALUE)))
 	{
-		OpenFieldRun(res, res->o_cards[1], res->d_cards[0]);
+		OpenFieldRun(res, res->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1], res->d_cards[PUNT_RETURN_DEFENCE_CARDS_TO_DRAW - 1]);
 	}
 
 	res->down = 0;
@@ -535,8 +708,12 @@ void PlayPunt(struct response* res)
 
 	MoveLineOfScrimmage(res, total_yards);
 
+
 	char buf2[256];
-	snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(res));
+	if(TouchdownScored(res)) // if kicked into the end zone
+		snprintf(buf2, sizeof(buf2), "Ball caught %d yards into the end zone", abs(ConvertLosToYardLine(res)));
+	else
+		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(res));
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
 
 	SwitchPossession(res);
@@ -554,9 +731,7 @@ void PlayPunt(struct response* res)
 */
 int SetLosExtraPoint(struct response* res)
 {
-	int distance;
-
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		res->line_of_scrimmage = END_ZONE_WIDTH + FIELD_WIDTH - EXTRA_POINT_YARDAGE_FROM_END_ZONE;
 	}
@@ -576,7 +751,7 @@ int GetFieldGoalDistance(struct response* res)
 {
 	int distance;
 
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		distance = (FIELD_WIDTH - (res->line_of_scrimmage - END_ZONE_WIDTH)) + FIELD_GOAL_YARDS_AFTER_END_ZONE;
 	}
@@ -596,7 +771,7 @@ void ResetForKickoff(struct response* res)
 {
 	res->kickoff_needed = true;
 
-	if ((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1))
+	if (GetDirectionOfPlay(res) == 1)
 	{
 		res->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 		res->line_of_first_down = res->line_of_scrimmage + YARDS_PER_FIRST_DOWN;
@@ -637,16 +812,16 @@ void PlayExtraPoint(struct response* res)
 	ResetLineOfFirstDown(res);
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Attempting extra point.", field_goal_distance);
+	snprintf(buf, sizeof(buf), "Attempting extra point.");
 	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res));// draw 1-5 cards
 
-	// TODO: check for an As block?
+	// check for an As block?
 
 	RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
 
-	// TODO: check for an As block?
+	// check for an As block?
 
 	int total_yards = TotalYardsOffence(res);
 	char buf2[256];
@@ -687,11 +862,11 @@ void PlayFieldGoal(struct response* res)
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res));// draw 1-5 cards
 
-	// TODO: check for an As block?
+	// check for an As block?
 
 	RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
 
-	// TODO: check for an As block?
+	// check for an As block?
 
 	int total_yards = TotalYardsOffence(res);
 	char buf2[256];
@@ -823,6 +998,17 @@ void AnnounceDown(struct response* res)
 }
 
 /*
+* NAME:        GetDirectionOfPlay
+* DESCRIPTION: return 1-2 if team with ball is going right or left
+* INPUTS:      response
+* OUTPUTS:     1-2 right or left
+*/
+int GetDirectionOfPlay(struct response* res)
+{
+	return res->team_in_possession == 1 ? res->team_1_direction : res->team_2_direction;
+}
+
+/*
 * NAME:        TouchdownScored
 * DESCRIPTION: check if we need to award a touchdown
 * INPUTS:      response
@@ -831,11 +1017,11 @@ void AnnounceDown(struct response* res)
 bool TouchdownScored(struct response* res)
 {
 	// check if touchdown, make sure not a safety
-	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
 	{
 		return true;
 	}
-	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	else if ((GetDirectionOfPlay(res) == 2) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
 	{
 		return true;
 	}
@@ -852,11 +1038,11 @@ bool TouchdownScored(struct response* res)
 bool SafetyScored(struct response* res)
 {
 	// check if safety
-	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
 	{
 		return true;
 	}
-	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	else if ((GetDirectionOfPlay(res) == 2) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
 	{
 		return true;
 	}
@@ -872,11 +1058,11 @@ bool SafetyScored(struct response* res)
 */
 bool FirstDownScored(struct response* res)
 {
-	if (((res->team_in_possession == 1 && res->team_1_direction == 1) || (res->team_in_possession == 2 && res->team_2_direction == 1)) && (res->line_of_scrimmage >= res->line_of_first_down))
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= res->line_of_first_down))
 	{
 		return true;
 	}
-	else if (((res->team_in_possession == 1 && res->team_1_direction == 2) || (res->team_in_possession == 2 && res->team_2_direction == 2)) && (res->line_of_scrimmage <= res->line_of_first_down))
+	else if ((GetDirectionOfPlay(res) == 2) && (res->line_of_scrimmage <= res->line_of_first_down))
 	{
 		return true;
 	}
@@ -922,14 +1108,33 @@ void AwardSafety(struct response* res)
 }
 
 /*
+* NAME:        GetOneOrTwoPointConversion
+* DESCRIPTION: ask for and return the conversion type
+* INPUTS:      response
+* OUTPUTS:     int 1 = 1 pt attempt, 2 = 2 pt attempt
+*/
+int GetOneOrTwoPointConversion(struct response* res)
+{
+	int points = 1;
+	ConsoleShowScreen(res, "Extra point attempt (1 - 2): ", GAME_SPEED * 2);
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		points = atoi(input);
+	}
+	if (points != 1 && points != 2)
+		points = 1;
+	return points;
+}
+
+/*
 * NAME:        ResolveEndOfPlay
 * DESCRIPTION: resolve first down, touchdown etc
 * INPUTS:      response
 * OUTPUTS:     None
 */
-void ResolveEndOfPlay(struct response* res, int play_type)
+void ResolveEndOfPlay(struct response* res)
 {
-	if (play_type == PLAY_TYPE_TIMEOUT) // if a timeout was just played successfully, do nothing
+	if (res->play_type == PLAY_TYPE_TIMEOUT) // if a timeout was just played successfully, do nothing
 		;
 	else if (TouchdownScored(res))// if in end zone, award touchdown and set res->extra_point_needed = true;
 	{
@@ -939,7 +1144,7 @@ void ResolveEndOfPlay(struct response* res, int play_type)
 	{
 		AwardSafety(res);
 	}
-	else if ((play_type != PLAY_TYPE_FIELD_GOAL) && (play_type != PLAY_TYPE_PUNT) && (FirstDownScored(res)))
+	else if ((res->play_type != PLAY_TYPE_FIELD_GOAL) && (res->play_type != PLAY_TYPE_PUNT) && (FirstDownScored(res)))
 	{
 		ConsoleShowScreen(res, "First down achieved", GAME_SPEED * 30);
 		ResetLineOfFirstDown(res);
@@ -949,6 +1154,9 @@ void ResolveEndOfPlay(struct response* res, int play_type)
 	{
 		TurnoverOnDowns(res, false);
 	}
+	res->matchup_number = 0;
+	res->formation = 0;
+	res->play_type = 0;
 	ClearAllCards(res);
 }
 
@@ -960,16 +1168,17 @@ void ResolveEndOfPlay(struct response* res, int play_type)
 */
 void DoPlay(struct response* res)
 {
-	int play_type = 0;
-
 	if (res->kickoff_needed)
 	{
-		play_type = 2; // always punt on first play of each half
+		res->play_type = 2; // always punt on first play of each half
 		res->kickoff_needed = false;
 	}
 	else if (res->extra_point_needed)
 	{
-		play_type = 3;  // TODO: 2 point extra, just a normal play from 2 yard line?
+		if (GetOneOrTwoPointConversion(res) == 2) // ask player if 1 or 2 point conversion?
+			res->play_type = 1;						  // 2 pt attempt
+		else
+			res->play_type = 3;						  // 1 pt attempt
 	}
 	else
 	{
@@ -977,15 +1186,18 @@ void DoPlay(struct response* res)
 	}
 
 	bool retry = false;
-	if (!play_type)
-		play_type = GetPlayType(res);
+	if (!res->play_type)
+		res->play_type = GetPlayType(res);
 
 	do {
 		retry = false;
-		switch (play_type) {
+		switch (res->play_type) {
 		case PLAY_TYPE_NORMAL:
 		{
-			PlayNormal(res);
+			if (res->extra_point_needed)
+				PlayTwoPointConversion(res);
+			else
+				PlayNormal(res);
 			break;
 		}
 		case PLAY_TYPE_PUNT:
@@ -1026,11 +1238,11 @@ void DoPlay(struct response* res)
 		}
 		if(retry)
 			ConsoleShowScreen(res, "Invalid play type. Please pick a number between 1 and 5.", GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
-		if (retry || !play_type)
-			play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
+		if (retry || !res->play_type)
+			res->play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
 	} while (retry);
 
-	ResolveEndOfPlay(res, play_type);
+	ResolveEndOfPlay(res);
 }
 
 /*
@@ -1059,13 +1271,13 @@ void Play(struct response* res)
 				}
 			}
 
-			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER && res->quarter != 1) {
+			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER && res->quarter != 1) { // move this down below
 				SwitchEnds(res);
 				ConsoleShowScreen(res, "Switching ends...", GAME_SPEED * 10);
 			}
 
 			DoPlay(res);
 		}
-		//TODO: announce end of quarter, announce who will have the ball / be punting next, shuffle decks?
+		// announce end of quarter, announce who will have the ball / be punting next, shuffle decks?
 	}
 }
