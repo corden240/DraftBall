@@ -45,6 +45,11 @@
 
 #define NORMAL_PLAY_CARDS_TO_DRAW (4)
 
+#define RUN_PLAY_OFFENCE_CARDS_TO_DRAW (1)
+#define RUN_PLAY_DEFENCE_CARDS_TO_DRAW (1)
+
+#define PASS_PLAY_MAX_CARDS_TO_DRAW (10)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
 
@@ -141,6 +146,9 @@ struct response {
 	int d_cards_in_position[NORMAL_PLAY_CARDS_TO_DRAW];
 	int show_O_D_Both;
 	int matchup_number;
+
+	int pass_play;
+	int run_play;
 };
 
 struct table_weight {

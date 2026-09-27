@@ -1,30 +1,6 @@
-﻿  console.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(114,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(120,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(130,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(149,3): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(153,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\console.c(299,147): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-  main.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(21,6): warning C4013: 'GetDirectionOfPlay' undefined; assuming extern returning int
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(286,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(287,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(291,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(292,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(293,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(294,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(296,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(297,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(298,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(299,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(300,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(301,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(302,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\CardBowl\Card Bowl\main.c(303,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  main_d.c
-  play.c
+﻿  play.c
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(406,56): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
   rng.c
   Generating Code...
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(757,1): warning C4716: 'SetLosExtraPoint': must return a value
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(777,1): warning C4716: 'GetFieldGoalDistance': must return a value
+C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(979,1): warning C4716: 'SetLosExtraPoint': must return a value
   Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe

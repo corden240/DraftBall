@@ -158,7 +158,7 @@ void CoinToss(struct response* res)
 }
 
 /*
-* NAME:        GetTeamNames
+* NAME:        SetTeamNames
 * DESCRIPTION: setup game names
 * INPUTS:      response
 * OUTPUTS:     None
@@ -320,6 +320,9 @@ void ResponseConstructor(struct response* res)
 	res->formation = 0;
 	res->show_O_D_Both = 0;
 	res->matchup_number = 0;
+
+	res->pass_play = 0;
+	res->run_play = 0;
 }
 
 /*

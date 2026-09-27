@@ -258,7 +258,7 @@ void DrawField(struct response* res)
 			else {
 				if (i == res->line_of_scrimmage)
 					SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
-				else if (i == res->line_of_first_down && res->play_type != PLAY_TYPE_PUNT && res->play_type != PLAY_TYPE_FIELD_GOAL)
+				else if (i == res->line_of_first_down && res->play_type != PLAY_TYPE_PUNT && res->play_type != PLAY_TYPE_FIELD_GOAL && !res->kickoff_needed)
 					SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
 				else
 					SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -386,8 +386,8 @@ ShowCardsInFormation(struct response* res, int offence_or_defence)
 		for (int j = 0; j < gaps[i]; j++)
 			printf(" ");
 
-		if (res->show_O_D_Both == 3)
-			Sleep(GAME_SPEED * 10);
+		//if (res->show_O_D_Both == 3)
+		//	Sleep(GAME_SPEED * 5);
 		if (offence_or_defence == 1 && res->o_cards_in_position[i])
 			printf("%s", CardName(res->o_cards_in_position[i]));
 		else if (offence_or_defence == 2 && res->d_cards_in_position[i])
@@ -410,14 +410,14 @@ void ShowCards(struct response* res)
 	printf("\r\n                                 ");
 	printf("\r\n                                 ");
 
-	if (res->formation)
+	if (res->formation && !res->run_play && !res->pass_play)
 	{
 		if (res->show_O_D_Both == 0)
 			printf("                                 \r\n                                                                  ");
 		else if (res->show_O_D_Both == 1)
 		{
-			printf("\r\n                                 ");
 			ShowCardsInFormation(res, 1);	// send 1 for offence, 2 for defence
+			printf("\r\n");
 		}
 		else if (res->show_O_D_Both == 2)
 		{
@@ -435,17 +435,39 @@ void ShowCards(struct response* res)
 	}
 	else
 	{
-		if (res->o_cards[0])
-			PrintOCards(res);
-		else 
-			printf("                                 ");
+		if (res->o_cards[0] && res->d_cards[0])
+		{
+			if (res->d_cards[0])
+				PrintDCards(res);
+			else
+				printf("                                 ");
 
-		printf("\r\n                                 ");
+			printf("                        ");
 
-		if (res->d_cards[0])
-			PrintDCards(res);
+			printf("\r\n                                 ");
+
+			if (res->o_cards[0])
+				PrintOCards(res);
+			else
+				printf("                                 ");
+		}
 		else
+		{
 			printf("                                 ");
+
+			printf("                        ");
+
+			printf("\r\n                                 ");
+
+			if (res->d_cards[0])
+				PrintDCards(res);
+			else if (res->o_cards[0])
+				PrintOCards(res);
+			else
+				printf("                                 ");
+		}
+
+		printf("                        ");
 	}
 }
 
