@@ -389,9 +389,9 @@ ShowCardsInFormation(struct response* res, int offence_or_defence)
 		//if (res->show_O_D_Both == 3)
 		//	Sleep(GAME_SPEED * 5);
 		if (offence_or_defence == 1 && res->o_cards_in_position[i])
-			printf("%s", CardName(res->o_cards_in_position[i]));
+			PrintCard(res->o_cards_in_position[i]);
 		else if (offence_or_defence == 2 && res->d_cards_in_position[i])
-			printf("%s", CardName(res->d_cards_in_position[i]));
+			PrintCard(res->d_cards_in_position[i]);
 		else
 			printf("[]");
 	}

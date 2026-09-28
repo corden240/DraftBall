@@ -17,6 +17,7 @@ void ResetForKickoff(struct response* res);
 void SwitchEnds(struct response* res);
 int GetDirectionOfPlay(struct response* res);
 const char* GetTeamName(struct response* res, int team);
+int GetDirectionOfPlay(struct response* res);
 
 /*
 * NAME:        ClearAllCards
@@ -76,7 +77,7 @@ void ClearDCards(struct response* res)
 int DrawOneCard(struct response* res, struct table_weight* deck)
 {
 	//return (KING | CLUBS); // force
-	if (TableWeightTotalWeight(deck) < 0)
+	if (TableWeightTotalWeight(deck) <= 0)
 	{
 		TableWeightEnableAll(deck);
 		ConsoleShowScreen(res, "Deck empty, reshuffling...", GAME_SPEED * 20);
@@ -947,8 +948,14 @@ void PlayPunt(struct response* res)
 	MoveLineOfScrimmage(res, total_yards);
 
 	char buf2[256];
-	if(TouchdownScored(res)) // if kicked into the end zone
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	{
 		snprintf(buf2, sizeof(buf2), "Ball caught %d yards into the end zone", abs(ConvertLosToYardLine(res)));
+	}
+	else if ((GetDirectionOfPlay(res) == 2) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	{
+		snprintf(buf2, sizeof(buf2), "Ball caught %d yards into the end zone", abs(ConvertLosToYardLine(res)));
+	}	
 	else
 		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(res));
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
@@ -1008,6 +1015,7 @@ int GetFieldGoalDistance(struct response* res)
 void ResetForKickoff(struct response* res)
 {
 	res->kickoff_needed = true;
+	res->down = 0;
 
 	if (GetDirectionOfPlay(res) == 1)
 	{
@@ -1255,7 +1263,11 @@ int GetDirectionOfPlay(struct response* res)
 bool TouchdownScored(struct response* res)
 {
 	// check if touchdown, make sure not a safety
-	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	if (res->play_type != PLAY_TYPE_NORMAL)
+	{
+		return false;
+	}
+	else if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
 	{
 		return true;
 	}
@@ -1276,7 +1288,11 @@ bool TouchdownScored(struct response* res)
 bool SafetyScored(struct response* res)
 {
 	// check if safety
-	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
+	if ((res->play_type != PLAY_TYPE_NORMAL) && (res->play_type != PLAY_TYPE_PUNT))
+	{
+		return false;
+	}
+	else if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage <= END_ZONE_WIDTH))
 	{
 		return true;
 	}
@@ -1304,9 +1320,8 @@ bool FirstDownScored(struct response* res)
 	{
 		return true;
 	}
-	else
-		return false;
-	return true;
+	
+	return false;
 }
 
 /*

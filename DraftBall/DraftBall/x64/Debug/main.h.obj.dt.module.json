@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "DraftBall\\x64\\Debug\\main.obj",
+            "outputs": [
+                "DraftBall\\x64\\Debug\\main.h.obj.dt.module.json",
+                "DraftBall\\x64\\Debug\\main.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

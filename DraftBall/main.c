@@ -9,6 +9,7 @@ void SwitchPossession(struct response* res);
 void ResetLineOfFirstDown(struct response* res);
 void ResetLineOfScrimmage(struct response* res);
 void Play(struct response* res);
+int GetDirectionOfPlay(struct response* res);
 
 /*
 * NAME:        ResetLineOfScrimmage
