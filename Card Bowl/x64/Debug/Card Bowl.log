@@ -1,6 +1,0 @@
-﻿  play.c
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(406,56): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-  rng.c
-  Generating Code...
-C:\Users\charl\source\repos\CardBowl\Card Bowl\play.c(979,1): warning C4716: 'SetLosExtraPoint': must return a value
-  Card Bowl.vcxproj -> C:\Users\charl\source\repos\CardBowl\x64\Debug\Card Bowl.exe

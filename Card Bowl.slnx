@@ -1,7 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Project Path="Card Bowl/Card Bowl.vcxproj" Id="04c05e87-41a7-4778-87d2-22953709955e" />
-</Solution>
