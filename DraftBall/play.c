@@ -18,6 +18,7 @@ void SwitchEnds(struct response* res);
 int GetDirectionOfPlay(struct response* res);
 const char* GetTeamName(struct response* res, int team);
 int GetDirectionOfPlay(struct response* res);
+const char* GetTargetPlayerName(struct response* res);
 
 /*
 * NAME:        ClearAllCards
@@ -303,10 +304,11 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 			ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 		}
 		yards = TotalYardsOffence(res);
-	}
+		MoveLineOfScrimmage(res, yards);
 
-	yards = TotalYardsOffence(res);
-	MoveLineOfScrimmage(res, yards);
+		if (TouchdownScored(res))
+			return;
+	}
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "OFR yards = %d  ", yards);
@@ -345,6 +347,7 @@ void PlayPass(struct response* res)
 		if ((res->o_cards[i + 1] & VALUE) == ACE && (res->o_cards[i + 1] & SUIT) == SPADES) // If O2+ is the Ace of spades then draw a replacement for that card and then go to Interception.
 		{
 			ConsoleShowScreen(res, "Pass intercepted ", GAME_SPEED * 20);
+			// replace card, set line of scrim
 			Interception(res);
 			return;
 		}
@@ -378,7 +381,9 @@ void PlayPass(struct response* res)
 		}
 		else if ((res->o_cards[i + 1] & SUIT) == ((res->o_cards[0] & SUIT))) // If it is the same suit as card O1 then the pass is incomplete
 		{
-			ConsoleShowScreen(res, "Pass incomplete ", GAME_SPEED * 20);
+			char buf6[256];
+			snprintf(buf6, sizeof(buf6), "Pass to %s incomplete ", GetTargetPlayerName(res));
+			ConsoleShowScreen(res, buf6, GAME_SPEED * 20);
 			ClearAllCards(res);
 			return;
 		}
@@ -404,10 +409,18 @@ void PlayPass(struct response* res)
 	MoveLineOfScrimmage(res, catch_yards);
 
 	char buf4[256];
-	snprintf(buf4, sizeof(buf4), "Ball caught at the %d", ConvertLosToYardLine(res));
+
+	if (TouchdownScored(res))
+		snprintf(buf4, sizeof(buf4), "Ball caught in the end zone");
+	else
+		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTargetPlayerName(res), ConvertLosToYardLine(res));
 	ConsoleShowScreen(res, buf4, GAME_SPEED * 10);
 
 	ClearAllCards(res);
+
+	if (TouchdownScored(res))
+		return;
+
 	ConsoleShowScreen(res, "YAC draw", GAME_SPEED * 10);
 
 	DrawCards(res, res->team_in_possession, 1, true);
@@ -424,6 +437,9 @@ void PlayPass(struct response* res)
 		yac_yards = 0;
 
 	MoveLineOfScrimmage(res, yac_yards);
+
+	if (TouchdownScored(res))
+		return;
 
 	if ((res->o_cards[0] & FACE) && ((res->o_cards[0] & VALUE) > (res->d_cards[0] & VALUE)))
 	{
@@ -471,8 +487,11 @@ void PlayRun(struct response* res)
 	MoveLineOfScrimmage(res, yards_gained);
 	
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Yards gained = %d  ", yards_gained);
+	snprintf(buf, sizeof(buf), "%s gained %d yards ", GetTargetPlayerName(res), yards_gained);
 	ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+
+	if (TouchdownScored(res))
+		return;
 
 	// if O2 is a face card and larger than D2 the go to Open field run
 	if ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & FACE) && ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & VALUE) > (res->d_cards[RUN_PLAY_DEFENCE_CARDS_TO_DRAW] & VALUE)))
@@ -550,7 +569,9 @@ int GetFormation(struct response* res)
 */
 int GetMatchupNumber(struct response* res)
 {
-	ConsoleShowScreen(res, "O pick matchup to play (1 - 4): ", 0);
+	char buf[256];
+	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 4):", GetTeamName(res, res->team_in_possession));
+	ConsoleShowScreen(res, buf, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -927,6 +948,52 @@ int ConvertLosToYardLine(struct response* res)
 }
 
 /*
+* NAME:        GetTargetPlayerName
+* DESCRIPTION: return the name of the player involved in this play
+* INPUTS:      response
+* OUTPUTS:     name
+*/
+const char* GetTargetPlayerName(struct response* res)
+{
+	// []       []  []       []
+	// 
+	// []         []     []  []
+	// 
+	// []  []            []  []
+	
+	if (res->team_in_possession == 1)
+	{
+		if (res->matchup_number == 1)
+			return res->team_1_wr_names[0];
+		else if ((res->formation == 1 && res->matchup_number == 4) || (res->formation == 2 && res->matchup_number == 3) || (res->formation == 3 && res->matchup_number == 2))
+			return res->team_1_wr_names[1];
+		else if ((res->formation == 2 && res->matchup_number == 4) || (res->formation == 3 && res->matchup_number == 3))
+			return res->team_1_wr_names[2];
+		else if ((res->formation == 3 && res->matchup_number == 4))
+			return res->team_1_wr_names[3];
+		else if ((res->formation == 1 && res->matchup_number == 2) || (res->formation == 2 && res->matchup_number == 2))
+			return res->team_1_rb_names[0];
+		else if ((res->formation == 1 && res->matchup_number == 3))
+			return res->team_1_rb_names[1];
+	}
+	else
+	{
+		if (res->matchup_number == 1)
+			return res->team_2_wr_names[0];
+		else if ((res->formation == 1 && res->matchup_number == 4) || (res->formation == 2 && res->matchup_number == 3) || (res->formation == 3 && res->matchup_number == 2))
+			return res->team_2_wr_names[1];
+		else if ((res->formation == 2 && res->matchup_number == 4) || (res->formation == 3 && res->matchup_number == 3))
+			return res->team_2_wr_names[2];
+		else if ((res->formation == 3 && res->matchup_number == 4))
+			return res->team_2_wr_names[3];
+		else if ((res->formation == 1 && res->matchup_number == 2) || (res->formation == 2 && res->matchup_number == 2))
+			return res->team_2_rb_names[0];
+		else if ((res->formation == 1 && res->matchup_number == 3))
+			return res->team_2_rb_names[1];
+	}
+}
+
+/*
 * NAME:        PlayPunt
 * DESCRIPTION: execute the play
 * INPUTS:      response
@@ -958,6 +1025,7 @@ void PlayPunt(struct response* res)
 	}	
 	else
 		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(res));
+
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
 
 	SwitchPossession(res);
@@ -1263,11 +1331,7 @@ int GetDirectionOfPlay(struct response* res)
 bool TouchdownScored(struct response* res)
 {
 	// check if touchdown, make sure not a safety
-	if (res->play_type != PLAY_TYPE_NORMAL)
-	{
-		return false;
-	}
-	else if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
 	{
 		return true;
 	}
@@ -1338,8 +1402,10 @@ void AwardTouchdown(struct response* res)
 		res->team_2_score += TOUCHDOWN_POINTS;
 
 	res->extra_point_needed = true;
-
-	ConsoleShowScreen(res, "Touch Down Scored!", GAME_SPEED * 50);
+	
+	char buf[256];
+	snprintf(buf, sizeof(buf), "Touch Down Scored by %s!", GetTargetPlayerName(res));
+	ConsoleShowScreen(res, buf, GAME_SPEED * 50);
 }
 
 /*

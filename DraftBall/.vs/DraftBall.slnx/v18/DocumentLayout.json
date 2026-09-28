@@ -7,24 +7,24 @@
       "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:play.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main_d.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:main_d.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\console.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:console.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|solutionrelative:rng.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04C05E87-41A7-4778-87D2-22953709955E}|DraftBall.vcxproj|C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main_d.prt||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -42,13 +42,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "main.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.c",
               "RelativeDocumentMoniker": "main.c",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.c",
               "RelativeToolTip": "main.c",
-              "ViewState": "AgIAADMAAAAAAAAAAAAhwEYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAMYAAAAAAAAAAAAgwNMAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-28T16:10:27.317Z",
               "IsPinned": true,
@@ -62,7 +62,7 @@
               "RelativeDocumentMoniker": "play.c",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\play.c",
               "RelativeToolTip": "play.c",
-              "ViewState": "AgIAAO0BAAAAAAAAAAAIwAQCAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAANwBAAAAAAAAAAAqwOIBAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-28T16:10:29.262Z",
               "IsPinned": true,
@@ -70,13 +70,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "main.h",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.h",
               "RelativeDocumentMoniker": "main.h",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\main.h",
               "RelativeToolTip": "main.h",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAgwIMAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-09-28T16:10:27.944Z",
               "IsPinned": true,
@@ -98,13 +98,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "console.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\console.c",
               "RelativeDocumentMoniker": "console.c",
               "ToolTip": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\console.c",
               "RelativeToolTip": "console.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAMMBAAAAAAAAAAAqwM8BAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-28T16:10:31.358Z",
               "IsPinned": true,
@@ -112,7 +112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "rng.c",
               "DocumentMoniker": "C:\\Users\\charl\\source\\repos\\DraftBall\\DraftBall\\rng.c",
               "RelativeDocumentMoniker": "rng.c",
@@ -121,8 +121,7 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2026-09-28T16:10:30.386Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -135,8 +134,7 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-09-28T16:10:29.104Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             }
           ]
         }

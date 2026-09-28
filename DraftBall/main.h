@@ -7,9 +7,10 @@
 #define YARDS_PER_FIRST_DOWN (10)
 #define PLAYS_PER_QUARTER (20)
 #define NUMBER_OF_QUARTERS (4)
+#define NUMBER_OF_QB_NAMES_PER_TEAM (1)
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
 #define NUMBER_OF_WR_NAMES_PER_TEAM (4)
-#define NUMBER_OF_PLAYER_NAMES_PER_TEAM (NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM)
+#define NUMBER_OF_PLAYER_NAMES_PER_TEAM (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM)
 #define NUMER_OF_COIN_TOSSES (6)
 
 #define GAME_SPEED    (50) // must be divisible by 5
@@ -131,10 +132,12 @@ struct response {
 	char team_2_name[32];
 	int team_1_direction; // 1 if team 1 is going left to right, 2 if team 1 is going right to left
 	int team_2_direction; // 1 if team 2 is going left to right, 2 if team 2 is going right to left
-	char team_1_rb_names[2][32];
-	char team_2_rb_names[2][32];
-	char team_1_wr_names[4][32];
-	char team_2_wr_names[4][32];
+	char team_1_qb_names[64][64];
+	char team_2_qb_names[64][64];
+	char team_1_rb_names[64][64];
+	char team_2_rb_names[64][64];
+	char team_1_wr_names[64][64];
+	char team_2_wr_names[64][64];
 	bool players_named;
 	int o_cards[CARDS_IN_A_DECK];
 	int d_cards[CARDS_IN_A_DECK];

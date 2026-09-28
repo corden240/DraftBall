@@ -203,10 +203,18 @@ void SetPlayerNames(struct response* res)
 		res->players_named = true;
 		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
 		{
-			if(i < NUMBER_OF_RB_NAMES_PER_TEAM)
+			if (i == 0)
 			{
 				char buf[256];
-				snprintf(buf, sizeof(buf), "Enter name for Team 1 RB Player %d: ", i + 1);
+				snprintf(buf, sizeof(buf), "Enter name for Team 1 QB Player %d: ", i + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_1_qb_names[i], sizeof(res->team_1_qb_names[i]), stdin);
+				res->team_1_qb_names[i][strcspn(res->team_1_qb_names[i], "\n")] = '\0';
+			}
+			else if(i < (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM))
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 1 RB Player %d: ", i);
 				ConsoleShowScreen(res, buf, 0);
 				fgets(res->team_1_rb_names[i], sizeof(res->team_1_rb_names[i]), stdin);
 				res->team_1_rb_names[i][strcspn(res->team_1_rb_names[i], "\n")] = '\0';
@@ -214,7 +222,7 @@ void SetPlayerNames(struct response* res)
 			else
 			{
 				char buf[256];
-				snprintf(buf, sizeof(buf), "Enter name for Team 1 WR Player %d: ", i - NUMBER_OF_RB_NAMES_PER_TEAM + 1);
+				snprintf(buf, sizeof(buf), "Enter name for Team 1 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
 				ConsoleShowScreen(res, buf, 0);
 				fgets(res->team_1_wr_names[i], sizeof(res->team_1_wr_names[i]), stdin);
 				res->team_1_wr_names[i][strcspn(res->team_1_wr_names[i], "\n")] = '\0';
@@ -222,10 +230,18 @@ void SetPlayerNames(struct response* res)
 		}
 		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
 		{
-			if (i < NUMBER_OF_RB_NAMES_PER_TEAM)
+			if (i == 0)
 			{
 				char buf[256];
-				snprintf(buf, sizeof(buf), "Enter name for Team 2 RB Player %d: ", i + 1);
+				snprintf(buf, sizeof(buf), "Enter name for Team 2 QB Player %d: ", i + 1);
+				ConsoleShowScreen(res, buf, 0);
+				fgets(res->team_2_qb_names[i], sizeof(res->team_2_qb_names[i]), stdin);
+				res->team_2_qb_names[i][strcspn(res->team_2_qb_names[i], "\n")] = '\0';
+			}
+			else if (i < (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM))
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Enter name for Team 2 RB Player %d: ", i);
 				ConsoleShowScreen(res, buf, 0);
 				fgets(res->team_2_rb_names[i], sizeof(res->team_2_rb_names[i]), stdin);
 				res->team_2_rb_names[i][strcspn(res->team_2_rb_names[i], "\n")] = '\0';
@@ -233,7 +249,7 @@ void SetPlayerNames(struct response* res)
 			else
 			{
 				char buf[256];
-				snprintf(buf, sizeof(buf), "Enter name for Team 2 WR Player %d: ", i - NUMBER_OF_RB_NAMES_PER_TEAM + 1);
+				snprintf(buf, sizeof(buf), "Enter name for Team 2 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
 				ConsoleShowScreen(res, buf, 0);
 				fgets(res->team_2_wr_names[i], sizeof(res->team_2_wr_names[i]), stdin);
 				res->team_2_wr_names[i][strcspn(res->team_2_wr_names[i], "\n")] = '\0';
@@ -288,6 +304,9 @@ void ResponseConstructor(struct response* res)
 	strcpy(res->team_2_name, "Team 2");
 	res->team_1_direction = 1; // default direction
 	res->team_2_direction = 2; // default direction
+
+	strcpy(res->team_1_qb_names[0], "Team 1 QB1");
+	strcpy(res->team_2_qb_names[0], "Team 2 QB1");
 
 	strcpy(res->team_1_rb_names[0], "Team 1 RB1");
 	strcpy(res->team_2_rb_names[0], "Team 2 RB1");

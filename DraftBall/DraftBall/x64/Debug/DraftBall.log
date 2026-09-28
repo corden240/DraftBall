@@ -1,29 +1,5 @@
-﻿  console.c
-  main.c
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(114,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(120,4): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(130,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(149,3): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(153,3): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\console.c(299,147): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(287,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(288,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(292,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(293,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(294,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(295,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(297,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(298,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(299,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(300,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(301,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(302,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(303,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\charl\source\repos\DraftBall\DraftBall\main.c(304,2): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  main_d.c
-  play.c
-C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(407,56): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-  rng.c
-  Generating Code...
-C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(986,1): warning C4716: 'SetLosExtraPoint': must return a value
+﻿  play.c
+C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(416,90): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
+C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(1054,1): warning C4716: 'SetLosExtraPoint': must return a value
+C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(994,1): warning C4715: 'GetTargetPlayerName': not all control paths return a value
   DraftBall.vcxproj -> C:\Users\charl\source\repos\DraftBall\DraftBall\x64\Debug\DraftBall.exe
