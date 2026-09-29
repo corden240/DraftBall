@@ -1,5 +1,0 @@
-﻿  play.c
-C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(416,90): warning C4013: 'ConvertLosToYardLine' undefined; assuming extern returning int
-C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(1054,1): warning C4716: 'SetLosExtraPoint': must return a value
-C:\Users\charl\source\repos\DraftBall\DraftBall\play.c(994,1): warning C4715: 'GetTargetPlayerName': not all control paths return a value
-  DraftBall.vcxproj -> C:\Users\charl\source\repos\DraftBall\DraftBall\x64\Debug\DraftBall.exe
