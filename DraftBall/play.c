@@ -1344,6 +1344,27 @@ bool TouchdownScored(struct response* res)
 }
 
 /*
+* NAME:        OutBackOfEndZone
+* DESCRIPTION: check if line of scrimmage is out the back of the end zone
+* INPUTS:      response
+* OUTPUTS:     bool
+*/
+bool OutBackOfEndZone(struct response* res)
+{
+	if ((GetDirectionOfPlay(res) == 1) && (res->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH + END_ZONE_WIDTH)))
+	{
+		return true;
+	}
+	else if ((GetDirectionOfPlay(res) == 2) && (res->line_of_scrimmage <= 0))
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+
+/*
 * NAME:        SafetyScored
 * DESCRIPTION: check if we need to award a safety
 * INPUTS:      response
@@ -1571,12 +1592,74 @@ void DoPlay(struct response* res)
 }
 
 /*
-* NAME:        Play
+* NAME:        EndOfQuarter
+* DESCRIPTION: resolve end of quarter stuff
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void EndOfQuarter(struct response* res)
+{
+	char buf[256];
+	snprintf(buf, sizeof(buf), "End of quarter %d.", res->quarter);
+	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+
+	if (res->quarter == 1 || res->quarter == 3)
+	{
+		SwitchEnds(res);
+		ConsoleShowScreen(res, "Switching ends...", GAME_SPEED * 20);
+	}
+	else if (res->quarter == 2)
+	{
+		res->team_in_possession = (res->team_started_with_possession - 1) ? 2 : 1; // team that started 1st half in possession needs ball to kickoff to the other team.
+		res->team_not_in_possession = (res->team_started_with_possession - 1) ? 1 : 2; // other team is receiving
+
+		char buf2[256];
+		snprintf(buf2, sizeof(buf2), "The %s will receive the ball to start the second half.",(res->team_started_with_possession - 1) ? res->team_1_name : res->team_2_name);
+		ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+
+		TableWeightEnableAll(player_1_deck); // shuffle all decks at half time
+		TableWeightEnableAll(player_2_deck);
+		TableWeightEnableAll(shared_deck);
+	}
+}
+
+/*
+* NAME:        EndOfGame
+* DESCRIPTION: handles end of game logic
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void EndOfGame(struct response* res)
+{
+	ConsoleShowScreen(res, "Game Over!", GAME_SPEED * 20);
+	if (res->team_1_score > res->team_2_score)
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s wins!", res->team_1_name);
+		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	}
+	else if (res->team_2_score > res->team_1_score)
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s wins!", res->team_2_name);
+		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	}
+	else
+	{
+		ConsoleShowScreen(res, "It's a tie!", GAME_SPEED * 20);
+	}
+
+	// print all the game stats? player stats, quarter stats, yards, downs etc
+}
+
+
+/*
+* NAME:        PlayGame
 * DESCRIPTION: plays out one american football game
 * INPUTS:      response
 * OUTPUTS:     None
 */
-void Play(struct response* res)
+void PlayGame(struct response* res)
 {
 	for (res->quarter = 1; res->quarter <= NUMBER_OF_QUARTERS; res->quarter++)
 	{
@@ -1595,14 +1678,9 @@ void Play(struct response* res)
 					res->team_in_possession = res->team_started_with_possession - 1 ? res->team_started_with_possession - 1 : res->team_started_with_possession + 1;
 				}
 			}
-
-			if (res->plays_remaining_in_quarter == PLAYS_PER_QUARTER && res->quarter != 1) { // move this down below
-				SwitchEnds(res);
-				ConsoleShowScreen(res, "Switching ends...", GAME_SPEED * 10);
-			}
-
 			DoPlay(res);
 		}
-		// announce end of quarter, announce who will have the ball / be punting next, shuffle decks?
+		EndOfQuarter(res);
 	}
+	EndOfGame(res);
 }

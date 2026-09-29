@@ -8,8 +8,9 @@
 void SwitchPossession(struct response* res);
 void ResetLineOfFirstDown(struct response* res);
 void ResetLineOfScrimmage(struct response* res);
-void Play(struct response* res);
+void PlayGame(struct response* res);
 int GetDirectionOfPlay(struct response* res);
+bool OutBackOfEndZone(struct response* res);
 
 /*
 * NAME:        ResetLineOfScrimmage
@@ -45,6 +46,18 @@ void MoveLineOfScrimmage(struct response* res, int yards)
 	}
 
 	res->line_of_scrimmage += yards_moved;
+
+	if (OutBackOfEndZone(res))
+	{
+		if (GetDirectionOfPlay(res) == 1)
+		{
+			res->line_of_scrimmage = (END_ZONE_WIDTH + FIELD_WIDTH + END_ZONE_WIDTH);
+		}
+		else
+		{
+			res->line_of_scrimmage = 0;
+		}
+	}
 }
 
 /*
@@ -71,6 +84,27 @@ void ResetLineOfFirstDown(struct response* res)
 }
 
 /*
+* NAME:        SwitchEndLineOfScrimmage
+* DESCRIPTION: switch direction of play LoS
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void SwitchEndLineOfScrimmage(struct response* res)
+{
+	int halfway_line = (END_ZONE_WIDTH + (FIELD_WIDTH / 2));
+
+	if ((res->line_of_scrimmage - halfway_line) < 0)
+	{
+		res->line_of_scrimmage = halfway_line + (halfway_line - res->line_of_scrimmage - END_ZONE_WIDTH);
+	}
+	else if ((res->line_of_scrimmage - halfway_line) > 0)
+	{
+		res->line_of_scrimmage = halfway_line - (res->line_of_scrimmage - halfway_line);
+	}
+	// else in the case that it is 0 then the line does not need to move anyway
+}
+
+/*
 * NAME:        SwitchEnds
 * DESCRIPTION: switch direction of play
 * INPUTS:      response
@@ -89,7 +123,7 @@ void SwitchEnds(struct response* res)
 		res->team_2_direction = 2;
 	}
 
-	ResetLineOfScrimmage(res);
+	SwitchEndLineOfScrimmage(res);
 	ResetLineOfFirstDown(res);
 }
 
@@ -143,6 +177,7 @@ void CoinToss(struct response* res)
 			res->team_started_with_possession = team_that_won_cointoss;
 
 		res->team_in_possession = res->team_started_with_possession;
+		res->team_not_in_possession = (res->team_in_possession - 1) ? 1 : 2;
 
 		if (res->team_started_with_possession == 1)
 		{
@@ -346,35 +381,6 @@ void ResponseConstructor(struct response* res)
 }
 
 /*
-* NAME:        EndOfGame
-* DESCRIPTION: handles end of game logic
-* INPUTS:      response
-* OUTPUTS:     None
-*/
-void EndOfGame(struct response* res)
-{
-	ConsoleShowScreen(res, "Game Over!", GAME_SPEED * 20);
-	if (res->team_1_score > res->team_2_score)
-	{
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s wins!", res->team_1_name);
-		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
-	}
-	else if (res->team_2_score > res->team_1_score)
-	{
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s wins!", res->team_2_name);
-		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
-	}
-	else
-	{
-		ConsoleShowScreen(res, "It's a tie!", GAME_SPEED * 20);
-	}
-	
-	// print all the game stats? player stats, quarter stats, yards, downs etc
-}
-
-/*
 * NAME:        SetupWindow
 * DESCRIPTION: opens window at certain size and sets font size
 * INPUTS:      None
@@ -415,7 +421,5 @@ void main()
     ResponseConstructor(&res);
     SetupGame(&res);
 	
-    Play(&res);
-	
-    EndOfGame(&res);
+    PlayGame(&res);
 }
