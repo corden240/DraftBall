@@ -378,6 +378,9 @@ void ResponseConstructor(struct response* res)
 
 	res->pass_play = 0;
 	res->run_play = 0;
+
+	res->interception = false;
+	res->fumble = false;
 }
 
 /*

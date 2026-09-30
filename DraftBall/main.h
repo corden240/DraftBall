@@ -152,6 +152,9 @@ struct response {
 
 	int pass_play;
 	int run_play;
+
+	bool interception;
+	bool fumble;
 };
 
 struct table_weight {

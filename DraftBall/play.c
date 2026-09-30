@@ -242,6 +242,7 @@ int TotalYardsDefence(struct response* res)
 void Interception(struct response* res)
 {
 	SwitchPossession(res);
+	ResetLineOfFirstDown(res);
 	res->down = 0;
 }
 
@@ -253,7 +254,10 @@ void Interception(struct response* res)
 */
 void Fumble(struct response* res)
 {
+	// shuffle deck
 
+	// teams draw 1 card each until play is resolved
+	// ClearAllCards(res); // between draws clear cards so we dont run out of room
 }
 
 /*
@@ -344,12 +348,15 @@ void PlayPass(struct response* res)
 
 		DrawCards(res, res->team_in_possession, 1, true);
 
-		if ((res->o_cards[i + 1] & VALUE) == ACE && (res->o_cards[i + 1] & SUIT) == SPADES) // If O2+ is the Ace of spades then draw a replacement for that card and then go to Interception.
+		if ((res->o_cards[i + 1] & VALUE) == ACE && (res->o_cards[i + 1] & SUIT) == SPADES)
 		{
 			ConsoleShowScreen(res, "Pass intercepted ", GAME_SPEED * 20);
-			// replace card, set line of scrim
-			Interception(res);
-			return;
+			res->interception = true;
+			ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+			res->o_cards[i + 1] = 0;
+			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			DrawCards(res, res->team_in_possession, 1, true);
+			break;
 		}
 		else if ((res->o_cards[i + 1] & VALUE) == (res->o_cards[0] & VALUE)
 	   && (((res->o_cards[i + 1] & RED) && (res->o_cards[0] & RED))
@@ -401,6 +408,8 @@ void PlayPass(struct response* res)
 			catch_yards = (catch_yards + 1) / 2;
 		snprintf(buf3, sizeof(buf3), "%d yards lost ", catch_yards);
 	}
+	else if (res->interception)
+		snprintf(buf3, sizeof(buf3), "Interception on a %d yard throw ", catch_yards);
 	else
 		snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
 
@@ -408,20 +417,25 @@ void PlayPass(struct response* res)
 
 	MoveLineOfScrimmage(res, catch_yards);
 
+	if(res->interception)
+		Interception(res);
+
 	char buf4[256];
 
 	if (TouchdownScored(res))
 		snprintf(buf4, sizeof(buf4), "Ball caught in the end zone");
+	else if (res->interception)
+		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTeamName(res, res->team_in_possession), ConvertLosToYardLine(res));
 	else
 		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTargetPlayerName(res), ConvertLosToYardLine(res));
-	ConsoleShowScreen(res, buf4, GAME_SPEED * 10);
+	ConsoleShowScreen(res, buf4, GAME_SPEED * 20);
 
 	ClearAllCards(res);
 
 	if (TouchdownScored(res))
 		return;
 
-	ConsoleShowScreen(res, "YAC draw", GAME_SPEED * 10);
+	ConsoleShowScreen(res, "YAC draw", GAME_SPEED * 20);
 
 	DrawCards(res, res->team_in_possession, 1, true);
 	DrawCards(res, res->team_not_in_possession, 1, true);
@@ -465,6 +479,25 @@ void PlayRun(struct response* res)
 
 	DrawCards(res, res->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
 	DrawCards(res, res->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
+	
+	if (((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES) || ((res->d_cards[1] & VALUE) == ACE && (res->d_cards[1] & SUIT) == SPADES)) // If O2 OR D2 is the Ace of spades then draw a replacement for that card and then go to Fumble
+	{
+		ConsoleShowScreen(res, "Ball fumbled ", GAME_SPEED * 20);
+		res->fumble = true;
+		ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+		if (((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES))
+		{
+			res->o_cards[1] = 0;
+			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			DrawCards(res, res->team_in_possession, 1, true);
+		}
+		else if ((res->d_cards[1] & VALUE) == ACE && (res->d_cards[1] & SUIT) == SPADES)
+		{
+		res->d_cards[1] = 0;
+		ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+		DrawCards(res, res->team_not_in_possession, 1, true);
+		}
+	}
 
 	int yards_gained = 0;
 	int difference = TotalYardsOffence(res) - TotalYardsDefence(res);
@@ -486,20 +519,27 @@ void PlayRun(struct response* res)
 
 	MoveLineOfScrimmage(res, yards_gained);
 	
+	if (res->fumble)
+	{
+		if (TouchdownScored(res))
+			return;
+
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%d yards gained before %s fumbled", yards_gained, GetTargetPlayerName(res));
+		ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+		Fumble(res);
+		return;
+	}
+
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s gained %d yards ", GetTargetPlayerName(res), yards_gained);
 	ConsoleShowScreen(res, buf, GAME_SPEED * 30);
-
-	if (TouchdownScored(res))
-		return;
 
 	// if O2 is a face card and larger than D2 the go to Open field run
 	if ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & FACE) && ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & VALUE) > (res->d_cards[RUN_PLAY_DEFENCE_CARDS_TO_DRAW] & VALUE)))
 	{
 		OpenFieldRun(res, res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW], res->d_cards[RUN_PLAY_DEFENCE_CARDS_TO_DRAW]);
 	}
-
-	// If O2 OR D2 is the Ace of spades then draw a replacement for that card and then go to Fumble
 }
 
 /*
@@ -1373,6 +1413,11 @@ bool OutBackOfEndZone(struct response* res)
 bool SafetyScored(struct response* res)
 {
 	// check if safety
+	if (res->interception) // TODO: if just intercepted, and possession has changed, if otherwise would be a safety, set ball to 20 yd line?
+		return false;
+	if(res->fumble)  // TODO: if just intercepted, and possession has changed, if otherwise would be a safety, set ball to 20 yd line?
+		return false;
+
 	if ((res->play_type != PLAY_TYPE_NORMAL) && (res->play_type != PLAY_TYPE_PUNT))
 	{
 		return false;
@@ -1497,6 +1542,10 @@ void ResolveEndOfPlay(struct response* res)
 		TurnoverOnDowns(res, false);
 	}
 
+	// TODO: if Ace of spades is disabled in shared deck, shuffle?
+
+	res->fumble = false;
+	res->interception = false;
 	res->show_O_D_Both = 0;
 	res->pass_play = 0;
 	res->run_play = 0;
