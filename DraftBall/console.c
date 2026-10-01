@@ -53,15 +53,44 @@ static void ShowTimeoutBlocks(HANDLE hConsole, int remaining, int pips_before_na
 			? (i >= TIMEOUTS_PER_TEAM_PER_HALF - remaining)
 			: (i < remaining);
 		if (is_remaining) {
-			SetConsoleTextAttribute(hConsole, CONSOLE_BG_LIGHTBLUE);
+			SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREY);
 			putchar(' ');
-			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 		}
 		else {
 			putchar(' ');
 		}
 		putchar(' ');
 	}
+}
+
+/*
+* NAME:        TruncateKeepRight
+* DESCRIPTION: copies src into dst keeping at most max_len characters; when
+*              truncating, the rightmost characters are kept so scores remain
+*              visible. Returns the length of the resulting string.
+* INPUTS:      dst     - destination buffer
+*              dst_size - size of dst including null terminator
+*              src     - source string
+*              max_len - maximum number of characters to keep
+* OUTPUTS:     length of the string written to dst
+*/
+static int TruncateKeepRight(char* dst, size_t dst_size, const char* src, int max_len)
+{
+	size_t src_len = strlen(src);
+	if (max_len <= 0) {
+		dst[0] = '\0';
+	}
+	else if ((int)src_len > max_len) {
+		size_t start = src_len - (size_t)max_len;
+		strncpy(dst, src + start, (size_t)max_len);
+		dst[max_len] = '\0';
+	}
+	else {
+		strcpy(dst, src);
+	}
+	(void)dst_size;
+	return (int)strlen(dst);
 }
 
 /*
@@ -74,7 +103,19 @@ void ShowTopInfo(struct response* res)
 {
 	printf("\n\r");
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
+
+	/* ---- Colours: change any value here to recolour that part ---- */
+	const int COLOUR_TIMEOUT_REMAINING = CONSOLE_BG_GREY;      /* used inside ShowTimeoutBlocks */
+	const int COLOUR_BASE = CONSOLE_TEXT_WHITE;   /* padding / separators / default */
+	const int COLOUR_TEAM_1_NAME = res->team_1_colour;
+	const int COLOUR_TEAM_2_NAME = res->team_2_colour;
+	const int COLOUR_ARROWS = CONSOLE_TEXT_WHITE;   /* direction arrows */
+	const int COLOUR_SCORE = CONSOLE_TEXT_WHITE;   /* "N : N" */
+	const int COLOUR_CLOCK = CONSOLE_TEXT_WHITE;   /* quarter / plays left */
+	(void)COLOUR_TIMEOUT_REMAINING;
+	/* --------------------------------------------------------------- */
+
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 
 	const int SIDE_GAP = 6;          /* exactly 10 spaces on each side of the middle */
 	const char DIV = ' ';
@@ -85,14 +126,18 @@ void ShowTopInfo(struct response* res)
 	int center = (width / 2) - 6;     /* index where middle should appear (0-based) */
 	if (center < 0) center = 0;
 
-	const char* team_1_direction = (res->team_1_direction == 1) ? ">>" : "<<";
-	const char* team_2_direction = (res->team_2_direction == 1) ? ">>" : "<<";
-
-	/* Build left and right raw strings (local buffers, no accumulation across calls) */
-	char left_raw[256];
+	/* ---- Build the individual segments (local buffers, no accumulation) ---- */
+	char t1_arrows[8];
+	char t1_name[64];
+	char score[32];
+	char t2_name[64];
+	char t2_arrows[8];
 	char right_raw[128];
-	snprintf(left_raw, sizeof(left_raw), "%s %s  %d : %d  %s %s",
-		team_1_direction, res->team_1_name, res->team_1_score, res->team_2_score, res->team_2_name, team_2_direction);
+	snprintf(t1_arrows, sizeof(t1_arrows), "%s ", (res->team_1_direction == 1) ? ">>" : "<<");
+	snprintf(t1_name, sizeof(t1_name), "%s", res->team_1_name);
+	snprintf(score, sizeof(score), "  %d : %d  ", res->team_1_score, res->team_2_score);
+	snprintf(t2_name, sizeof(t2_name), "%s", res->team_2_name);
+	snprintf(t2_arrows, sizeof(t2_arrows), " %s", (res->team_2_direction == 1) ? ">>" : "<<");
 	snprintf(right_raw, sizeof(right_raw), "Quarter: %d  Plays Left: %d",
 		res->quarter, res->plays_remaining_in_quarter);
 
@@ -100,36 +145,37 @@ void ShowTopInfo(struct response* res)
 	int left_gap_start = center - SIDE_GAP;
 	if (left_gap_start < 0) left_gap_start = 0;
 
-	/* Left side layout: [team1 pips] names/scores [team2 pips].
-	   Pips print with color changes, so only the core string is truncated;
-	   keep the rightmost characters so scores remain visible. */
+	/* Left side layout: [team1 pips] t1_arrows t1_name score t2_name t2_arrows [team2 pips].
+	   Pips print with colour changes, so only the core string is truncated;
+	   keep the rightmost characters so scores remain visible. Truncation is
+	   applied proportionally across the segments. */
 	int left_max_len = left_gap_start;
-	size_t left_raw_len = strlen(left_raw);
-	char left_display[256];
 	int show_blocks = 1;
 	int core_max_len = left_max_len - (2 * BLOCKS_WIDTH - 1);
-	if ((int)left_raw_len > core_max_len) {
-		if (core_max_len > 0) {
-			size_t start = left_raw_len - (size_t)core_max_len;
-			strncpy(left_display, left_raw + start, core_max_len);
-			left_display[core_max_len] = '\0';
-		}
-		else if (left_max_len > 0) {
-			/* too narrow for pips; drop them and keep rightmost core chars */
-			size_t start = left_raw_len - (size_t)left_max_len;
-			strncpy(left_display, left_raw + start, left_max_len);
-			left_display[left_max_len] = '\0';
+	int left_raw_len = (int)(strlen(t1_arrows) + strlen(t1_name) + strlen(score)
+		+ strlen(t2_name) + strlen(t2_arrows));
+	double keep_ratio = 1.0;
+	if (left_raw_len > core_max_len) {
+		if (core_max_len <= 0) {
+			/* too narrow for pips; drop them */
 			show_blocks = 0;
+			core_max_len = left_max_len;
 		}
-		else {
-			left_display[0] = '\0';
-			show_blocks = 0;
-		}
+		keep_ratio = (left_raw_len > 0) ? ((double)core_max_len / (double)left_raw_len) : 0.0;
 	}
-	else {
-		strcpy(left_display, left_raw);
-	}
-	int left_display_len = (int)strlen(left_display) + (show_blocks ? 2 * BLOCKS_WIDTH - 1 : 0);
+
+	char t1_arrows_d[8];
+	char t1_name_d[64];
+	char score_d[32];
+	char t2_name_d[64];
+	char t2_arrows_d[8];
+	int left_display_len = 0;
+	left_display_len += TruncateKeepRight(t1_arrows_d, sizeof(t1_arrows_d), t1_arrows, (int)(strlen(t1_arrows) * keep_ratio));
+	left_display_len += TruncateKeepRight(t1_name_d, sizeof(t1_name_d), t1_name, (int)(strlen(t1_name) * keep_ratio));
+	left_display_len += TruncateKeepRight(score_d, sizeof(score_d), score, (int)(strlen(score) * keep_ratio));
+	left_display_len += TruncateKeepRight(t2_name_d, sizeof(t2_name_d), t2_name, (int)(strlen(t2_name) * keep_ratio));
+	left_display_len += TruncateKeepRight(t2_arrows_d, sizeof(t2_arrows_d), t2_arrows, (int)(strlen(t2_arrows) * keep_ratio));
+	if (show_blocks) left_display_len += 2 * BLOCKS_WIDTH - 1;
 
 	/* Leading padding so the left display ends at left_gap_start-1 */
 	int leading_spaces = left_gap_start - left_display_len;
@@ -153,37 +199,51 @@ void ShowTopInfo(struct response* res)
 		strcpy(right_display, right_raw);
 	}
 
-	/* Print in segments so the pips can use a grey background */
+	/* ---- Print in segments so each part can use its own colour ---- */
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	for (int i = 0; i < leading_spaces; i++) putchar(' ');
 	if (show_blocks) {
 		ShowTimeoutBlocks(hConsole, res->team_1_timeouts_remaining, 1);
 	}
-	printf("%s", left_display);
+	SetConsoleTextAttribute(hConsole, COLOUR_ARROWS);
+	printf("%s", t1_arrows_d);
+	SetConsoleTextAttribute(hConsole, COLOUR_TEAM_1_NAME);
+	printf("%s", t1_name_d);
+	SetConsoleTextAttribute(hConsole, COLOUR_SCORE);
+	printf("%s", score_d);
+	SetConsoleTextAttribute(hConsole, COLOUR_TEAM_2_NAME);
+	printf("%s", t2_name_d);
+	SetConsoleTextAttribute(hConsole, COLOUR_ARROWS);
+	printf("%s", t2_arrows_d);
 	if (show_blocks) {
+		SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 		putchar(' ');
 		ShowTimeoutBlocks(hConsole, res->team_2_timeouts_remaining, 0);
 	}
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	for (int i = 0; i < SIDE_GAP; i++) putchar(' ');
 	putchar(DIV);
 	for (int i = 0; i < SIDE_GAP; i++) putchar(' ');
+	SetConsoleTextAttribute(hConsole, COLOUR_CLOCK);
 	printf("%s", right_display);
 
 	/* Pad the rest of the line out to the window width */
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	int line_len = left_gap_start + SIDE_GAP + 1 + SIDE_GAP + (int)strlen(right_display);
 	for (int i = line_len; i < width; i++) putchar(' ');
 
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 
 	printf("\n\r\n\r          ");
 
 	SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
 	printf(" ");// red box = line of scrim
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of scrimmage   ");
 
 	SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
 	printf(" ");// purple box = line of 1st down
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of 1st down    ");
 
 	if (res->team_in_possession == 1 || res->team_in_possession == 2)
@@ -196,7 +256,7 @@ void ShowTopInfo(struct response* res)
 		printf(buf);
 	}
 
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 }
 
 /*
@@ -297,13 +357,20 @@ void DrawField(struct response* res)
 void ShowGameInfo(struct response* res)
 {
 	int distance = abs(res->line_of_scrimmage - res->line_of_first_down);
-	if (res->play_type == PLAY_TYPE_PUNT || res->play_type == PLAY_TYPE_FIELD_GOAL)
+	if (res->play_type == PLAY_TYPE_PUNT || res->play_type == PLAY_TYPE_FIELD_GOAL || res->kickoff_needed)
 		distance = 0;
 
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("\n\r\n\r");
-	printf("                                 Down: %d  Distance: %d  Line of Scrimmage: %d                                   ", res->down,distance , ConvertLosToYardLine(res));
+	printf("                                                  ");
+
+	switch (res->down) {
+	case 1: { printf("%dst & %d", res->down, distance); break; }
+	case 2: { printf("%dnd & %d", res->down, distance); break; }
+	case 3: { printf("%drd & %d", res->down, distance); break; }
+	case 4: { printf("%dth & %d", res->down, distance); break; }
+	}
 }
 
 /*

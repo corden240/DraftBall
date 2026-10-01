@@ -218,8 +218,64 @@ void CoinToss(struct response* res)
 }
 
 /*
+* NAME:        SetTeamColours
+* DESCRIPTION: setup team colours
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void SetTeamColours(struct response* res)
+{
+	ConsoleShowScreen(res, "Would you like to pick team colours? y/n ", 0);
+	char input[16];
+	fgets(input, sizeof(input), stdin);
+
+	if (input[0] == 'Y' || input[0] == 'y')
+	{
+		bool team_1_colour_done = false;
+		bool team_2_colour_done = false;
+		do {
+			ConsoleShowScreen(res, "Enter colour for Team 1 (1 - 8): ", 0);
+			char input1[16];
+			fgets(input1, sizeof(input1), stdin);
+			int team_1_colour = atoi(input1);
+			if (team_1_colour < 1)
+				team_1_colour = 1;
+			else if (team_1_colour > 8)
+				team_1_colour = 8;
+			res->team_1_colour = team_1_colour;
+
+			ConsoleShowScreen(res, "Are you happy with this colour? y/n ", 0);
+			char input2[16];
+			fgets(input2, sizeof(input2), stdin);
+			if (input2[0] == 'Y' || input2[0] == 'y')
+				team_1_colour_done = true;
+		} while (!team_1_colour_done);
+
+		do {
+			ConsoleShowScreen(res, "Enter colour for Team 2 (1 - 8): ", 0);
+			char input3[16];
+			fgets(input3, sizeof(input3), stdin);
+			int team_2_colour = atoi(input3);
+			if (team_2_colour < 1)
+				team_2_colour = 1;
+			else if (team_2_colour > 8)
+				team_2_colour = 8;
+			res->team_2_colour = team_2_colour;
+
+			ConsoleShowScreen(res, "Are you happy with this colour? y/n ", 0);
+			char input4[16];
+			fgets(input4, sizeof(input4), stdin);
+			if (input4[0] == 'Y' || input4[0] == 'y')
+				team_2_colour_done = true;
+		} while (!team_2_colour_done);
+	}
+	else
+		res->players_named = false;
+}
+
+/*
 * NAME:        SetTeamNames
-* DESCRIPTION: setup game names
+* DESCRIPTION: setup team names
 * INPUTS:      response
 * OUTPUTS:     None
 */
@@ -351,6 +407,8 @@ void SetupGame(struct response* res)
 	srand((unsigned)time(NULL));
 
 	SetTeamNames(res);
+
+	SetTeamColours(res);
 
 	SetPlayerNames(res);
 
