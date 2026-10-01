@@ -243,6 +243,8 @@ void DrawField(struct response* res)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+	char* plays[] = { "Play", "Punt", "FG", "Kneel", "Timeout" };
 	printf("\n\r");
 
 	PrintSideline();
@@ -273,6 +275,11 @@ void DrawField(struct response* res)
 				}
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 			}
+		}
+		if (j < (PITCH_WIDTH - 1))
+		{
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" %d %s ", j + 1, plays[j]);
 		}
 	}
 

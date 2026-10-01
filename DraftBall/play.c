@@ -415,7 +415,7 @@ void PlayPass(struct response* res)
 		{
 			ConsoleShowScreen(res, "QB sacked ", GAME_SPEED * 20);
 			ClearAllCards(res);
-			DrawCards(res, res->team_in_possession, QB_SACK_CARDS_TO_DRAW, true);// draw for sack loss yardage, if and As then fumble
+			DrawCards(res, res->team_in_possession, QB_SACK_CARDS_TO_DRAW, true);// draw for sack loss yardage
 
 			if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES) || ((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES))
 			{
@@ -700,7 +700,7 @@ int GetFormation(struct response* res)
 int GetMatchupNumber(struct response* res)
 {
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 4):", GetTeamName(res, res->team_in_possession));
+	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 4): ", GetTeamName(res, res->team_in_possession));
 	ConsoleShowScreen(res, buf, 0);
 
 	char input[16];
@@ -805,7 +805,7 @@ void PlayNormal(struct response* res)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, press enter to draw", GetTeamName(res, res->team_in_possession));
-	ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+	ConsoleShowScreen(res, buf, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -823,7 +823,7 @@ void PlayNormal(struct response* res)
 	
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(res, res->team_not_in_possession));
-	ConsoleShowScreen(res, buf2, GAME_SPEED * 30);
+	ConsoleShowScreen(res, buf2, 0);
 
 	char input2[16];
 	fgets(input2, sizeof(input2), stdin);
@@ -971,21 +971,22 @@ int GetFieldGoalCardsToRedraw(struct response* res) {
 * OUTPUTS:     int
 */
 int GetFieldGoalCardsToDraw(struct response* res) {
-	char buf[256];
-	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", FIELD_GOAL_MAX_CARDS);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 2);
-
+	//char buf[256];
+	//snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", FIELD_GOAL_MAX_CARDS);
+	//ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	//
 	int num = 0;
-	char input[16];
-	if (fgets(input, sizeof(input), stdin)) {
-		num = atoi(input);
-	}
+	//char input[16];
+	//if (fgets(input, sizeof(input), stdin)) {
+	//	num = atoi(input);
+	//}
+	//
+	//if (num > FIELD_GOAL_MAX_CARDS)
+	//	num = FIELD_GOAL_MAX_CARDS;
+	//else if (num < 1)
+	//	num = 1;
 
-	if (num > FIELD_GOAL_MAX_CARDS)
-		num = FIELD_GOAL_MAX_CARDS;
-	else if (num < 1)
-		num = 1;
-
+	num = 6; // why would anyone not want to draw all 6 cards?
 	return num;
 }
 
@@ -1086,9 +1087,9 @@ int ConvertLosToYardLine(struct response* res)
 const char* GetQBName(struct response* res)
 {
 	if (res->team_in_possession == 1)
-		return res->team_1_qb_names[1];
+		return res->team_1_qb_names[0];
 	else
-		return res->team_2_qb_names[1];
+		return res->team_2_qb_names[0];
 }
 
 /*
@@ -1249,15 +1250,13 @@ void ResetForKickoff(struct response* res)
 */
 void TurnoverOnDowns(struct response* res, bool field_goal)
 {
-	if (res->plays_remaining_in_quarter > 1) // dont change possession if 1 play left because end of quarter could take possession off this team when it shouldn't
-	{
-		SwitchPossession(res);
-		if(field_goal)
-			MoveLineOfScrimmage(res, FIELD_GOAL_MISS_PENALTY_YARDS);
-		ResetLineOfFirstDown(res);
-	}
+	SwitchPossession(res);
+	if(field_goal)
+		MoveLineOfScrimmage(res, FIELD_GOAL_MISS_PENALTY_YARDS);
+	ResetLineOfFirstDown(res);
 	res->down = 0;
 }
+
 /*
 * NAME:        PlayExtraPoint
 * DESCRIPTION: execute the play
@@ -1276,13 +1275,13 @@ void PlayExtraPoint(struct response* res)
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res), true);// draw 1-5 cards
 
-	// check for an As block?
-
-	RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
-
-	// check for an As block?
-
 	int total_yards = TotalYardsOffence(res);
+
+	if (total_yards < field_goal_distance)
+		RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
+
+	total_yards = TotalYardsOffence(res);
+
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
@@ -1320,13 +1319,13 @@ void PlayFieldGoal(struct response* res)
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res), true);// draw 1-5 cards
 
-	// check for an As block?
-
-	RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
-
-	// check for an As block?
-
 	int total_yards = TotalYardsOffence(res);
+	
+	if (total_yards < field_goal_distance)
+		RedrawCards(res, res->team_in_possession, GetFieldGoalCardsToRedraw(res));// redraw 0-2 cards, get player choice on high or low ones
+
+	total_yards = TotalYardsOffence(res);
+
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
@@ -1359,34 +1358,39 @@ void PlayKneel(struct response* res)
 * NAME:        PlayTimeout
 * DESCRIPTION: execute the play
 * INPUTS:      response
-* OUTPUTS:     None
+* OUTPUTS:     bool need to pick different play
 */
-void PlayTimeout(struct response* res)
+bool PlayTimeout(struct response* res)
 {
-	ConsoleShowScreen(res, "Timeout Used", GAME_SPEED * 20);
+	// find which team wants to call the timeout, if they have 0 left return true
+	int team = GetTimeoutTeam(res);
+	
+	if (team == 1 && !res->team_1_timeouts_remaining)
+		return true;
+	else if (team == 2 && !res->team_2_timeouts_remaining)
+		return true;
+	
+	char buf[256];
+	snprintf(buf, sizeof(buf), "%s timeout used", GetTeamName(res, team));
+	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 
-	res->plays_remaining_in_quarter += 2; //add 2 plays back to the clock but then 1 will be deleted as this counts as a play
+	//
 
-	if (res->team_in_possession == 1)
+	if (team == 1)
 		res->team_1_timeouts_remaining--;
 	else
 		res->team_2_timeouts_remaining--;
 
-
 	for (int i = 0; i < 5; i++)
 	{
-		res->plays_remaining_in_quarter -= 2; //add 2 plays back to the clock but then 1 will be deleted as this counts as a play
-
-		if (res->team_in_possession == 1)
+		if (team == 1)
 			res->team_1_timeouts_remaining++;
 		else
 			res->team_2_timeouts_remaining++;
 
 		ConsoleShowScreen(res, 0, ANIMATE_SPEED);
 
-		res->plays_remaining_in_quarter += 2; //add 2 plays back to the clock but then 1 will be deleted as this counts as a play
-
-		if (res->team_in_possession == 1)
+		if (team == 1)
 			res->team_1_timeouts_remaining--;
 		else
 			res->team_2_timeouts_remaining--;
@@ -1395,6 +1399,30 @@ void PlayTimeout(struct response* res)
 	}
 
 	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+	res->plays_remaining_in_quarter += 2;
+	res->down -= 1;
+}
+
+/*
+* NAME:        GetTimeoutTeam
+* DESCRIPTION: get input from player for which team called the timeout
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+int GetTimeoutTeam(struct response* res)
+{
+	int team = 0;
+	ConsoleShowScreen(res, "Which team called timeout? (1 - 2): ", GAME_SPEED * 2);
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		team = atoi(input);
+	}
+
+	if (team < 1)
+		team = 1;
+	else if (team > 2)
+		team = 2;
+	return team;
 }
 
 /*
@@ -1580,7 +1608,10 @@ void AwardTouchdown(struct response* res)
 	res->extra_point_needed = true;
 	
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Touch Down Scored by %s!", GetTargetPlayerName(res));
+	if(res->play_type == PLAY_TYPE_NORMAL)
+		snprintf(buf, sizeof(buf), "Touch Down Scored by %s!", GetTargetPlayerName(res));
+	else
+		snprintf(buf, sizeof(buf), "Touch Down Scored");
 	ConsoleShowScreen(res, buf, GAME_SPEED * 50);
 }
 
@@ -1743,12 +1774,8 @@ void DoPlay(struct response* res)
 		{
 			if (res->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
 				retry = true;
-			else if (res->team_in_possession == 1 && !res->team_1_timeouts_remaining)
-				retry = true;
-			else if (res->team_in_possession == 2 && !res->team_2_timeouts_remaining)
-				retry = true;
 			else
-				PlayTimeout(res);
+				retry = PlayTimeout(res);
 			break;
 		}
 		default:
@@ -1788,9 +1815,13 @@ void EndOfQuarter(struct response* res)
 		res->team_in_possession = (res->team_started_with_possession - 1) ? 2 : 1; // team that started 1st half in possession needs ball to kickoff to the other team.
 		res->team_not_in_possession = (res->team_started_with_possession - 1) ? 1 : 2; // other team is receiving
 
+		res->kickoff_needed;
+
 		char buf2[256];
 		snprintf(buf2, sizeof(buf2), "The %s will receive the ball to start the second half.",(res->team_started_with_possession - 1) ? res->team_1_name : res->team_2_name);
 		ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+
+		ConsoleShowScreen(res, "All decks shuffled at half time ", GAME_SPEED * 20);
 
 		TableWeightEnableAll(player_1_deck); // shuffle all decks at half time
 		TableWeightEnableAll(player_2_deck);
@@ -1810,13 +1841,13 @@ void EndOfGame(struct response* res)
 	if (res->team_1_score > res->team_2_score)
 	{
 		char buf[256];
-		snprintf(buf, sizeof(buf), "%s wins!", res->team_1_name);
+		snprintf(buf, sizeof(buf), "The %s win!", res->team_1_name);
 		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 	}
 	else if (res->team_2_score > res->team_1_score)
 	{
 		char buf[256];
-		snprintf(buf, sizeof(buf), "%s wins!", res->team_2_name);
+		snprintf(buf, sizeof(buf), "The %s win!", res->team_2_name);
 		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 	}
 	else

@@ -5,7 +5,7 @@
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
 #define YARDS_PER_FIRST_DOWN (10)
-#define PLAYS_PER_QUARTER (20)
+#define PLAYS_PER_QUARTER (12)
 #define NUMBER_OF_QUARTERS (4)
 #define NUMBER_OF_QB_NAMES_PER_TEAM (1)
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
@@ -157,6 +157,9 @@ struct response {
 
 	bool interception;
 	bool fumble;
+
+	int team_1_colour;
+	int team_2_colour;
 };
 
 struct table_weight {

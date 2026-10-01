@@ -84,6 +84,27 @@ void ResetLineOfFirstDown(struct response* res)
 }
 
 /*
+* NAME:        SwitchEndLineOfFirstDown
+* DESCRIPTION: switch direction of play 1st down line
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void SwitchEndLineOfFirstDown(struct response* res)
+{
+	int halfway_line = (END_ZONE_WIDTH + (FIELD_WIDTH / 2));
+
+	if ((res->line_of_first_down - halfway_line) < 0)
+	{
+		res->line_of_first_down = halfway_line + (halfway_line - res->line_of_first_down - END_ZONE_WIDTH);
+	}
+	else if ((res->line_of_first_down - halfway_line) > 0)
+	{
+		res->line_of_first_down = halfway_line - (res->line_of_first_down - halfway_line);
+	}
+	// else in the case that it is 0 then the line does not need to move anyway
+}
+
+/*
 * NAME:        SwitchEndLineOfScrimmage
 * DESCRIPTION: switch direction of play LoS
 * INPUTS:      response
@@ -124,7 +145,7 @@ void SwitchEnds(struct response* res)
 	}
 
 	SwitchEndLineOfScrimmage(res);
-	ResetLineOfFirstDown(res);
+	SwitchEndLineOfFirstDown(res);
 }
 
 /*
@@ -135,6 +156,9 @@ void SwitchEnds(struct response* res)
 */
 void SwitchPossession(struct response* res)
 {
+	ConsoleShowScreen(res, "Shared deck shuffled on change of possession ", GAME_SPEED * 20);
+	TableWeightEnableAll(shared_deck);
+
 	res->team_not_in_possession = res->team_in_possession;
 	res->team_in_possession = res->team_in_possession - 1 ? res->team_in_possession - 1 : res->team_in_possession + 1;
 	return;
@@ -207,6 +231,9 @@ void SetTeamNames(struct response* res)
 
 	if (input[0] == 'Y' || input[0] == 'y')
 	{
+		strcpy(res->team_1_name, " ");
+		strcpy(res->team_2_name, " ");
+
 		ConsoleShowScreen(res, "Enter name for Team 1: ", 0);
 		fgets(res->team_1_name, sizeof(res->team_1_name), stdin);
 		res->team_1_name[strcspn(res->team_1_name, "\n")] = '\0';
@@ -234,6 +261,23 @@ void SetPlayerNames(struct response* res)
 	if (input[0] == 'Y' || input[0] == 'y')
 	{
 		res->players_named = true;
+		strcpy(res->team_1_qb_names[0], " ");
+		strcpy(res->team_2_qb_names[0], " ");
+
+		strcpy(res->team_1_rb_names[0], " ");
+		strcpy(res->team_2_rb_names[0], " ");
+		strcpy(res->team_1_rb_names[1], " ");
+		strcpy(res->team_2_rb_names[1], " ");
+
+		strcpy(res->team_1_wr_names[0], " ");
+		strcpy(res->team_2_wr_names[0], " ");
+		strcpy(res->team_1_wr_names[1], " ");
+		strcpy(res->team_2_wr_names[1], " ");
+		strcpy(res->team_1_wr_names[2], " ");
+		strcpy(res->team_2_wr_names[2], " ");
+		strcpy(res->team_1_wr_names[3], " ");
+		strcpy(res->team_2_wr_names[3], " ");
+		 
 		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
 		{
 			if (i == 0)
@@ -249,16 +293,16 @@ void SetPlayerNames(struct response* res)
 				char buf[256];
 				snprintf(buf, sizeof(buf), "Enter name for Team 1 RB Player %d: ", i);
 				ConsoleShowScreen(res, buf, 0);
-				fgets(res->team_1_rb_names[i], sizeof(res->team_1_rb_names[i]), stdin);
-				res->team_1_rb_names[i][strcspn(res->team_1_rb_names[i], "\n")] = '\0';
+				fgets(res->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], sizeof(res->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM]), stdin);
+				res->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM][strcspn(res->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], "\n")] = '\0';
 			}
 			else
 			{
 				char buf[256];
 				snprintf(buf, sizeof(buf), "Enter name for Team 1 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
 				ConsoleShowScreen(res, buf, 0);
-				fgets(res->team_1_wr_names[i], sizeof(res->team_1_wr_names[i]), stdin);
-				res->team_1_wr_names[i][strcspn(res->team_1_wr_names[i], "\n")] = '\0';
+				fgets(res->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], sizeof(res->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)]), stdin);
+				res->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)][strcspn(res->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], "\n")] = '\0';
 			}
 		}
 		for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
@@ -276,16 +320,16 @@ void SetPlayerNames(struct response* res)
 				char buf[256];
 				snprintf(buf, sizeof(buf), "Enter name for Team 2 RB Player %d: ", i);
 				ConsoleShowScreen(res, buf, 0);
-				fgets(res->team_2_rb_names[i], sizeof(res->team_2_rb_names[i]), stdin);
-				res->team_2_rb_names[i][strcspn(res->team_2_rb_names[i], "\n")] = '\0';
+				fgets(res->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], sizeof(res->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM]), stdin);
+				res->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM][strcspn(res->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], "\n")] = '\0';
 			}
 			else
 			{
 				char buf[256];
 				snprintf(buf, sizeof(buf), "Enter name for Team 2 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
 				ConsoleShowScreen(res, buf, 0);
-				fgets(res->team_2_wr_names[i], sizeof(res->team_2_wr_names[i]), stdin);
-				res->team_2_wr_names[i][strcspn(res->team_2_wr_names[i], "\n")] = '\0';
+				fgets(res->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], sizeof(res->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)]), stdin);
+				res->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)][strcspn(res->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], "\n")] = '\0';
 			}
 		}
 	}
@@ -383,6 +427,9 @@ void ResponseConstructor(struct response* res)
 
 	res->interception = false;
 	res->fumble = false;
+
+	res->team_1_colour = CONSOLE_TEXT_WHITE;
+	res->team_2_colour = CONSOLE_TEXT_WHITE;
 }
 
 /*
@@ -421,7 +468,12 @@ void main()
 
 	// start of game settings and info page, red line = LoS, purple line = first down, plays 1-5 = normal, punt etc
 
-	SetupWindow();	
+	SetupWindow();
+
+
+
+
+
     struct response res;
     ResponseConstructor(&res);
     SetupGame(&res);
