@@ -43,6 +43,22 @@ void TableWeightSet(struct table_weight* table, int val, bool on_off)
 }
 
 /*
+* NAME:        GetTableValOnOff
+* DESCRIPTION: return on_off of a value in a table
+* INPUTS:      table, val
+* OUTPUTS:     true = on, false = off
+*/
+bool GetTableValOnOff(struct table_weight* table, int val)
+{
+	for (int i = 0; i < MAX_WEIGHTS_IN_TABLE; i++)
+	{
+		if (table[i].val == val)
+			return table[i].on_off;
+	}
+	return true;
+}
+
+/*
 * NAME:        TableWeightEnableAll
 * DESCRIPTION: sets all values in a table to true
 * INPUTS:      table

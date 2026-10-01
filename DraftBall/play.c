@@ -19,6 +19,9 @@ int GetDirectionOfPlay(struct response* res);
 const char* GetTeamName(struct response* res, int team);
 int GetDirectionOfPlay(struct response* res);
 const char* GetTargetPlayerName(struct response* res);
+bool GetTableValOnOff(struct table_weight* table, int val);
+const char* GetQBName(struct response* res);
+bool SafetyScored(struct response* res);
 
 /*
 * NAME:        ClearAllCards
@@ -254,10 +257,48 @@ void Interception(struct response* res)
 */
 void Fumble(struct response* res)
 {
-	// shuffle deck
+	bool fumble_resolved = false;
+	int save_team_started_with_ball = res->team_in_possession;
+	do {
+		ClearAllCards(res);
+		ConsoleShowScreen(res, "Drawing fumble cards ", GAME_SPEED * 20);
+		DrawCards(res, res->team_in_possession, 1, true);
+		DrawCards(res, res->team_not_in_possession, 1, true);
 
-	// teams draw 1 card each until play is resolved
-	// ClearAllCards(res); // between draws clear cards so we dont run out of room
+		if ((res->o_cards[0] & SUIT) == (res->d_cards[0] & SUIT))
+		{
+			ConsoleShowScreen(res, "Same suit, ball moves, new cards needed ", GAME_SPEED * 20);
+			MoveLineOfScrimmage(res, TotalYardsOffence(res) - TotalYardsDefence(res));
+			ConsoleShowScreen(res, 0, GAME_SPEED * 20);
+		}
+		else if ((res->o_cards[0] & VALUE) == (res->d_cards[0] & VALUE))
+		{
+			ConsoleShowScreen(res, "Draw, new cards needed ", GAME_SPEED * 20);
+		}
+		else
+		{
+			if ((res->d_cards[0] & VALUE) > (res->o_cards[0] & VALUE))
+			{
+				SwitchPossession(res);
+				ResetLineOfFirstDown(res);
+				res->down = 0;
+			}
+
+			char buf4[256];
+			snprintf(buf4, sizeof(buf4), "The %s recovered the ball at the %d yard line ", GetTeamName(res, res->team_in_possession), ConvertLosToYardLine(res));
+			ConsoleShowScreen(res, buf4, GAME_SPEED * 30);
+			fumble_resolved = true;
+		}
+	} while (!fumble_resolved);
+
+	if (save_team_started_with_ball != res->team_in_possession && SafetyScored(res))
+	{
+		// team recovers ball in their own end zone after opponents fumble
+		ConsoleShowScreen(res, "Ball recovered in own end zone, touchback issued ", 0);
+		ResetLineOfScrimmage(res);
+		ResetLineOfFirstDown(res);
+		res->down = 0;
+	}
 }
 
 /*
@@ -307,15 +348,23 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 			snprintf(buf, sizeof(buf), "Face Card! %d extra cards", ofr_o_value);
 			ConsoleShowScreen(res, buf, GAME_SPEED * 20);
 		}
-		yards = TotalYardsOffence(res);
+		yards = (res->o_cards[i] & VALUE);
 		MoveLineOfScrimmage(res, yards);
+		ConsoleShowScreen(res, 0, GAME_SPEED * 5);
 
 		if (TouchdownScored(res))
 			return;
+
+		if ((res->o_cards[i] & VALUE) == ACE && (res->o_cards[i] & SUIT) == SPADES)
+		{
+			ConsoleShowScreen(res, "Ball fumbled", GAME_SPEED * 20);
+			Fumble(res);
+			return;
+		}
 	}
 
 	char buf2[256];
-	snprintf(buf2, sizeof(buf2), "OFR yards = %d  ", yards);
+	snprintf(buf2, sizeof(buf2), "OFR yards = %d  ", TotalYardsOffence(res));
 	ConsoleShowScreen(res, buf2, GAME_SPEED * 30);
 
 	return;
@@ -351,6 +400,8 @@ void PlayPass(struct response* res)
 		if ((res->o_cards[i + 1] & VALUE) == ACE && (res->o_cards[i + 1] & SUIT) == SPADES)
 		{
 			ConsoleShowScreen(res, "Pass intercepted ", GAME_SPEED * 20);
+			if (res->extra_point_needed)
+				return;
 			res->interception = true;
 			ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
 			res->o_cards[i + 1] = 0;
@@ -359,17 +410,29 @@ void PlayPass(struct response* res)
 			break;
 		}
 		else if ((res->o_cards[i + 1] & VALUE) == (res->o_cards[0] & VALUE)
-	   && (((res->o_cards[i + 1] & RED) && (res->o_cards[0] & RED))
-	    || ((res->o_cards[i + 1] & BLACK) && (res->o_cards[0] & BLACK)))) // If it is the same rank and colour as card O1 then it is a sack
+			&& (((res->o_cards[i + 1] & RED) && (res->o_cards[0] & RED))
+				|| ((res->o_cards[i + 1] & BLACK) && (res->o_cards[0] & BLACK)))) // If it is the same rank and colour as card O1 then it is a sack
 		{
 			ConsoleShowScreen(res, "QB sacked ", GAME_SPEED * 20);
 			ClearAllCards(res);
-			DrawCards(res, res->team_in_possession, 2, true);// draw for sack loss yardage, if and As then fumble
-			//if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES) || ((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES))
-			//{
-			//	Fumble(res);
-			//  return;
-			//}
+			DrawCards(res, res->team_in_possession, QB_SACK_CARDS_TO_DRAW, true);// draw for sack loss yardage, if and As then fumble
+
+			if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES) || ((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES))
+			{
+				char buffer[256];
+				snprintf(buffer, sizeof(buffer), "%s fumbled the ball", GetQBName(res));
+				ConsoleShowScreen(res, buffer, GAME_SPEED * 20);
+				res->fumble = true;
+				ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+				if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES))
+				{
+					res->o_cards[0] = res->o_cards[1];
+				}
+				res->o_cards[1] = 0;
+				ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+				DrawCards(res, res->team_in_possession, 1, true);
+			}
+
 			int sack_yards = TotalYardsOffence(res);
 
 			if (sack_yards % 2 == 0)
@@ -384,6 +447,9 @@ void PlayPass(struct response* res)
 			MoveLineOfScrimmage(res, -sack_yards);
 			ResetLineOfFirstDown(res);
 
+			if (res->fumble)
+				Fumble(res);
+
 			return;
 		}
 		else if ((res->o_cards[i + 1] & SUIT) == ((res->o_cards[0] & SUIT))) // If it is the same suit as card O1 then the pass is incomplete
@@ -395,7 +461,7 @@ void PlayPass(struct response* res)
 			return;
 		}
 	}
-	
+
 	DrawCards(res, res->team_not_in_possession, 1, true); // defence draws 1
 	int catch_yards = TotalYardsOffence(res) - TotalYardsDefence(res);
 
@@ -417,8 +483,20 @@ void PlayPass(struct response* res)
 
 	MoveLineOfScrimmage(res, catch_yards);
 
-	if(res->interception)
+	if (res->interception)
+	{
 		Interception(res);
+
+		if (SafetyScored(res))
+		{
+			// if intercepted in own end zone, force a touchback as otherwise they could run and fumble which causes all sorts of issues
+			ConsoleShowScreen(res, "Ball caught in own end zone, touchback issued ", 0);
+			ResetLineOfScrimmage(res);
+			ResetLineOfFirstDown(res);
+			res->down = 0;
+			return;
+		}
+	}
 
 	char buf4[256];
 
@@ -440,20 +518,48 @@ void PlayPass(struct response* res)
 	DrawCards(res, res->team_in_possession, 1, true);
 	DrawCards(res, res->team_not_in_possession, 1, true);
 
-	//if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES) || ((res->d_cards[0] & VALUE) == ACE && (res->d_cards[0] & SUIT) == SPADES))
-	//{
-	//	Fumble(res);
-	//}else
-	
+	if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES) || ((res->d_cards[0] & VALUE) == ACE && (res->d_cards[0] & SUIT) == SPADES))
+	{
+		char buffer[256];
+		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(res), ConvertLosToYardLine(res));
+		ConsoleShowScreen(res, buffer, GAME_SPEED * 20);
+		res->fumble = true;
+		ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+		if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES))
+		{
+			res->o_cards[0] = 0;
+			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			DrawCards(res, res->team_in_possession, 1, true);
+		}
+		else
+		{
+			res->d_cards[0] = 0;
+			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			DrawCards(res, res->team_not_in_possession, 1, true);
+		}
+
+		Fumble(res);
+	}
+
 	int yac_yards = TotalYardsOffence(res) - TotalYardsDefence(res);
-	
+
 	if (yac_yards < 0)
 		yac_yards = 0;
 
 	MoveLineOfScrimmage(res, yac_yards);
 
 	if (TouchdownScored(res))
+	{
+		if (res->fumble)
+			ConsoleShowScreen(res, "End zone reached before fumble! ", GAME_SPEED * 20);
 		return;
+	}
+	
+	if (res->fumble)
+	{	
+		Fumble(res);
+		return;
+	}
 
 	if ((res->o_cards[0] & FACE) && ((res->o_cards[0] & VALUE) > (res->d_cards[0] & VALUE)))
 	{
@@ -559,23 +665,7 @@ void PlayTwoPointConversion(struct response* res)
 		res->line_of_scrimmage = END_ZONE_WIDTH + TWO_POINT_CONVERSION_YARDS;
 	}
 
-	PlayNormal(res); // not right as in conversion a pick 6 cant happen but it can in PlayNormal, need to guard for this
-
-	if (TouchdownScored(res)) // if in the end zone
-	{
-		ConsoleShowScreen(res, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
-		res->team_1_score += TWO_POINT_CONVERSION_POINTS;
-	}
-	else
-	{
-		ConsoleShowScreen(res, "Missed Extra Points", GAME_SPEED * 20);
-	}
-
-	ResetForKickoff(res);
-
-	res->down = 0;
-	res->plays_remaining_in_quarter++; // should not take a play clock play so add one back
-	res->extra_point_needed = false;
+	PlayNormal(res); // not fully correct because in a conversion a pick 6 cant happen but it can in PlayNormal, need to guard for this
 }
 
 /*
@@ -985,6 +1075,20 @@ int ConvertLosToYardLine(struct response* res)
 	{
 		return (res->line_of_scrimmage - END_ZONE_WIDTH);
 	}
+}
+
+/*
+* NAME:        GetQBName
+* DESCRIPTION: get qn name in possession
+* INPUTS:      response
+* OUTPUTS:     name
+*/
+const char* GetQBName(struct response* res)
+{
+	if (res->team_in_possession == 1)
+		return res->team_1_qb_names[1];
+	else
+		return res->team_2_qb_names[1];
 }
 
 /*
@@ -1412,12 +1516,6 @@ bool OutBackOfEndZone(struct response* res)
 */
 bool SafetyScored(struct response* res)
 {
-	// check if safety
-	if (res->interception) // TODO: if just intercepted, and possession has changed, if otherwise would be a safety, set ball to 20 yd line?
-		return false;
-	if(res->fumble)  // TODO: if just intercepted, and possession has changed, if otherwise would be a safety, set ball to 20 yd line?
-		return false;
-
 	if ((res->play_type != PLAY_TYPE_NORMAL) && (res->play_type != PLAY_TYPE_PUNT))
 	{
 		return false;
@@ -1452,6 +1550,18 @@ bool FirstDownScored(struct response* res)
 	}
 	
 	return false;
+}
+
+/*
+* NAME:        AwardTwoPointConversion
+* DESCRIPTION: award 2 pts
+* INPUTS:      response
+* OUTPUTS:     None
+*/
+void AwardTwoPointConversion(struct response* res)
+{
+	ConsoleShowScreen(res, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
+	res->team_1_score += TWO_POINT_CONVERSION_POINTS;
 }
 
 /*
@@ -1519,8 +1629,20 @@ int GetOneOrTwoPointConversion(struct response* res)
 */
 void ResolveEndOfPlay(struct response* res)
 {
-	if (res->play_type == PLAY_TYPE_TIMEOUT) // if a timeout was just played successfully, do nothing
+	if (res->play_type == PLAY_TYPE_TIMEOUT || res->play_type == PLAY_TYPE_FIELD_GOAL) // if a timeout was just played successfully OR field goal just happened, do nothing
 		;
+	else if (res->extra_point_needed && res->play_type == PLAY_TYPE_NORMAL)
+	{
+		if (TouchdownScored(res)) // if in the end zone
+			AwardTwoPointConversion(res); // 2 point conversion attempted
+		else
+			ConsoleShowScreen(res, "Missed Extra Points", GAME_SPEED * 20);
+
+		ResetForKickoff(res);
+		res->down = 0;
+		res->plays_remaining_in_quarter++; // should not take a play clock play so add one back
+		res->extra_point_needed = false;
+	}
 	else if (TouchdownScored(res))// if in end zone, award touchdown and set res->extra_point_needed = true;
 	{
 		AwardTouchdown(res);
@@ -1542,7 +1664,11 @@ void ResolveEndOfPlay(struct response* res)
 		TurnoverOnDowns(res, false);
 	}
 
-	// TODO: if Ace of spades is disabled in shared deck, shuffle?
+	if (!GetTableValOnOff(shared_deck, (ACE | SPADES | BLACK | DECK_SHARED))) // if Ace of spades is disabled in shared deck, shuffle that deck
+	{
+		TableWeightEnableAll(shared_deck);
+		ConsoleShowScreen(res, "Ace of Spades used, reshuffling...", GAME_SPEED * 20);
+	}
 
 	res->fumble = false;
 	res->interception = false;
