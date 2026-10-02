@@ -2,10 +2,18 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+
+#define LOADING_SCREEN_ANIMATIONS (20)
+#define GAME_BIT_FONT_HEIGHT (7)
+#define DRAFT_BALL_TITLE_WIDTH (60)
+#define DRAFT_BALL_BALL_WIDTH (22)
+#define DRAFT_BALL_NUM_STAR_ROWS (5)
+#define DRAFT_BALL_TITLE_UNIQUE_ROWS (2)
+
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
 #define YARDS_PER_FIRST_DOWN (10)
-#define PLAYS_PER_QUARTER (12)
+#define PLAYS_PER_QUARTER (10)
 #define NUMBER_OF_QUARTERS (4)
 #define NUMBER_OF_QB_NAMES_PER_TEAM (1)
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
@@ -175,7 +183,7 @@ struct card_name {
 extern struct card_name card_names[];
 
 /* Prototypes */
-void ConsoleShowScreen(struct response* res, char txt[1000], int pause);
+void ConsoleShowGameScreen(struct response* res, char txt[1000], int pause);
 void TableWeightEnableAll(struct table_weight* table);
 int TableWeightDecision(struct table_weight* table, bool enable_all);
 const char* CardName(int card);

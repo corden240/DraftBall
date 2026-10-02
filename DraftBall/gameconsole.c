@@ -17,6 +17,36 @@ void ResetScreen()
 }
 
 /*
+* NAME:        HideCursor
+* DESCRIPTION: hides cursor
+* INPUTS:      None
+* OUTPUTS:     None
+*/
+void HideCursor()
+{
+	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO info;
+	info.dwSize = 100;
+	info.bVisible = FALSE;
+	SetConsoleCursorInfo(consoleHandle, &info);
+}
+
+/*
+* NAME:        UnHideCursor
+* DESCRIPTION: hides cursor
+* INPUTS:      None
+* OUTPUTS:     None
+*/
+void UnHideCursor()
+{
+	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO info;
+	info.dwSize = 100;
+	info.bVisible = TRUE;
+	SetConsoleCursorInfo(consoleHandle, &info);
+}
+
+/*
 * NAME:        CardName
 * DESCRIPTION: look up the display text for a card
 * INPUTS:      card (full card value; FACE/color/DECK bits ignored)
@@ -565,12 +595,12 @@ void ShowText(struct response* res, char txt[1000])
 }
 
 /*
-* NAME:        ConsoleShowScreen
+* NAME:        ConsoleShowGameScreen
 * DESCRIPTION: updates the whole screen with current data
 * INPUTS:      response, text to display, pause time, wait for keypress
 * OUTPUTS:     None
 */
-void ConsoleShowScreen(struct response* res, char txt[1000], int pause) // if called this asking a question to the player, make sure to called getch straight after
+void ConsoleShowGameScreen(struct response* res, char txt[1000], int pause) // if called this asking a question to the player, make sure to called getch straight after
 {
 	ResetScreen();     // go to top left of screen and clear it
 	ShowTopInfo(res);  // draw score at top of screen with play clock

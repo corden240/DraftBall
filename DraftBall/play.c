@@ -84,7 +84,7 @@ int DrawOneCard(struct response* res, struct table_weight* deck)
 	if (TableWeightTotalWeight(deck) <= 0)
 	{
 		TableWeightEnableAll(deck);
-		ConsoleShowScreen(res, "Deck empty, reshuffling...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Deck empty, reshuffling...", GAME_SPEED * 20);
 	}
 
 	int card = TableWeightDecision(deck, false);
@@ -122,7 +122,7 @@ void DrawCards(struct response* res, int team_to_draw, int num, bool shared)
 		else
 			hand[start + i] = DrawOneCard(res, player_2_deck);
 
-		ConsoleShowScreen(res, 0, GAME_SPEED * 8); // show cards drawn
+		ConsoleShowGameScreen(res, 0, GAME_SPEED * 8); // show cards drawn
 	}
 }
 
@@ -139,7 +139,7 @@ void RedrawCards(struct response* res, int team_to_draw, int num)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Replace the low or high cards (1 - 2): ");
-	ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 2);
 
 	int hilo = 0;
 	char input[16];
@@ -188,7 +188,7 @@ void RedrawCards(struct response* res, int team_to_draw, int num)
 			{
 				int idx = indices[k];
 				res->o_cards[idx] = DrawOneCard(res, shared_deck);
-				ConsoleShowScreen(res, 0, GAME_SPEED * 8); // show cards drawn
+				ConsoleShowGameScreen(res, 0, GAME_SPEED * 8); // show cards drawn
 			}
 		}
 		else /* hilo == 2 */
@@ -198,7 +198,7 @@ void RedrawCards(struct response* res, int team_to_draw, int num)
 			{
 				int idx = indices[hand_size - 1 - k];
 				res->o_cards[idx] = DrawOneCard(res, shared_deck);
-				ConsoleShowScreen(res, 0, GAME_SPEED * 8); // show cards drawn
+				ConsoleShowGameScreen(res, 0, GAME_SPEED * 8); // show cards drawn
 			}
 		}
 	}
@@ -261,19 +261,19 @@ void Fumble(struct response* res)
 	int save_team_started_with_ball = res->team_in_possession;
 	do {
 		ClearAllCards(res);
-		ConsoleShowScreen(res, "Drawing fumble cards ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Drawing fumble cards ", GAME_SPEED * 20);
 		DrawCards(res, res->team_in_possession, 1, true);
 		DrawCards(res, res->team_not_in_possession, 1, true);
 
 		if ((res->o_cards[0] & SUIT) == (res->d_cards[0] & SUIT))
 		{
-			ConsoleShowScreen(res, "Same suit, ball moves, new cards needed ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Same suit, ball moves, new cards needed ", GAME_SPEED * 20);
 			MoveLineOfScrimmage(res, TotalYardsOffence(res) - TotalYardsDefence(res));
-			ConsoleShowScreen(res, 0, GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, 0, GAME_SPEED * 20);
 		}
 		else if ((res->o_cards[0] & VALUE) == (res->d_cards[0] & VALUE))
 		{
-			ConsoleShowScreen(res, "Draw, new cards needed ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Draw, new cards needed ", GAME_SPEED * 20);
 		}
 		else
 		{
@@ -286,7 +286,7 @@ void Fumble(struct response* res)
 
 			char buf4[256];
 			snprintf(buf4, sizeof(buf4), "The %s recovered the ball at the %d yard line ", GetTeamName(res, res->team_in_possession), ConvertLosToYardLine(res));
-			ConsoleShowScreen(res, buf4, GAME_SPEED * 30);
+			ConsoleShowGameScreen(res, buf4, GAME_SPEED * 30);
 			fumble_resolved = true;
 		}
 	} while (!fumble_resolved);
@@ -294,7 +294,7 @@ void Fumble(struct response* res)
 	if (save_team_started_with_ball != res->team_in_possession && SafetyScored(res))
 	{
 		// team recovers ball in their own end zone after opponents fumble
-		ConsoleShowScreen(res, "Ball recovered in own end zone, touchback issued ", 0);
+		ConsoleShowGameScreen(res, "Ball recovered in own end zone, touchback issued ", 0);
 		ResetLineOfScrimmage(res);
 		ResetLineOfFirstDown(res);
 		res->down = 0;
@@ -309,7 +309,7 @@ void Fumble(struct response* res)
 */
 void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 {
-	ConsoleShowScreen(res, "Open field run!", GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, "Open field run!", GAME_SPEED * 20);
 
 	int ofr_o_value = (offence_1 & VALUE) - 10;
 
@@ -330,7 +330,7 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Drawing %d cards...", cards_to_draw);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 
 	int yards = 0;
 
@@ -346,18 +346,18 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 			cards_to_draw += ofr_o_value;
 			char buf[256];
 			snprintf(buf, sizeof(buf), "Face Card! %d extra cards", ofr_o_value);
-			ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 		}
 		yards = (res->o_cards[i] & VALUE);
 		MoveLineOfScrimmage(res, yards);
-		ConsoleShowScreen(res, 0, GAME_SPEED * 5);
+		ConsoleShowGameScreen(res, 0, GAME_SPEED * 5);
 
 		if (TouchdownScored(res))
 			return;
 
 		if ((res->o_cards[i] & VALUE) == ACE && (res->o_cards[i] & SUIT) == SPADES)
 		{
-			ConsoleShowScreen(res, "Ball fumbled", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Ball fumbled", GAME_SPEED * 20);
 			Fumble(res);
 			return;
 		}
@@ -365,7 +365,7 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "OFR yards = %d  ", TotalYardsOffence(res));
-	ConsoleShowScreen(res, buf2, GAME_SPEED * 30);
+	ConsoleShowGameScreen(res, buf2, GAME_SPEED * 30);
 
 	return;
 }
@@ -378,7 +378,7 @@ void OpenFieldRun(struct response* res, int offence_1, int defence_1)
 */
 void PlayPass(struct response* res)
 {
-	ConsoleShowScreen(res, "Pass play ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, "Pass play ", GAME_SPEED * 10);
 
 	for (int i = 0; i < PASS_PLAY_MAX_CARDS_TO_DRAW; i++)
 	{
@@ -386,7 +386,7 @@ void PlayPass(struct response* res)
 		{
 			char buf[256];
 			snprintf(buf, sizeof(buf), "Sum = %d, draw a card? y/n ", TotalYardsOffence(res));
-			ConsoleShowScreen(res, buf, 0);
+			ConsoleShowGameScreen(res, buf, 0);
 
 			char input[16];
 			fgets(input, sizeof(input), stdin);
@@ -399,13 +399,13 @@ void PlayPass(struct response* res)
 
 		if ((res->o_cards[i + 1] & VALUE) == ACE && (res->o_cards[i + 1] & SUIT) == SPADES)
 		{
-			ConsoleShowScreen(res, "Pass intercepted ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Pass intercepted ", GAME_SPEED * 20);
 			if (res->extra_point_needed)
 				return;
 			res->interception = true;
-			ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Replacing card... ", GAME_SPEED * 20);
 			res->o_cards[i + 1] = 0;
-			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 			DrawCards(res, res->team_in_possession, 1, true);
 			break;
 		}
@@ -413,7 +413,7 @@ void PlayPass(struct response* res)
 			&& (((res->o_cards[i + 1] & RED) && (res->o_cards[0] & RED))
 				|| ((res->o_cards[i + 1] & BLACK) && (res->o_cards[0] & BLACK)))) // If it is the same rank and colour as card O1 then it is a sack
 		{
-			ConsoleShowScreen(res, "QB sacked ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "QB sacked ", GAME_SPEED * 20);
 			ClearAllCards(res);
 			DrawCards(res, res->team_in_possession, QB_SACK_CARDS_TO_DRAW, true);// draw for sack loss yardage
 
@@ -421,15 +421,15 @@ void PlayPass(struct response* res)
 			{
 				char buffer[256];
 				snprintf(buffer, sizeof(buffer), "%s fumbled the ball", GetQBName(res));
-				ConsoleShowScreen(res, buffer, GAME_SPEED * 20);
+				ConsoleShowGameScreen(res, buffer, GAME_SPEED * 20);
 				res->fumble = true;
-				ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+				ConsoleShowGameScreen(res, "Replacing card... ", GAME_SPEED * 20);
 				if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES))
 				{
 					res->o_cards[0] = res->o_cards[1];
 				}
 				res->o_cards[1] = 0;
-				ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+				ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 				DrawCards(res, res->team_in_possession, 1, true);
 			}
 
@@ -442,7 +442,7 @@ void PlayPass(struct response* res)
 
 			char buf2[256];
 			snprintf(buf2, sizeof(buf2), "%d yards lost ", sack_yards);
-			ConsoleShowScreen(res, buf2, 0);
+			ConsoleShowGameScreen(res, buf2, 0);
 
 			MoveLineOfScrimmage(res, -sack_yards);
 			ResetLineOfFirstDown(res);
@@ -456,7 +456,7 @@ void PlayPass(struct response* res)
 		{
 			char buf6[256];
 			snprintf(buf6, sizeof(buf6), "Pass to %s incomplete ", GetTargetPlayerName(res));
-			ConsoleShowScreen(res, buf6, GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, buf6, GAME_SPEED * 20);
 			ClearAllCards(res);
 			return;
 		}
@@ -479,7 +479,7 @@ void PlayPass(struct response* res)
 	else
 		snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
 
-	ConsoleShowScreen(res, buf3, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, buf3, GAME_SPEED * 10);
 
 	MoveLineOfScrimmage(res, catch_yards);
 
@@ -490,7 +490,7 @@ void PlayPass(struct response* res)
 		if (SafetyScored(res))
 		{
 			// if intercepted in own end zone, force a touchback as otherwise they could run and fumble which causes all sorts of issues
-			ConsoleShowScreen(res, "Ball caught in own end zone, touchback issued ", 0);
+			ConsoleShowGameScreen(res, "Ball caught in own end zone, touchback issued ", 0);
 			ResetLineOfScrimmage(res);
 			ResetLineOfFirstDown(res);
 			res->down = 0;
@@ -506,14 +506,14 @@ void PlayPass(struct response* res)
 		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTeamName(res, res->team_in_possession), ConvertLosToYardLine(res));
 	else
 		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTargetPlayerName(res), ConvertLosToYardLine(res));
-	ConsoleShowScreen(res, buf4, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf4, GAME_SPEED * 20);
 
 	ClearAllCards(res);
 
 	if (TouchdownScored(res))
 		return;
 
-	ConsoleShowScreen(res, "YAC draw", GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, "YAC draw", GAME_SPEED * 20);
 
 	DrawCards(res, res->team_in_possession, 1, true);
 	DrawCards(res, res->team_not_in_possession, 1, true);
@@ -522,19 +522,19 @@ void PlayPass(struct response* res)
 	{
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(res), ConvertLosToYardLine(res));
-		ConsoleShowScreen(res, buffer, GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, buffer, GAME_SPEED * 20);
 		res->fumble = true;
-		ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Replacing card... ", GAME_SPEED * 20);
 		if (((res->o_cards[0] & VALUE) == ACE && (res->o_cards[0] & SUIT) == SPADES))
 		{
 			res->o_cards[0] = 0;
-			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 			DrawCards(res, res->team_in_possession, 1, true);
 		}
 		else
 		{
 			res->d_cards[0] = 0;
-			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 			DrawCards(res, res->team_not_in_possession, 1, true);
 		}
 
@@ -551,7 +551,7 @@ void PlayPass(struct response* res)
 	if (TouchdownScored(res))
 	{
 		if (res->fumble)
-			ConsoleShowScreen(res, "End zone reached before fumble! ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "End zone reached before fumble! ", GAME_SPEED * 20);
 		return;
 	}
 	
@@ -569,7 +569,7 @@ void PlayPass(struct response* res)
 	{
 		char buf5[256];
 		snprintf(buf5, sizeof(buf5), "%d yards after catch ", yac_yards);
-		ConsoleShowScreen(res, buf5, GAME_SPEED * 10);
+		ConsoleShowGameScreen(res, buf5, GAME_SPEED * 10);
 	}
 }
 
@@ -581,26 +581,26 @@ void PlayPass(struct response* res)
 */
 void PlayRun(struct response* res)
 {
-	ConsoleShowScreen(res, "Run play ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, "Run play ", GAME_SPEED * 10);
 
 	DrawCards(res, res->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
 	DrawCards(res, res->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
 	
 	if (((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES) || ((res->d_cards[1] & VALUE) == ACE && (res->d_cards[1] & SUIT) == SPADES)) // If O2 OR D2 is the Ace of spades then draw a replacement for that card and then go to Fumble
 	{
-		ConsoleShowScreen(res, "Ball fumbled ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Ball fumbled ", GAME_SPEED * 20);
 		res->fumble = true;
-		ConsoleShowScreen(res, "Replacing card... ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Replacing card... ", GAME_SPEED * 20);
 		if (((res->o_cards[1] & VALUE) == ACE && (res->o_cards[1] & SUIT) == SPADES))
 		{
 			res->o_cards[1] = 0;
-			ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 			DrawCards(res, res->team_in_possession, 1, true);
 		}
 		else if ((res->d_cards[1] & VALUE) == ACE && (res->d_cards[1] & SUIT) == SPADES)
 		{
 		res->d_cards[1] = 0;
-		ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+		ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 		DrawCards(res, res->team_not_in_possession, 1, true);
 		}
 	}
@@ -632,14 +632,14 @@ void PlayRun(struct response* res)
 
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%d yards gained before %s fumbled", yards_gained, GetTargetPlayerName(res));
-		ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+		ConsoleShowGameScreen(res, buf, GAME_SPEED * 30);
 		Fumble(res);
 		return;
 	}
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s gained %d yards ", GetTargetPlayerName(res), yards_gained);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 30);
 
 	// if O2 is a face card and larger than D2 the go to Open field run
 	if ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & FACE) && ((res->o_cards[RUN_PLAY_OFFENCE_CARDS_TO_DRAW] & VALUE) > (res->d_cards[RUN_PLAY_DEFENCE_CARDS_TO_DRAW] & VALUE)))
@@ -681,7 +681,7 @@ int GetFormation(struct response* res)
 	// []         []     []  []
 	// 
 	// []  []            []  []
-	ConsoleShowScreen(res, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1 - 3): ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1 - 3): ", GAME_SPEED * 10);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -701,7 +701,7 @@ int GetMatchupNumber(struct response* res)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 4): ", GetTeamName(res, res->team_in_possession));
-	ConsoleShowScreen(res, buf, 0);
+	ConsoleShowGameScreen(res, buf, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -727,7 +727,7 @@ void PutCardsInFormation(struct response* res, int offence_or_defence)
 			retry = false;
 			char buf[256];
 			snprintf(buf, sizeof(buf), "What position (1 - %d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
-			ConsoleShowScreen(res, buf, GAME_SPEED * 1);
+			ConsoleShowGameScreen(res, buf, GAME_SPEED * 1);
 
 			char input[16];
 			fgets(input, sizeof(input), stdin);
@@ -736,7 +736,7 @@ void PutCardsInFormation(struct response* res, int offence_or_defence)
 			if (pick < 1 || pick > NORMAL_PLAY_CARDS_TO_DRAW || (offence_or_defence == 1 && res->o_cards_in_position[pick - 1]) || (offence_or_defence == 2 && res->d_cards_in_position[pick - 1]))
 			{
 				retry = true;
-				ConsoleShowScreen(res, "Invalid position chosen, choose again.", GAME_SPEED * 20);
+				ConsoleShowGameScreen(res, "Invalid position chosen, choose again.", GAME_SPEED * 20);
 			}
 
 		} while (retry);
@@ -744,7 +744,7 @@ void PutCardsInFormation(struct response* res, int offence_or_defence)
 			res->o_cards_in_position[pick - 1] = res->o_cards[i];
 		else if (offence_or_defence == 2)
 			res->d_cards_in_position[pick - 1] = res->d_cards[i];
-		ConsoleShowScreen(res, 0, GAME_SPEED * 1);
+		ConsoleShowGameScreen(res, 0, GAME_SPEED * 1);
 	}
 }
 
@@ -805,7 +805,7 @@ void PlayNormal(struct response* res)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, press enter to draw", GetTeamName(res, res->team_in_possession));
-	ConsoleShowScreen(res, buf, 0);
+	ConsoleShowGameScreen(res, buf, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -815,7 +815,7 @@ void PlayNormal(struct response* res)
 	res->formation = GetFormation(res); // O: pick layout/formation/personnel
 	res->show_O_D_Both = 1;
 
-	ConsoleShowScreen(res, 0, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
 
 	PutCardsInFormation(res, 1); // Offence place cards in positions, send 1 for offence
 	
@@ -823,7 +823,7 @@ void PlayNormal(struct response* res)
 	
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(res, res->team_not_in_possession));
-	ConsoleShowScreen(res, buf2, 0);
+	ConsoleShowGameScreen(res, buf2, 0);
 
 	char input2[16];
 	fgets(input2, sizeof(input2), stdin);
@@ -839,7 +839,7 @@ void PlayNormal(struct response* res)
 	PutCardsInFormation(res, 2); // Defence place cards in positions, send 1 for Defence
 	
 	res->show_O_D_Both = 0; // cover both sets of cards
-	ConsoleShowScreen(res, "Press enter to reveal matchups", GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, "Press enter to reveal matchups", GAME_SPEED * 10);
 	char input3[16];
 	fgets(input3, sizeof(input3), stdin);
 
@@ -856,12 +856,12 @@ void PlayNormal(struct response* res)
 		res->o_cards_in_position[i] = 0;
 		res->d_cards_in_position[i] = 0;
 	}
-	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
 	{
 		res->o_cards_in_position[i] = save_o_cards[i];
 		res->d_cards_in_position[i] = save_d_cards[i];
-		ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+		ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 	}
 
 	res->matchup_number = GetMatchupNumber(res); // Show all 8 cards and "O: pick which of the 4 match ups to play"
@@ -879,7 +879,7 @@ void PlayNormal(struct response* res)
 	res->o_cards[0] = O1;
 	res->d_cards[0] = D1;
 	
-	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 
 	if(res->pass_play)
 		PlayPass(res);
@@ -897,7 +897,7 @@ int GetPuntCardsToRedraw(struct response* res) {
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(res), PUNT_REDRAW_MAX_CARDS);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -922,7 +922,7 @@ int GetPuntCardsToRedraw(struct response* res) {
 int GetPuntCardsToDraw(struct response* res) {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", PUNT_MAX_CARDS);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -948,7 +948,7 @@ int GetFieldGoalCardsToRedraw(struct response* res) {
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(res), FIELD_GOAL_REDRAW_MAX_CARDS);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -973,7 +973,7 @@ int GetFieldGoalCardsToRedraw(struct response* res) {
 int GetFieldGoalCardsToDraw(struct response* res) {
 	//char buf[256];
 	//snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", FIELD_GOAL_MAX_CARDS);
-	//ConsoleShowScreen(res, buf, GAME_SPEED * 2);
+	//ConsoleShowGameScreen(res, buf, GAME_SPEED * 2);
 	//
 	int num = 0;
 	//char input[16];
@@ -998,7 +998,7 @@ int GetFieldGoalCardsToDraw(struct response* res) {
 */
 bool TouchBack(struct response* res)
 {
-	ConsoleShowScreen(res, "Would you like to action a touchback? y/n ", 0);
+	ConsoleShowGameScreen(res, "Would you like to action a touchback? y/n ", 0);
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 
@@ -1030,7 +1030,7 @@ void PlayPuntReturn(struct response* res)
 		}
 	}
 
-	ConsoleShowScreen(res, "Punt return...", GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, "Punt return...", GAME_SPEED * 20);
 
 	// Receiver draws two cards and the punter draws one card from the shared deck
 	DrawCards(res, res->team_in_possession, PUNT_RETURN_OFFENCE_CARDS_TO_DRAW, true);
@@ -1043,11 +1043,11 @@ void PlayPuntReturn(struct response* res)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Return yards = %d  ", yards);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 30);
 
 	MoveLineOfScrimmage(res, yards); // move line of scrimmage 
 
-	ConsoleShowScreen(res, 0, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 20);
 
 	// if O2 is a face card and larger than D1 the go to Open field run
 	if ((res->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & FACE) && ((res->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & VALUE) > (res->d_cards[PUNT_RETURN_DEFENCE_CARDS_TO_DRAW - 1] & VALUE)))
@@ -1146,7 +1146,7 @@ const char* GetTargetPlayerName(struct response* res)
 */
 void PlayPunt(struct response* res)
 {
-	ConsoleShowScreen(res, "Punting...", GAME_SPEED * 20); // announce punt
+	ConsoleShowGameScreen(res, "Punting...", GAME_SPEED * 20); // announce punt
 
 	DrawCards(res, res->team_in_possession, GetPuntCardsToDraw(res), true);// draw 1-5 cards
 
@@ -1155,7 +1155,7 @@ void PlayPunt(struct response* res)
 	int total_yards = TotalYardsOffence(res);
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Total Yards: %d", total_yards);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 10);
 
 	MoveLineOfScrimmage(res, total_yards);
 
@@ -1171,11 +1171,11 @@ void PlayPunt(struct response* res)
 	else
 		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(res));
 
-	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf2, GAME_SPEED * 20);
 
 	SwitchPossession(res);
 
-	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 
 	PlayPuntReturn(res);
 }
@@ -1271,7 +1271,7 @@ void PlayExtraPoint(struct response* res)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Attempting extra point. %d yards needed. ", field_goal_distance);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res), true);// draw 1-5 cards
 
@@ -1284,16 +1284,16 @@ void PlayExtraPoint(struct response* res)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
-	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf2, GAME_SPEED * 20);
 
 	if (total_yards >= field_goal_distance)
 	{
-		ConsoleShowScreen(res, "Extra Point Scored!", GAME_SPEED * 50); // resolve, scored
+		ConsoleShowGameScreen(res, "Extra Point Scored!", GAME_SPEED * 50); // resolve, scored
 		res->team_1_score += EXTRA_POINT_POINTS;
 	}
 	else if (total_yards < field_goal_distance)
 	{
-		ConsoleShowScreen(res, "Missed Extra Point", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Missed Extra Point", GAME_SPEED * 20);
 	}
 	
 	ResetForKickoff(res);
@@ -1315,7 +1315,7 @@ void PlayFieldGoal(struct response* res)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Attempting a %d yard field goal.", field_goal_distance);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 
 	DrawCards(res, res->team_in_possession, GetFieldGoalCardsToDraw(res), true);// draw 1-5 cards
 
@@ -1328,18 +1328,18 @@ void PlayFieldGoal(struct response* res)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
-	ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf2, GAME_SPEED * 20);
 
 	if (total_yards >= field_goal_distance)
 	{
-		ConsoleShowScreen(res, "Field Goal Scored!", GAME_SPEED * 50); // resolve, scored
+		ConsoleShowGameScreen(res, "Field Goal Scored!", GAME_SPEED * 50); // resolve, scored
 		res->team_1_score += FIELD_GOAL_POINTS;
 		ResetForKickoff(res);
 	}
 	else if (total_yards < field_goal_distance)
 	{
 		TurnoverOnDowns(res, true); // turnover at line of scrimmage + 10 if missed
-		ConsoleShowScreen(res, "Missed field goal, turnover at LoS + 10", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Missed field goal, turnover at LoS + 10", GAME_SPEED * 20);
 	}
 }
 
@@ -1351,7 +1351,7 @@ void PlayFieldGoal(struct response* res)
 */
 void PlayKneel(struct response* res)
 {
-	ConsoleShowScreen(res, "QB Kneel executed. Play over.", GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, "QB Kneel executed. Play over.", GAME_SPEED * 20);
 }
 
 /*
@@ -1372,7 +1372,7 @@ bool PlayTimeout(struct response* res)
 	
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s timeout used", GetTeamName(res, team));
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 
 	//
 
@@ -1388,17 +1388,17 @@ bool PlayTimeout(struct response* res)
 		else
 			res->team_2_timeouts_remaining++;
 
-		ConsoleShowScreen(res, 0, ANIMATE_SPEED);
+		ConsoleShowGameScreen(res, 0, ANIMATE_SPEED);
 
 		if (team == 1)
 			res->team_1_timeouts_remaining--;
 		else
 			res->team_2_timeouts_remaining--;
 
-		ConsoleShowScreen(res, 0, ANIMATE_SPEED);
+		ConsoleShowGameScreen(res, 0, ANIMATE_SPEED);
 	}
 
-	ConsoleShowScreen(res, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 	res->plays_remaining_in_quarter += 2;
 	res->down -= 1;
 }
@@ -1412,7 +1412,7 @@ bool PlayTimeout(struct response* res)
 int GetTimeoutTeam(struct response* res)
 {
 	int team = 0;
-	ConsoleShowScreen(res, "Which team called timeout? (1 - 2): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, "Which team called timeout? (1 - 2): ", GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		team = atoi(input);
@@ -1434,7 +1434,7 @@ int GetTimeoutTeam(struct response* res)
 int GetPlayType(struct response* res)
 {
 	int play_type = 0;
-	ConsoleShowScreen(res, "Pick game type (1 - 5): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, "Pick game type (1 - 5): ", GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		play_type = atoi(input);
@@ -1480,7 +1480,7 @@ void AnnounceDown(struct response* res)
 
 	len += snprintf(buf + len, sizeof(buf) - len, "%s down", down_str);
 
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 }
 
 /*
@@ -1588,7 +1588,7 @@ bool FirstDownScored(struct response* res)
 */
 void AwardTwoPointConversion(struct response* res)
 {
-	ConsoleShowScreen(res, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
+	ConsoleShowGameScreen(res, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
 	res->team_1_score += TWO_POINT_CONVERSION_POINTS;
 }
 
@@ -1612,7 +1612,7 @@ void AwardTouchdown(struct response* res)
 		snprintf(buf, sizeof(buf), "Touch Down Scored by %s!", GetTargetPlayerName(res));
 	else
 		snprintf(buf, sizeof(buf), "Touch Down Scored");
-	ConsoleShowScreen(res, buf, GAME_SPEED * 50);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 50);
 }
 
 /*
@@ -1628,7 +1628,7 @@ void AwardSafety(struct response* res)
 	else if (res->team_in_possession == 2)
 		res->team_1_score += SAFETY_POINTS;
 
-	ConsoleShowScreen(res, "Safety Scored!", GAME_SPEED * 50);
+	ConsoleShowGameScreen(res, "Safety Scored!", GAME_SPEED * 50);
 	
 	ResetForKickoff(res);
 }
@@ -1642,7 +1642,7 @@ void AwardSafety(struct response* res)
 int GetOneOrTwoPointConversion(struct response* res)
 {
 	int points = 1;
-	ConsoleShowScreen(res, "Extra point attempt (1 - 2): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(res, "Extra point attempt (1 - 2): ", GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		points = atoi(input);
@@ -1667,7 +1667,7 @@ void ResolveEndOfPlay(struct response* res)
 		if (TouchdownScored(res)) // if in the end zone
 			AwardTwoPointConversion(res); // 2 point conversion attempted
 		else
-			ConsoleShowScreen(res, "Missed Extra Points", GAME_SPEED * 20);
+			ConsoleShowGameScreen(res, "Missed Extra Points", GAME_SPEED * 20);
 
 		ResetForKickoff(res);
 		res->down = 0;
@@ -1686,7 +1686,7 @@ void ResolveEndOfPlay(struct response* res)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%s first down achieved", GetTeamName(res, res->team_in_possession));
-		ConsoleShowScreen(res, buf, GAME_SPEED * 30);
+		ConsoleShowGameScreen(res, buf, GAME_SPEED * 30);
 		ResetLineOfFirstDown(res);
 		res->down = 0;
 	}
@@ -1698,7 +1698,7 @@ void ResolveEndOfPlay(struct response* res)
 	if (!GetTableValOnOff(shared_deck, (ACE | SPADES | BLACK | DECK_SHARED))) // if Ace of spades is disabled in shared deck, shuffle that deck
 	{
 		TableWeightEnableAll(shared_deck);
-		ConsoleShowScreen(res, "Ace of Spades used, reshuffling...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Ace of Spades used, reshuffling...", GAME_SPEED * 20);
 	}
 
 	res->fumble = false;
@@ -1785,7 +1785,7 @@ void DoPlay(struct response* res)
 		}
 		}
 		if(retry)
-			ConsoleShowScreen(res, "Invalid play type. Please pick a number between 1 and 5.", GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
+			ConsoleShowGameScreen(res, "Invalid play type. Please pick a number between 1 and 5.", GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
 		if (retry || !res->play_type)
 			res->play_type = GetPlayType(res); // player picks what to do: normal play, punt, field goal, kneel, timeout
 	} while (retry);
@@ -1803,12 +1803,12 @@ void EndOfQuarter(struct response* res)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "End of quarter %d.", res->quarter);
-	ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 
 	if (res->quarter == 1 || res->quarter == 3)
 	{
 		SwitchEnds(res);
-		ConsoleShowScreen(res, "Switching ends...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "Switching ends...", GAME_SPEED * 20);
 	}
 	else if (res->quarter == 2)
 	{
@@ -1819,9 +1819,9 @@ void EndOfQuarter(struct response* res)
 
 		char buf2[256];
 		snprintf(buf2, sizeof(buf2), "The %s will receive the ball to start the second half.",(res->team_started_with_possession - 1) ? res->team_1_name : res->team_2_name);
-		ConsoleShowScreen(res, buf2, GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, buf2, GAME_SPEED * 20);
 
-		ConsoleShowScreen(res, "All decks shuffled at half time ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "All decks shuffled at half time ", GAME_SPEED * 20);
 
 		TableWeightEnableAll(player_1_deck); // shuffle all decks at half time
 		TableWeightEnableAll(player_2_deck);
@@ -1837,22 +1837,22 @@ void EndOfQuarter(struct response* res)
 */
 void EndOfGame(struct response* res)
 {
-	ConsoleShowScreen(res, "Game Over!", GAME_SPEED * 20);
+	ConsoleShowGameScreen(res, "Game Over!", GAME_SPEED * 20);
 	if (res->team_1_score > res->team_2_score)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", res->team_1_name);
-		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 	}
 	else if (res->team_2_score > res->team_1_score)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", res->team_2_name);
-		ConsoleShowScreen(res, buf, GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, buf, GAME_SPEED * 20);
 	}
 	else
 	{
-		ConsoleShowScreen(res, "It's a tie!", GAME_SPEED * 20);
+		ConsoleShowGameScreen(res, "It's a tie!", GAME_SPEED * 20);
 	}
 
 	// print all the game stats? player stats, quarter stats, yards, downs etc

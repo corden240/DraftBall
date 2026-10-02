@@ -139,11 +139,13 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="console.c" />
+    <ClCompile Include="gameconsole.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="main_d.c" />
     <ClCompile Include="play.c" />
     <ClCompile Include="rng.c" />
+    <ClCompile Include="setupgame.c" />
+    <ClCompile Include="startup.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
