@@ -3,13 +3,13 @@
 #include <windows.h>
 #include <string.h>
 
-int GetDirectionOfPlay(struct response* res);
+int GetDirectionOfPlay(struct game_data* game_data);
 
 /*
 * NAME:        ResetScreen
 * DESCRIPTION: clears screen and sets cursor to top left
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void ResetScreen()
 {
@@ -19,8 +19,8 @@ void ResetScreen()
 /*
 * NAME:        HideCursor
 * DESCRIPTION: hides cursor
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void HideCursor()
 {
@@ -34,8 +34,8 @@ void HideCursor()
 /*
 * NAME:        UnHideCursor
 * DESCRIPTION: hides cursor
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void UnHideCursor()
 {
@@ -71,7 +71,7 @@ const char* CardName(int card)
 *              remaining        - timeouts left (0..TIMEOUTS_PER_TEAM_PER_HALF)
 *              pips_before_name - 1 if pips print before the team name (team 1),
 *                                 0 if they print after it (team 2)
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 static void ShowTimeoutBlocks(HANDLE hConsole, int remaining, int pips_before_name)
 {
@@ -126,10 +126,10 @@ static int TruncateKeepRight(char* dst, size_t dst_size, const char* src, int ma
 /*
 * NAME:        ShowTopInfo
 * DESCRIPTION: displays timeouts, teams, scores, and clock
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
-void ShowTopInfo(struct response* res)
+void ShowTopInfo(struct game_data* game_data)
 {
 	printf("\n\r");
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -137,8 +137,8 @@ void ShowTopInfo(struct response* res)
 	/* ---- Colours: change any value here to recolour that part ---- */
 	const int COLOUR_TIMEOUT_REMAINING = CONSOLE_BG_GREY;      /* used inside ShowTimeoutBlocks */
 	const int COLOUR_BASE = CONSOLE_TEXT_WHITE;   /* padding / separators / default */
-	const int COLOUR_TEAM_1_NAME = res->team_1_colour;
-	const int COLOUR_TEAM_2_NAME = res->team_2_colour;
+	const int COLOUR_TEAM_1_NAME = game_data->team_1_colour;
+	const int COLOUR_TEAM_2_NAME = game_data->team_2_colour;
 	const int COLOUR_ARROWS = CONSOLE_TEXT_WHITE;   /* direction arrows */
 	const int COLOUR_SCORE = CONSOLE_TEXT_WHITE;   /* "N : N" */
 	const int COLOUR_CLOCK = CONSOLE_TEXT_WHITE;   /* quarter / plays left */
@@ -163,13 +163,13 @@ void ShowTopInfo(struct response* res)
 	char t2_name[64];
 	char t2_arrows[8];
 	char right_raw[128];
-	snprintf(t1_arrows, sizeof(t1_arrows), "%s ", (res->team_1_direction == 1) ? ">>" : "<<");
-	snprintf(t1_name, sizeof(t1_name), "%s", res->team_1_name);
-	snprintf(score, sizeof(score), "  %d : %d  ", res->team_1_score, res->team_2_score);
-	snprintf(t2_name, sizeof(t2_name), "%s", res->team_2_name);
-	snprintf(t2_arrows, sizeof(t2_arrows), " %s", (res->team_2_direction == 1) ? ">>" : "<<");
+	snprintf(t1_arrows, sizeof(t1_arrows), "%s ", (game_data->team_1_direction == 1) ? ">>" : "<<");
+	snprintf(t1_name, sizeof(t1_name), "%s", game_data->team_1_name);
+	snprintf(score, sizeof(score), "  %d : %d  ", game_data->team_1_score, game_data->team_2_score);
+	snprintf(t2_name, sizeof(t2_name), "%s", game_data->team_2_name);
+	snprintf(t2_arrows, sizeof(t2_arrows), " %s", (game_data->team_2_direction == 1) ? ">>" : "<<");
 	snprintf(right_raw, sizeof(right_raw), "Quarter: %d  Plays Left: %d",
-		res->quarter, res->plays_remaining_in_quarter);
+		game_data->quarter, game_data->plays_remaining_in_quarter);
 
 	/* left gap must start SIDE_GAP chars left of center */
 	int left_gap_start = center - SIDE_GAP;
@@ -233,7 +233,7 @@ void ShowTopInfo(struct response* res)
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	for (int i = 0; i < leading_spaces; i++) putchar(' ');
 	if (show_blocks) {
-		ShowTimeoutBlocks(hConsole, res->team_1_timeouts_remaining, 1);
+		ShowTimeoutBlocks(hConsole, game_data->team_1_timeouts_remaining, 1);
 	}
 	SetConsoleTextAttribute(hConsole, COLOUR_ARROWS);
 	printf("%s", t1_arrows_d);
@@ -248,7 +248,7 @@ void ShowTopInfo(struct response* res)
 	if (show_blocks) {
 		SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 		putchar(' ');
-		ShowTimeoutBlocks(hConsole, res->team_2_timeouts_remaining, 0);
+		ShowTimeoutBlocks(hConsole, game_data->team_2_timeouts_remaining, 0);
 	}
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	for (int i = 0; i < SIDE_GAP; i++) putchar(' ');
@@ -276,13 +276,13 @@ void ShowTopInfo(struct response* res)
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of 1st down    ");
 
-	if (res->team_in_possession == 1 || res->team_in_possession == 2)
+	if (game_data->team_in_possession == 1 || game_data->team_in_possession == 2)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "   %s %s in possession % s   ",
-			GetDirectionOfPlay(res) == 1 ? ">>" : "<<",
-			(res->team_in_possession - 1) ? res->team_2_name : res->team_1_name,
-			GetDirectionOfPlay(res) == 1 ? ">>" : "<<");
+			GetDirectionOfPlay(game_data) == 1 ? ">>" : "<<",
+			(game_data->team_in_possession - 1) ? game_data->team_2_name : game_data->team_1_name,
+			GetDirectionOfPlay(game_data) == 1 ? ">>" : "<<");
 		printf(buf);
 	}
 
@@ -292,8 +292,8 @@ void ShowTopInfo(struct response* res)
 /*
 * NAME:        PrintYardNumbers
 * DESCRIPTION: show yard lines below the field
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void PrintYardNumbers(void) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -310,8 +310,8 @@ void PrintYardNumbers(void) {
 /*
 * NAME:        PrintSideline
 * DESCRIPTION: print sideline
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void PrintSideline(void) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -326,10 +326,10 @@ void PrintSideline(void) {
 /*
 * NAME:        DrawField
 * DESCRIPTION: shows field and lines 
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
-void DrawField(struct response* res)
+void DrawField(struct game_data* game_data)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -348,9 +348,9 @@ void DrawField(struct response* res)
 				printf("/");
 			}
 			else {
-				if (i == res->line_of_scrimmage)
+				if (i == game_data->line_of_scrimmage)
 					SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
-				else if (i == res->line_of_first_down && res->play_type != PLAY_TYPE_PUNT && res->play_type != PLAY_TYPE_FIELD_GOAL && !res->kickoff_needed)
+				else if (i == game_data->line_of_first_down && game_data->play_type != PLAY_TYPE_PUNT && game_data->play_type != PLAY_TYPE_FIELD_GOAL && !game_data->kickoff_needed)
 					SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
 				else
 					SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -381,13 +381,13 @@ void DrawField(struct response* res)
 /*
 * NAME:        ShowGameInfo
 * DESCRIPTION: prints down and distance info
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
-void ShowGameInfo(struct response* res)
+void ShowGameInfo(struct game_data* game_data)
 {
-	int distance = abs(res->line_of_scrimmage - res->line_of_first_down);
-	if (res->play_type == PLAY_TYPE_PUNT || res->play_type == PLAY_TYPE_FIELD_GOAL || res->kickoff_needed)
+	int distance = abs(game_data->line_of_scrimmage - game_data->line_of_first_down);
+	if (game_data->play_type == PLAY_TYPE_PUNT || game_data->play_type == PLAY_TYPE_FIELD_GOAL || game_data->kickoff_needed)
 		distance = 0;
 
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -395,19 +395,19 @@ void ShowGameInfo(struct response* res)
 	printf("\n\r\n\r");
 	printf("                                                  ");
 
-	switch (res->down) {
-	case 1: { printf("%dst & %d", res->down, distance); break; }
-	case 2: { printf("%dnd & %d", res->down, distance); break; }
-	case 3: { printf("%drd & %d", res->down, distance); break; }
-	case 4: { printf("%dth & %d", res->down, distance); break; }
+	switch (game_data->down) {
+	case 1: { printf("%dst & %d", game_data->down, distance); break; }
+	case 2: { printf("%dnd & %d", game_data->down, distance); break; }
+	case 3: { printf("%drd & %d", game_data->down, distance); break; }
+	case 4: { printf("%dth & %d", game_data->down, distance); break; }
 	}
 }
 
 /*
 * NAME:        PrintCard
 * DESCRIPTION: prints 1 card in correct colour
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
 void PrintCard(int card)
 {
@@ -427,19 +427,19 @@ void PrintCard(int card)
 /*
 * NAME:        PrintOCards
 * DESCRIPTION: prints o cards
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
-void PrintOCards(struct response* res)
+void PrintOCards(struct game_data* game_data)
 {
-	for (int i = 0; i < CARDS_IN_A_DECK && res->o_cards[i] != '\0'; i++)
+	for (int i = 0; i < CARDS_IN_A_DECK && game_data->o_cards[i] != '\0'; i++)
 	{
 		if (i == 0)
 			printf("O: ");
-		if (!res->o_cards[i])
+		if (!game_data->o_cards[i])
 			break;
-		PrintCard(res->o_cards[i]);
-		if (res->o_cards[i + 1])
+		PrintCard(game_data->o_cards[i]);
+		if (game_data->o_cards[i + 1])
 			printf(", ");
 	}
 }
@@ -447,34 +447,34 @@ void PrintOCards(struct response* res)
 /*
 * NAME:        PrintDCards
 * DESCRIPTION: prints d cards
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
-void PrintDCards(struct response* res)
+void PrintDCards(struct game_data* game_data)
 {
 
-	for (int i = 0; i < CARDS_IN_A_DECK && res->d_cards[i] != '\0'; i++)
+	for (int i = 0; i < CARDS_IN_A_DECK && game_data->d_cards[i] != '\0'; i++)
 	{
 		if (i == 0)
 			printf("D: ");
-		if (!res->d_cards[i])
+		if (!game_data->d_cards[i])
 			break;
-		PrintCard(res->d_cards[i]);
-		if (res->d_cards[i + 1])
+		PrintCard(game_data->d_cards[i]);
+		if (game_data->d_cards[i + 1])
 			printf(", ");
 	}
 }
 
 /*
 * NAME:        ShowCardsInFormation
-* DESCRIPTION: shows given cards in res->formation
-* INPUTS:      response, offence_or_defence (1-2)
-* OUTPUTS:     None
+* DESCRIPTION: shows given cards in game_data->formation
+* INPUTS:      game_data, offence_or_defence (1-2)
+* OUTPUTS:     none
 */
-ShowCardsInFormation(struct response* res, int offence_or_defence)
+ShowCardsInFormation(struct game_data* game_data, int offence_or_defence)
 {
 	int gaps[] = { 0, 0, 0, 0, };
-	switch (res->formation) {
+	switch (game_data->formation) {
 	case 1:{ gaps[1] = 7, gaps[2] = 2, gaps[3] = 8; break;}
 	case 2:{ gaps[1] = 9, gaps[2] = 6, gaps[3] = 2; break;}
 	case 3:{ gaps[1] = 2, gaps[2] = 13, gaps[3] = 2; break;}
@@ -490,12 +490,12 @@ ShowCardsInFormation(struct response* res, int offence_or_defence)
 		for (int j = 0; j < gaps[i]; j++)
 			printf(" ");
 
-		//if (res->show_O_D_Both == 3)
+		//if (game_data->show_O_D_Both == 3)
 		//	Sleep(GAME_SPEED * 5);
-		if (offence_or_defence == 1 && res->o_cards_in_position[i])
-			PrintCard(res->o_cards_in_position[i]);
-		else if (offence_or_defence == 2 && res->d_cards_in_position[i])
-			PrintCard(res->d_cards_in_position[i]);
+		if (offence_or_defence == 1 && game_data->o_cards_in_position[i])
+			PrintCard(game_data->o_cards_in_position[i]);
+		else if (offence_or_defence == 2 && game_data->d_cards_in_position[i])
+			PrintCard(game_data->d_cards_in_position[i]);
 		else
 			printf("[]");
 	}
@@ -504,45 +504,45 @@ ShowCardsInFormation(struct response* res, int offence_or_defence)
 /*
 * NAME:        ShowCards
 * DESCRIPTION: prints cards
-* INPUTS:      response
-* OUTPUTS:     None
+* INPUTS:      game_data
+* OUTPUTS:     none
 */
-void ShowCards(struct response* res)
+void ShowCards(struct game_data* game_data)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("\r\n                                 ");
 	printf("\r\n                                 ");
 
-	if (res->formation && !res->run_play && !res->pass_play)
+	if (game_data->formation && !game_data->run_play && !game_data->pass_play)
 	{
-		if (res->show_O_D_Both == 0)
+		if (game_data->show_O_D_Both == 0)
 			printf("                                 \r\n                                                                  ");
-		else if (res->show_O_D_Both == 1)
+		else if (game_data->show_O_D_Both == 1)
 		{
-			ShowCardsInFormation(res, 1);	// send 1 for offence, 2 for defence
+			ShowCardsInFormation(game_data, 1);	// send 1 for offence, 2 for defence
 			printf("\r\n");
 		}
-		else if (res->show_O_D_Both == 2)
+		else if (game_data->show_O_D_Both == 2)
 		{
-			ShowCardsInFormation(res, 2);	// send 1 for offence, 2 for defence
+			ShowCardsInFormation(game_data, 2);	// send 1 for offence, 2 for defence
 			printf("\r\n");
 		}
-		else if (res->show_O_D_Both == 3)
+		else if (game_data->show_O_D_Both == 3)
 		{
-			ShowCardsInFormation(res, 2);	// send 1 for offence, 2 for defence;
+			ShowCardsInFormation(game_data, 2);	// send 1 for offence, 2 for defence;
 			printf("\r\n                                 ");
-			ShowCardsInFormation(res, 1);
+			ShowCardsInFormation(game_data, 1);
 		}
 		else
-			printf("Error res->show_O_D_Both wrong");
+			printf("Error game_data->show_O_D_Both wrong");
 	}
 	else
 	{
-		if (res->o_cards[0] && res->d_cards[0])
+		if (game_data->o_cards[0] && game_data->d_cards[0])
 		{
-			if (res->d_cards[0])
-				PrintDCards(res);
+			if (game_data->d_cards[0])
+				PrintDCards(game_data);
 			else
 				printf("                                 ");
 
@@ -550,8 +550,8 @@ void ShowCards(struct response* res)
 
 			printf("\r\n                                 ");
 
-			if (res->o_cards[0])
-				PrintOCards(res);
+			if (game_data->o_cards[0])
+				PrintOCards(game_data);
 			else
 				printf("                                 ");
 		}
@@ -563,10 +563,10 @@ void ShowCards(struct response* res)
 
 			printf("\r\n                                 ");
 
-			if (res->d_cards[0])
-				PrintDCards(res);
-			else if (res->o_cards[0])
-				PrintOCards(res);
+			if (game_data->d_cards[0])
+				PrintDCards(game_data);
+			else if (game_data->o_cards[0])
+				PrintOCards(game_data);
 			else
 				printf("                                 ");
 		}
@@ -578,10 +578,10 @@ void ShowCards(struct response* res)
 /*
 * NAME:        ShowText
 * DESCRIPTION: prints text given to function
-* INPUTS:      response, text to display
-* OUTPUTS:     None
+* INPUTS:      game_data, text to display
+* OUTPUTS:     none
 */
-void ShowText(struct response* res, char txt[1000])
+void ShowText(struct game_data* game_data, char txt[1000])
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -597,18 +597,18 @@ void ShowText(struct response* res, char txt[1000])
 /*
 * NAME:        ConsoleShowGameScreen
 * DESCRIPTION: updates the whole screen with current data
-* INPUTS:      response, text to display, pause time, wait for keypress
-* OUTPUTS:     None
+* INPUTS:      game_data, text to display, pause time, wait for keypress
+* OUTPUTS:     none
 */
-void ConsoleShowGameScreen(struct response* res, char txt[1000], int pause) // if called this asking a question to the player, make sure to called getch straight after
+void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], int pause) // if called this asking a question to the player, make sure to called getch straight after
 {
 	ResetScreen();     // go to top left of screen and clear it
-	ShowTopInfo(res);  // draw score at top of screen with play clock
-	DrawField(res);    // draw field with line of scrimmage and down and distance lines
-	ShowGameInfo(res); // then write down and distance numbers
-	ShowCards(res);    // card drawn info?
+	ShowTopInfo(game_data);  // draw score at top of screen with play clock
+	DrawField(game_data);    // draw field with line of scrimmage and down and distance lines
+	ShowGameInfo(game_data); // then write down and distance numbers
+	ShowCards(game_data);    // card drawn info?
 	if(txt)
-		ShowText(res, txt);// then draw text sent to function
+		ShowText(game_data, txt);// then draw text sent to function
 	if(pause)
 		Sleep(pause);      // pause for a bit if needed)
 }

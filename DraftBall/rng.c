@@ -9,7 +9,7 @@
 * NAME:        TableWeightTotalWeight
 * DESCRIPTION: return total weight of enabled values
 * INPUTS:      table
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 int TableWeightTotalWeight(struct table_weight* table)
 {
@@ -29,7 +29,7 @@ int TableWeightTotalWeight(struct table_weight* table)
 * NAME:        TableWeightSet
 * DESCRIPTION: set a value in a table to true or false
 * INPUTS:      table, val, bool
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void TableWeightSet(struct table_weight* table, int val, bool on_off)
 {
@@ -62,7 +62,7 @@ bool GetTableValOnOff(struct table_weight* table, int val)
 * NAME:        TableWeightEnableAll
 * DESCRIPTION: sets all values in a table to true
 * INPUTS:      table
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void TableWeightEnableAll(struct table_weight* table)
 {
@@ -78,7 +78,7 @@ void TableWeightEnableAll(struct table_weight* table)
 * NAME:        TableWeightDecision
 * DESCRIPTION: makes a table weight decision, can enable all
 * INPUTS:      table
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 int TableWeightDecision(struct table_weight* table, bool enable_all)
 {

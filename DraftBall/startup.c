@@ -9,7 +9,7 @@ void ResetScreen();
 * NAME:        PrintTextWithDelays
 * DESCRIPTION: prints text given to function with a delay between each letter
 * INPUTS:      text to display
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void PrintTextWithDelays(char txt[1000])
 {
@@ -147,7 +147,7 @@ int (*DraftBallBalls[DRAFT_BALL_BALL_FRAMES])[DRAFT_BALL_BALL_WIDTH] =
 * NAME:        ShowGameName
 * DESCRIPTION: loading page large game name
 * INPUTS:      frame number
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void ShowGameName(int frame_number)
 {
@@ -210,7 +210,7 @@ void ShowGameName(int frame_number)
 * NAME:        ShowMenuTransitionGameName
 * DESCRIPTION: game name move for menu	
 * INPUTS:      frame number
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void ShowMenuTransitionGameName(int frame_number)
 {
@@ -286,8 +286,8 @@ void ShowMenuTransitionGameName(int frame_number)
 /*
 * NAME:        ShowMenuTitle
 * DESCRIPTION: game name in menu
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void ShowMenuTitle()
 {
@@ -349,9 +349,9 @@ void ShowMenuTitle()
 * NAME:        ShowMenuOptions
 * DESCRIPTION: game menu options
 * INPUTS:      menu choices
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
-void ShowMenuOptions(struct menu_choices* menu, bool first_text)
+void ShowMenuOptions(struct total_data* total_data, bool first_text)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	for (int i = 0; i < MENU_OPTIONS_NUMBER; i++)
@@ -360,7 +360,7 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 		if (i == 0)
 		{
 			printf("     ");
-			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if(first_text)
 				PrintTextWithDelays("Play Exhibition");
@@ -370,7 +370,7 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 		else if (i == 1)
 		{
 			printf("       ");
-			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play Season");
@@ -380,7 +380,7 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 		else if (i == 2)
 		{
 			printf("     ");
-			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play 2 min drive");
@@ -390,7 +390,7 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 		else if (i == 3)
 		{
 			printf("        ");
-			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Settings");
@@ -400,7 +400,7 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 		else if (i == 4)
 		{
 			printf("          ");
-			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Quit");
@@ -415,19 +415,19 @@ void ShowMenuOptions(struct menu_choices* menu, bool first_text)
 * NAME:        ShowMenu
 * DESCRIPTION: game menu
 * INPUTS:      menu choices
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
-void ShowMenu(struct menu_choices* menu, bool first_text)
+void ShowMenu(struct total_data* total_data, bool first_text)
 {
 	ShowMenuTitle();
-	ShowMenuOptions(menu, first_text);
+	ShowMenuOptions(total_data, first_text);
 }
 
 /*
 * NAME:        ShowLoadingStars
 * DESCRIPTION: loading page stars
 * INPUTS:      frame number
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
 void ShowLoadingStars(int frame_number)
 {
@@ -480,8 +480,8 @@ void ShowLoadingStars(int frame_number)
 /*
 * NAME:        LoadingScreen
 * DESCRIPTION: Animates opening of game
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void LoadingScreen()
 {
@@ -499,8 +499,8 @@ void LoadingScreen()
 /*
 * NAME:        TransitionToMenuScreen
 * DESCRIPTION: Animates from loading to menu
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void TransitionToMenuScreen()
 {
@@ -517,23 +517,23 @@ void TransitionToMenuScreen()
 * NAME:        MenuScreen
 * DESCRIPTION: Menu
 * INPUTS:      menu choices, first text
-* OUTPUTS:     None
+* OUTPUTS:     none
 */
-void MenuScreen(struct menu_choices* menu, bool first_text)
+void MenuScreen(struct total_data* total_data, bool first_text)
 {
 	ResetScreen();
-	ShowMenu(menu, first_text);
+	ShowMenu(total_data, first_text);
 }
 
 /*
 * NAME:        Startup
 * DESCRIPTION: Opens the game with a loading, start and menu screen
-* INPUTS:      None
-* OUTPUTS:     None
+* INPUTS:      none
+* OUTPUTS:     none
 */
 void Startup(struct menu_choices* menu) {
 	
 	LoadingScreen();
 	TransitionToMenuScreen();
-	MenuScreen(menu, false);
+	MenuScreen(menu, true);
 }

@@ -4,7 +4,7 @@
 
 
 #define DRAFT_BALL_BALL_FRAMES (9)
-#define LOADING_SCREEN_ANIMATIONS (DRAFT_BALL_BALL_FRAMES * 5)
+#define LOADING_SCREEN_ANIMATIONS (DRAFT_BALL_BALL_FRAMES * 3)
 #define LOADING_TRANSITION_SCREEN_ANIMATIONS ((DRAFT_BALL_BALL_FRAMES * 2) + 1)
 #define GAME_BIT_FONT_HEIGHT (7)
 #define DRAFT_BALL_TITLE_WIDTH (60)
@@ -13,6 +13,9 @@
 #define DRAFT_BALL_TITLE_UNIQUE_ROWS (2)
 
 #define MENU_OPTIONS_NUMBER (5)
+
+#define TWO_MIN_DRIVE_PLAYS (5)
+#define TWO_MIN_DRIVE_TIMEOUTS (2)
 
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
@@ -127,7 +130,7 @@ enum play_types {
 	PLAY_TYPE_TIMEOUT = 5
 };
 
-struct response {
+struct game_data {
 	int line_of_scrimmage;
 	int line_of_first_down;
 	int down;
@@ -138,7 +141,6 @@ struct response {
 	int quarter;
 	int plays_remaining_in_quarter;
 	int shuffle_deck_needed[NUMBER_OF_DECKS]; // int 1 if that deck needs to be shuffled, 0 if not
-	bool replay_game;
 	int team_1_timeouts_remaining;
 	int team_2_timeouts_remaining;
 	int team_started_with_possession; // 1 if team 1, 2 if team 2
@@ -174,9 +176,20 @@ struct response {
 	int team_2_colour;
 };
 
-struct menu_choices {
-	int current_selection;
-	/* add any other fields you need */
+struct season_data {
+	int no_games;
+	int no_teams;
+	char team_names[64][64];
+	char team_wins[64][64];
+	char team_losses[64][64];
+	char team_draws[64][64];
+};
+
+struct total_data {
+	bool fouls;
+	int game_speed;
+	int current_game_mode;
+	int current_menu_selection;
 };
 
 struct table_weight {
@@ -192,7 +205,7 @@ struct card_name {
 extern struct card_name card_names[];
 
 /* Prototypes */
-void ConsoleShowGameScreen(struct response* res, char txt[1000], int pause);
+void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], int pause);
 void TableWeightEnableAll(struct table_weight* table);
 int TableWeightDecision(struct table_weight* table, bool enable_all);
 const char* CardName(int card);
