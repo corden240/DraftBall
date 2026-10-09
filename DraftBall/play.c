@@ -4,6 +4,7 @@
 #include <stdlib.h>   /* srand, rand, atoi */
 #include <time.h>     /* time() */
 #include "main.h"
+#include <string.h>
 
 void ResetLineOfFirstDown(struct response* res);
 void SwitchPossession(struct response* res);
@@ -22,6 +23,9 @@ const char* GetTargetPlayerName(struct response* res);
 bool GetTableValOnOff(struct table_weight* table, int val);
 const char* GetQBName(struct response* res);
 bool SafetyScored(struct response* res);
+void PlayGame(struct response* res);
+int ConvertLosToYardLine(struct response* res);
+int GetTimeoutTeam(struct response* res);
 
 /*
 * NAME:        ClearAllCards
@@ -1136,6 +1140,7 @@ const char* GetTargetPlayerName(struct response* res)
 		else if ((res->formation == 1 && res->matchup_number == 3))
 			return res->team_2_rb_names[1];
 	}
+	return -1;
 }
 
 /*
@@ -1184,9 +1189,9 @@ void PlayPunt(struct response* res)
 * NAME:        SetLosExtraPoint
 * DESCRIPTION: get field distance to fg
 * INPUTS:      response
-* OUTPUTS:     distance
+* OUTPUTS:     none
 */
-int SetLosExtraPoint(struct response* res)
+void SetLosExtraPoint(struct response* res)
 {
 	if (GetDirectionOfPlay(res) == 1)
 	{
@@ -1401,6 +1406,7 @@ bool PlayTimeout(struct response* res)
 	ConsoleShowGameScreen(res, 0, GAME_SPEED * 10);
 	res->plays_remaining_in_quarter += 2;
 	res->down -= 1;
+	return false;
 }
 
 /*

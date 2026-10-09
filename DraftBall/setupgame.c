@@ -2,6 +2,7 @@
 #include <stdlib.h>   /* srand, rand, atoi */
 #include <time.h>     /* time() */
 #include "main.h"
+#include <string.h>
 
 void SwitchPossession(struct response* res);
 void ResetLineOfFirstDown(struct response* res);
@@ -9,6 +10,7 @@ void ResetLineOfScrimmage(struct response* res);
 void PlayGame(struct response* res);
 int GetDirectionOfPlay(struct response* res);
 bool OutBackOfEndZone(struct response* res);
+
 
 /*
 * NAME:        ResetLineOfScrimmage

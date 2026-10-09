@@ -4,10 +4,17 @@
 #include <stdlib.h>   /* srand, rand, atoi */
 #include <time.h>     /* time() */
 #include "main.h"
+#include <string.h>
 
 void HideCursor();
 void UnHideCursor();
 void Startup();
+void MenuChoicesConstructor(struct menu_choices* menu);
+int MenuOutcome(struct menu_choices* menu);
+void ResponseConstructor(struct response* res);
+void SetupGame(struct response* res);
+void PlayGame(struct response* res);
+void Settings();
 
 /*
 * NAME:        SetupWindow
@@ -36,6 +43,37 @@ void SetupWindow()
 }
 
 /*
+* NAME:        ExecuteMenuChoice
+* DESCRIPTION: play out each menu option
+* INPUTS:      None
+* OUTPUTS:     None
+*/
+void ExecuteMenuChoice(struct menu_choices* menu)
+{
+	do {
+		int menu_outcome = MenuOutcome(menu);
+
+		if (menu_outcome == 0) // play 1 game
+		{
+			struct response res;
+			ResponseConstructor(&res);
+			SetupGame(&res);
+			PlayGame(&res);
+		}
+		else if (menu_outcome == 1) // play season
+		{
+		}
+		else if (menu_outcome == 2) // play 2 min drive, down 6 points in the 4th? 2 timeouts, 5 plays, start at own 35?
+		{
+		}
+		else if (menu_outcome == 3) // settings page
+		{
+			Settings();
+		}
+	} while (1);
+}
+
+/*
 * NAME:        main
 * DESCRIPTION: main game loop
 * INPUTS:      None
@@ -45,13 +83,9 @@ void main()
 {
 	SetupWindow();
 	
-	Startup(); // Loading and intro page -> Homepage -> menu -> settings -> game modes
+	struct menu_choices menu;
+	MenuChoicesConstructor(&menu);
+	Startup(&menu);
 
-    struct response res;
-    ResponseConstructor(&res);
-    SetupGame(&res);
-	
-    PlayGame(&res);
-
-	// end of game, back to menu, onto next game in season etc
+	ExecuteMenuChoice(&menu);
 }

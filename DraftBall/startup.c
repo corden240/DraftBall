@@ -1,8 +1,24 @@
 #include "main.h"
 #include <windows.h>
-//#include "gameconsole.c"
+#include <stdio.h>
+#include <string.h>
 
 void ResetScreen();
+
+/*
+* NAME:        PrintTextWithDelays
+* DESCRIPTION: prints text given to function with a delay between each letter
+* INPUTS:      text to display
+* OUTPUTS:     None
+*/
+void PrintTextWithDelays(char txt[1000])
+{
+	for (int i = 0; i < MAX_STRING_lENGTH && txt[i] != '\0'; i++)
+	{
+		printf("%c", txt[i]);
+		Sleep(10);
+	}
+}
 
 int DraftBallTitle[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_TITLE_WIDTH] =
 {	//     D                     R                     A                       F                   T                     B                     A                     L                     L
@@ -15,7 +31,7 @@ int DraftBallTitle[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_TITLE_WIDTH] =
 	{1, 1, 1, 1, 0,   0,   1, 0, 0, 0, 1,   0,   1, 0, 0, 0, 1,   0,   1, 0, 0, 0, 0,   0,   0, 0, 1, 0, 0,   0,   1, 1, 1, 1, 0,   0,   1, 0, 0, 0, 1,   0,   1, 1, 1, 1, 1,   0,   1, 1, 1, 1, 1,   0, 0, 0, 0, 0, 0, 0,},
 };
 
-int DraftBallBall[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+int DraftBallBall1[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
 {
 	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
@@ -24,6 +40,107 @@ int DraftBallBall[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
 	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
 	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall2[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall3[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall4[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall5[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall6[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall7[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall8[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int DraftBallBall9[GAME_BIT_FONT_HEIGHT][DRAFT_BALL_BALL_WIDTH] =
+{
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+};
+
+int (*DraftBallBalls[DRAFT_BALL_BALL_FRAMES])[DRAFT_BALL_BALL_WIDTH] =
+{
+	&DraftBallBall1,
+	&DraftBallBall2,
+	&DraftBallBall3,
+	&DraftBallBall4,
+	&DraftBallBall5,
+	&DraftBallBall6,
+	&DraftBallBall7,
+	&DraftBallBall8,
+	&DraftBallBall9,
 };
 
 /*
@@ -46,11 +163,11 @@ void ShowGameName(int frame_number)
 
 		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
 		{
-			if (DraftBallBall[x][i] == 1)
+			if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 1)
 			{
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
 			}
-			else if (DraftBallBall[x][i] == 2)
+			else if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 2)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
 			else
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -73,11 +190,11 @@ void ShowGameName(int frame_number)
 
 		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
 		{
-			if (DraftBallBall[x][i] == 1)
+			if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 1)
 			{
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
 			}
-			else if (DraftBallBall[x][i] == 2)
+			else if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 2)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
 			else
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -87,6 +204,223 @@ void ShowGameName(int frame_number)
 		printf("\r\n");
 	}
 	printf("\r\n");
+}
+
+/*
+* NAME:        ShowMenuTransitionGameName
+* DESCRIPTION: game name move for menu	
+* INPUTS:      frame number
+* OUTPUTS:     None
+*/
+void ShowMenuTransitionGameName(int frame_number)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int buffer = 12, height_buffer = (frame_number > 7) ? 1 : 8 - frame_number;
+
+	for (int i = 0; i < height_buffer; i++)
+	{
+		printf("\r\n");
+	}
+
+	for (int x = 0; x < GAME_BIT_FONT_HEIGHT; x++)
+	{
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+		for (int y = 0; y < buffer; y++)
+		{
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
+		{
+			if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+			}
+			else if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 2)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_TITLE_WIDTH; i++)
+		{
+			if (DraftBallTitle[x][i] == 1)
+			{
+				if (frame_number % 10 > 4)
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_BLUE);
+				else
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
+			}
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
+		{
+			if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+			}
+			else if (DraftBallBalls[frame_number % DRAFT_BALL_BALL_FRAMES][x][i] == 2)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		printf("\r\n");
+	}
+	for (int i = 0; i < height_buffer; i++)
+	{
+		for (int j = 0; j < WINDOW_WIDTH; j++)
+		{
+			printf(" ");
+		}
+	}
+	printf("\r\n");
+}
+
+/*
+* NAME:        ShowMenuTitle
+* DESCRIPTION: game name in menu
+* INPUTS:      None
+* OUTPUTS:     None
+*/
+void ShowMenuTitle()
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int buffer = 12;
+	printf("\r\n");
+	for (int x = 0; x < GAME_BIT_FONT_HEIGHT; x++)
+	{
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+		for (int y = 0; y < buffer; y++)
+		{
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
+		{
+			if (DraftBallBalls[0][x][i] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+			}
+			else if (DraftBallBalls[0][x][i] == 2)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_TITLE_WIDTH; i++)
+		{
+			if (DraftBallTitle[x][i] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_BLUE);
+			}
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		for (int i = 0; i < DRAFT_BALL_BALL_WIDTH; i++)
+		{
+			if (DraftBallBalls[0][x][i] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+			}
+			else if (DraftBallBalls[0][x][i] == 2)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+			else
+				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+		}
+
+		printf("\r\n");
+	}
+	printf("\r\n");
+}
+
+/*
+* NAME:        ShowMenuOptions
+* DESCRIPTION: game menu options
+* INPUTS:      menu choices
+* OUTPUTS:     None
+*/
+void ShowMenuOptions(struct menu_choices* menu, bool first_text)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	for (int i = 0; i < MENU_OPTIONS_NUMBER; i++)
+	{
+		printf("\r\n\r\n                                             ");
+		if (i == 0)
+		{
+			printf("     ");
+			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if(first_text)
+				PrintTextWithDelays("Play Exhibition");
+			else
+				printf("Play Exhibition");
+		}
+		else if (i == 1)
+		{
+			printf("       ");
+			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Play Season");
+			else
+				printf("Play Season");
+		}
+		else if (i == 2)
+		{
+			printf("     ");
+			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Play 2 min drive");
+			else
+				printf("Play 2 min drive");
+		}
+		else if (i == 3)
+		{
+			printf("        ");
+			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Settings");
+			else
+				printf("Settings");
+		}
+		else if (i == 4)
+		{
+			printf("          ");
+			if (menu->current_selection == i)//if this one is currently selected, print > and then console invert the text
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Quit");
+			else
+				printf("Quit");
+		}
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	}
+}
+
+/*
+* NAME:        ShowMenu
+* DESCRIPTION: game menu
+* INPUTS:      menu choices
+* OUTPUTS:     None
+*/
+void ShowMenu(struct menu_choices* menu, bool first_text)
+{
+	ShowMenuTitle();
+	ShowMenuOptions(menu, first_text);
 }
 
 /*
@@ -157,9 +491,38 @@ void LoadingScreen()
 		ShowLoadingStars(x);	
 		ShowGameName(x);
 		ShowLoadingStars(x);
-		Sleep(200);
+		Sleep(75);
 	}
 	system("cls");
+}
+
+/*
+* NAME:        TransitionToMenuScreen
+* DESCRIPTION: Animates from loading to menu
+* INPUTS:      None
+* OUTPUTS:     None
+*/
+void TransitionToMenuScreen()
+{
+	for (int x = 0; x < LOADING_TRANSITION_SCREEN_ANIMATIONS; x++)
+	{
+		ResetScreen();
+		ShowMenuTransitionGameName(x);
+		Sleep(75);
+	}
+	system("cls");
+}
+
+/*
+* NAME:        MenuScreen
+* DESCRIPTION: Menu
+* INPUTS:      menu choices, first text
+* OUTPUTS:     None
+*/
+void MenuScreen(struct menu_choices* menu, bool first_text)
+{
+	ResetScreen();
+	ShowMenu(menu, first_text);
 }
 
 /*
@@ -168,7 +531,9 @@ void LoadingScreen()
 * INPUTS:      None
 * OUTPUTS:     None
 */
-void Startup() {
+void Startup(struct menu_choices* menu) {
 	
 	LoadingScreen();
+	TransitionToMenuScreen();
+	MenuScreen(menu, false);
 }

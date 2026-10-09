@@ -3,12 +3,16 @@
 #include <stddef.h>
 
 
-#define LOADING_SCREEN_ANIMATIONS (20)
+#define DRAFT_BALL_BALL_FRAMES (9)
+#define LOADING_SCREEN_ANIMATIONS (DRAFT_BALL_BALL_FRAMES * 5)
+#define LOADING_TRANSITION_SCREEN_ANIMATIONS ((DRAFT_BALL_BALL_FRAMES * 2) + 1)
 #define GAME_BIT_FONT_HEIGHT (7)
 #define DRAFT_BALL_TITLE_WIDTH (60)
 #define DRAFT_BALL_BALL_WIDTH (22)
 #define DRAFT_BALL_NUM_STAR_ROWS (5)
 #define DRAFT_BALL_TITLE_UNIQUE_ROWS (2)
+
+#define MENU_OPTIONS_NUMBER (5)
 
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
@@ -168,6 +172,11 @@ struct response {
 
 	int team_1_colour;
 	int team_2_colour;
+};
+
+struct menu_choices {
+	int current_selection;
+	/* add any other fields you need */
 };
 
 struct table_weight {
