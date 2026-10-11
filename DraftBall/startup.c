@@ -360,7 +360,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		if (i == 0)
 		{
 			printf("     ");
-			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if(first_text)
 				PrintTextWithDelays("Play Exhibition");
@@ -370,7 +370,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 1)
 		{
 			printf("       ");
-			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play Season");
@@ -380,7 +380,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 2)
 		{
 			printf("     ");
-			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play 2 min drive");
@@ -389,18 +389,28 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		}
 		else if (i == 3)
 		{
+			printf("       ");
+			if (total_data->current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("How to play");
+			else
+				printf("How to play");
+		}
+		else if (i == 4)
+		{
 			printf("        ");
-			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Settings");
 			else
 				printf("Settings");
 		}
-		else if (i == 4)
+		else if (i == 5)
 		{
 			printf("          ");
-			if (total_data->current_menu_selection == i)//if this one is currently selected, print > and then console invert the text
+			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Quit");

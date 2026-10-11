@@ -1,6 +1,6 @@
 #include "main.h"
-#include <stdio.h>
 #include <windows.h>
+#include <stdio.h>
 #include <string.h>
 
 int GetDirectionOfPlay(struct game_data* game_data);

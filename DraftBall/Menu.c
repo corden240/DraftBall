@@ -9,8 +9,8 @@ void MenuScreen();
 /*
 * NAME:        MenuOutcome
 * DESCRIPTION: Gets which game type wants to be played
-* INPUTS:      none
-* OUTPUTS:     none
+* INPUTS:      total_data
+* OUTPUTS:     int choice
 */
 int MenuOutcome(struct total_data* total_data) {
 
@@ -26,11 +26,15 @@ int MenuOutcome(struct total_data* total_data) {
 				if (total_data->current_menu_selection > 0) {
 					total_data->current_menu_selection--;
 				}
+				else
+					total_data->current_menu_selection = (MENU_OPTIONS_NUMBER - 1);
 				break;
 			case 80: // down arrow
 				if (total_data->current_menu_selection < (MENU_OPTIONS_NUMBER - 1)) {
 					total_data->current_menu_selection++;
 				}
+				else
+					total_data->current_menu_selection = 0;
 				break;
 			default:
 				break;

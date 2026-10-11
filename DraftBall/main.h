@@ -12,7 +12,11 @@
 #define DRAFT_BALL_NUM_STAR_ROWS (5)
 #define DRAFT_BALL_TITLE_UNIQUE_ROWS (2)
 
-#define MENU_OPTIONS_NUMBER (5)
+#define MENU_OPTIONS_NUMBER (6)
+
+#define RULES_OPTIONS_NUMBER (7)
+
+#define SETTINGS_OPTIONS_NUMBER (2)
 
 #define TWO_MIN_DRIVE_PLAYS (5)
 #define TWO_MIN_DRIVE_TIMEOUTS (2)
@@ -48,7 +52,7 @@
 #define FIELD_GOAL_MAX_CARDS (6)
 #define FIELD_GOAL_REDRAW_MAX_CARDS (2)
 #define FIELD_GOAL_YARDS_AFTER_END_ZONE (18)
-#define FIELD_GOAL_MISS_PENALTY_YARDS (10)
+#define FIELD_GOAL_MISS_PENALTY_YARDS (0) // missing a field goal used to turnover AND lose 10 yards, now its 0
 
 #define QB_SACK_CARDS_TO_DRAW (2)
 

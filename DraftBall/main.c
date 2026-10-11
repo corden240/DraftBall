@@ -15,10 +15,12 @@ void ExhibitionGameDataConstructor(struct game_data* game_data);
 void SetupExhibitionGame(struct game_data* game_data);
 void PlayGame(struct game_data* game_data);
 void Settings();
+void SetupSeason(struct season_data* season_data);
 void PlaySeason(struct season_data* season_data);
 void TwoMinDriveGameDataConstructor(struct game_data* game_data);
 void SeasonDataConstructor(struct season_data* season_data);
 void SetupTwoMinDrive(struct game_data* game_data);
+void HowToPlay();
 
 /*
 * NAME:        TotalDataConstructor
@@ -96,10 +98,15 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			SetupTwoMinDrive(&game_data);
 			PlayGame(&game_data); // TODO: needs to leave if lose the ball, needs to be only one player
 		}
-		else if (menu_outcome == 3) // settings page
+		else if (menu_outcome == 3) // how to play page
 		{
 			total_data->current_game_mode = 3;
-			Settings();
+			HowToPlay();
+		}
+		else if (menu_outcome == 4) // settings page
+		{
+			total_data->current_game_mode = 4;
+			Settings(total_data);
 		}
 		system("cls");
 	} while (1);
