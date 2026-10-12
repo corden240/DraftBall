@@ -12,7 +12,7 @@ void ResetLineOfFirstDown(struct game_data* game_data);
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void TwoMinDriveGameDataConstructor(struct game_data* game_data)
+void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_data* total_data)
 {
 	game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	game_data->line_of_first_down = 0;
@@ -75,11 +75,15 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data)
 
 	game_data->interception = false;
 	game_data->fumble = false;
+	game_data->drive_over = false;
 
 	game_data->team_1_colour = CONSOLE_TEXT_WHITE;
 	game_data->team_2_colour = CONSOLE_TEXT_WHITE;
 
 	ResetLineOfFirstDown(game_data);
+
+	game_data->fouls = total_data->fouls;
+	game_data->current_game_mode = total_data->current_game_mode;
 }
 
 /*
@@ -224,9 +228,9 @@ void SetTeamStartLine(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetupTwoMinDrive(struct game_data* game_data)
+void SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data)
 {
-	TwoMinDriveGameDataConstructor(game_data);  // TODO: send total_data in with this to transfer settings in?
+	TwoMinDriveGameDataConstructor(game_data, total_data);  // TODO: send total_data in with this to transfer settings in?
 
 	SetTeamNamesTwoMinDrive(game_data);
 

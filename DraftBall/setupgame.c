@@ -169,6 +169,11 @@ void SwitchPossession(struct game_data* game_data)
 
 	game_data->team_not_in_possession = game_data->team_in_possession;
 	game_data->team_in_possession = game_data->team_in_possession - 1 ? game_data->team_in_possession - 1 : game_data->team_in_possession + 1;
+
+	/* two-minute drill ends when the defence has the ball */
+	if (game_data->current_game_mode == 2 && game_data->team_in_possession == 2)
+		game_data->drive_over = true;
+
 	return;
 }
 
@@ -410,7 +415,7 @@ void SetPlayerNames(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void ExhibitionGameDataConstructor(struct game_data* game_data)
+void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_data* total_data)
 {
 	game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	game_data->line_of_first_down = 0;
@@ -476,6 +481,9 @@ void ExhibitionGameDataConstructor(struct game_data* game_data)
 
 	game_data->team_1_colour = CONSOLE_TEXT_WHITE;
 	game_data->team_2_colour = CONSOLE_TEXT_WHITE;
+
+	game_data->fouls = total_data->fouls;
+	game_data->current_game_mode = total_data->current_game_mode;
 }
 
 /*
@@ -484,9 +492,9 @@ void ExhibitionGameDataConstructor(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetupExhibitionGame(struct game_data* game_data)
+void SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data)
 {
-	ExhibitionGameDataConstructor(game_data); // TODO: send total_data in with this to transfer settings in?
+	ExhibitionGameDataConstructor(game_data, total_data);
 
 	SetTeamNames(game_data);
 

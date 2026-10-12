@@ -192,9 +192,10 @@ void SetPlayerNamesSeason(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SeasonDataConstructor(struct season_data* season_data)
+void SeasonDataConstructor(struct season_data* season_data, struct total_data* total_data)
 {
-
+	season_data->fouls = total_data->fouls;
+	season_data->current_game_mode = total_data->current_game_mode;
 }
 
 
@@ -204,8 +205,10 @@ void SeasonDataConstructor(struct season_data* season_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetupSeason(struct season_data* season_data)
+void SetupSeason(struct season_data* season_data, struct total_data* total_data)
 {
+	SeasonDataConstructor(season_data, total_data);  // TODO: send total_data in with this to transfer settings in?
+
 	SetTeamNamesSeason(season_data);
 
 	SetTeamColoursSeason(season_data);

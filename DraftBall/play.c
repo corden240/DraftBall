@@ -1892,6 +1892,8 @@ void PlayGame(struct game_data* game_data)
 				}
 			}
 			DoPlay(game_data);
+			if (game_data->drive_over || ((game_data->current_game_mode == 2) && (game_data->team_1_score > game_data->team_2_score)))
+				break;
 		}
 		EndOfQuarter(game_data);
 	}

@@ -178,6 +178,10 @@ struct game_data {
 
 	int team_1_colour;
 	int team_2_colour;
+
+	int current_game_mode;
+	bool fouls;
+	bool drive_over;   /* two-minute drill: defense gained possession */
 };
 
 struct season_data {
@@ -187,6 +191,9 @@ struct season_data {
 	char team_wins[64][64];
 	char team_losses[64][64];
 	char team_draws[64][64];
+
+	int current_game_mode;
+	bool fouls;
 };
 
 struct total_data {

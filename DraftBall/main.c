@@ -12,14 +12,14 @@ void UnHideCursor();
 void Startup();
 int MenuOutcome(struct total_data* menu);
 void ExhibitionGameDataConstructor(struct game_data* game_data);
-void SetupExhibitionGame(struct game_data* game_data);
+void SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data);
 void PlayGame(struct game_data* game_data);
 void Settings();
-void SetupSeason(struct season_data* season_data);
+void SetupSeason(struct season_data* season_data, struct total_data* total_data);
 void PlaySeason(struct season_data* season_data);
 void TwoMinDriveGameDataConstructor(struct game_data* game_data);
 void SeasonDataConstructor(struct season_data* season_data);
-void SetupTwoMinDrive(struct game_data* game_data);
+void SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data);
 void HowToPlay();
 
 /*
@@ -78,16 +78,15 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			total_data->current_game_mode = 0;
 			system("cls");
 			struct game_data game_data;
-			SetupExhibitionGame(&game_data);
+			SetupExhibitionGame(&game_data, total_data);
 			PlayGame(&game_data);
 		}
 		else if (menu_outcome == 1) // play season
 		{
 			total_data->current_game_mode = 1;
 			system("cls");
-			struct season_data season_data;
-			SeasonDataConstructor(&season_data);  // TODO: send total_data in with this to transfer settings in?
-			SetupSeason(&season_data); // TODO: move contructor in here?
+			struct season_data season_data;	
+			SetupSeason(&season_data, total_data);
 			PlaySeason(&season_data);
 		}
 		else if (menu_outcome == 2) // play 2 min drive, down 6 points in the 4th? 2 timeouts, 5 plays, start at own 35?
@@ -95,7 +94,7 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			total_data->current_game_mode = 2;
 			system("cls");
 			struct game_data game_data;		
-			SetupTwoMinDrive(&game_data);
+			SetupTwoMinDrive(&game_data, total_data);
 			PlayGame(&game_data); // TODO: needs to leave if lose the ball, needs to be only one player
 		}
 		else if (menu_outcome == 3) // how to play page
