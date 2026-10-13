@@ -26,6 +26,7 @@ bool SafetyScored(struct game_data* game_data);
 void PlayGame(struct game_data* game_data);
 int ConvertLosToYardLine(struct game_data* game_data);
 int GetTimeoutTeam(struct game_data* game_data);
+void GameStats(struct game_data* game_data);
 
 /*
 * NAME:        ClearAllCards
@@ -1862,7 +1863,7 @@ void EndOfGame(struct game_data* game_data)
 		ConsoleShowGameScreen(game_data, "It's a tie!", GAME_SPEED * 20);
 	}
 
-	// print all the game stats? player stats, quarter stats, yards, downs etc
+	GameStats(game_data);// print all the game stats? player stats, quarter stats, yards, downs etc
 }
 
 

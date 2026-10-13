@@ -63,7 +63,7 @@ static void ShowSettingsOptions(int current_menu_selection, bool first_text, str
 /*
 * NAME:        SettingsMenuOutcome
 * DESCRIPTION: Gets which entry picked
-* INPUTS:      none
+* INPUTS:      total_data
 * OUTPUTS:     int choice
 */
 int SettingsMenuOutcome(struct total_data* total_data) {

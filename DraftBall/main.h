@@ -18,6 +18,8 @@
 
 #define SETTINGS_OPTIONS_NUMBER (2)
 
+#define GAME_STATS_NUMBER (3)
+
 #define TWO_MIN_DRIVE_PLAYS (5)
 #define TWO_MIN_DRIVE_TIMEOUTS (2)
 
