@@ -186,7 +186,7 @@ void SwitchPossession(struct game_data* game_data)
 void CoinToss(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "Coin toss: ", GAME_SPEED * 10);
-	for (int i = 0; i < NUMER_OF_COIN_TOSSES; i++)
+	for (int i = 0; i < NUMER_OF_COIN_TOSSES_ANIMATION; i++)
 	{
 		ConsoleShowGameScreen(game_data, "\\", GAME_SPEED / 5);
 		ConsoleShowGameScreen(game_data, "|", GAME_SPEED / 5);
@@ -484,6 +484,34 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 
 	game_data->fouls = total_data->fouls;
 	game_data->current_game_mode = total_data->current_game_mode;
+
+	/*game stats data*/
+	game_data->playoffs = false; // true if we are currently in the playoff part of the season, use to not add to record
+	for (int i = 0; i < NUMBER_OF_TEAMS_PER_GAME; i++) {
+		for (int j = 0; j < NUMBER_OF_QUARTERS; j++) {
+			game_data->quarter_scores[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < NUMBER_OF_TEAMS_PER_GAME; i++) {
+		for (int j = 0; j < WIN_LOSS_DRAW; j++) {
+			game_data->team_records[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_QB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_QUARTERBACK_STATS; j++) {
+			game_data->quarterback_stats[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_RUNNINGBACK_STATS; j++) {
+			game_data->runningback_stats[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_RECEIVER_STATS; j++) {
+			game_data->receiver_stats[i][j] = 0;
+		}
+	}
 }
 
 /*

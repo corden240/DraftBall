@@ -23,6 +23,7 @@
 #define TWO_MIN_DRIVE_PLAYS (5)
 #define TWO_MIN_DRIVE_TIMEOUTS (2)
 
+#define NUMBER_OF_TEAMS_PER_GAME (2)
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
 #define YARDS_PER_FIRST_DOWN (10)
@@ -32,7 +33,9 @@
 #define NUMBER_OF_RB_NAMES_PER_TEAM (2)
 #define NUMBER_OF_WR_NAMES_PER_TEAM (4)
 #define NUMBER_OF_PLAYER_NAMES_PER_TEAM (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM)
-#define NUMER_OF_COIN_TOSSES (6)
+#define NUMER_OF_COIN_TOSSES_ANIMATION (6)
+
+#define WIN_LOSS_DRAW (3)
 
 #define GAME_SPEED    (50) // must be divisible by 5
 #define ANIMATE_SPEED (50)
@@ -136,6 +139,41 @@ enum play_types {
 	PLAY_TYPE_TIMEOUT = 5
 };
 
+enum quarterback_stats {
+	COMPLETE_PASSES,
+	ATTEMPTED_PASSES,
+	YARDS, // all yards from throws, not from running the ball
+	TOUCHDOWNS, // TDs thrown
+	INTERCEPTIONS_THROWN,
+	SACKS1,
+	SACKS2,
+	NUMBER_OF_QUARTERBACK_STATS,
+};
+
+enum runningback_stats {
+	CARRIES,
+	YARDS,
+	TOUCHDOWNS,
+	LONGEST_RUN_LENGTH,
+	NUMBER_OF_RUNNINGBACK_STATS,
+};
+
+enum receiver_stats {
+	RECEPTIONS,
+	YARDS,
+	TOUCHDOWNS,
+	LONGEST_PLAY,
+	TARGETS,
+	NUMBER_OF_RECEIVER_STATS,
+};
+
+enum team_record_stats {
+	WINS,
+	LOSSES,
+	DRAWS,
+	TEAM_RECORD_STATS_NUMBER,
+};
+
 struct game_data {
 	int line_of_scrimmage;
 	int line_of_first_down;
@@ -184,6 +222,16 @@ struct game_data {
 	int current_game_mode;
 	bool fouls;
 	bool drive_over;   /* two-minute drill: defense gained possession */
+
+	/*game stats data*/
+	bool playoffs; // true if we are currently in the playoff part of the season, use to not add to record
+	int quarter_scores[NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QUARTERS];
+	int team_records[NUMBER_OF_TEAMS_PER_GAME][WIN_LOSS_DRAW]; // dont print this if not in a season, only add to this in regular season, TODO: export this back out to season data at the end of a season game
+	int quarterback_stats[NUMBER_OF_QB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QUARTERBACK_STATS];
+	int runningback_stats[NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RUNNINGBACK_STATS];
+	int receiver_stats[NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RECEIVER_STATS];
+
+	// store other calculated stats as well
 };
 
 struct season_data {

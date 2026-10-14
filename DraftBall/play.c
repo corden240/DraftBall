@@ -1295,7 +1295,16 @@ void PlayExtraPoint(struct game_data* game_data)
 	if (total_yards >= field_goal_distance)
 	{
 		ConsoleShowGameScreen(game_data, "Extra Point Scored!", GAME_SPEED * 50); // resolve, scored
-		game_data->team_1_score += EXTRA_POINT_POINTS;
+		if (game_data->team_in_possession == 1)
+		{
+			game_data->team_1_score += EXTRA_POINT_POINTS;
+			game_data->quarter_scores[0][game_data->quarter - 1] += EXTRA_POINT_POINTS;
+		}
+		else if (game_data->team_in_possession == 2)
+		{
+			game_data->team_2_score += EXTRA_POINT_POINTS;
+			game_data->quarter_scores[1][game_data->quarter - 1] += EXTRA_POINT_POINTS;
+		}
 	}
 	else if (total_yards < field_goal_distance)
 	{
@@ -1339,7 +1348,14 @@ void PlayFieldGoal(struct game_data* game_data)
 	if (total_yards >= field_goal_distance)
 	{
 		ConsoleShowGameScreen(game_data, "Field Goal Scored!", GAME_SPEED * 50); // resolve, scored
-		game_data->team_1_score += FIELD_GOAL_POINTS;
+		if (game_data->team_in_possession == 1) {
+			game_data->team_1_score += FIELD_GOAL_POINTS;
+			game_data->quarter_scores[0][game_data->quarter - 1] += FIELD_GOAL_POINTS;
+		}
+		else if (game_data->team_in_possession == 2) {
+			game_data->team_2_score += FIELD_GOAL_POINTS;
+			game_data->quarter_scores[1][game_data->quarter - 1] += FIELD_GOAL_POINTS;
+		}
 		ResetForKickoff(game_data);
 	}
 	else if (total_yards < field_goal_distance)
@@ -1596,7 +1612,14 @@ bool FirstDownScored(struct game_data* game_data)
 void AwardTwoPointConversion(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
-	game_data->team_1_score += TWO_POINT_CONVERSION_POINTS;
+	if (game_data->team_in_possession == 1){
+		game_data->team_1_score += TWO_POINT_CONVERSION_POINTS;
+		game_data->quarter_scores[0][game_data->quarter - 1] += TWO_POINT_CONVERSION_POINTS;
+	}
+	else if (game_data->team_in_possession == 2){
+		game_data->team_2_score += TWO_POINT_CONVERSION_POINTS;
+		game_data->quarter_scores[1][game_data->quarter - 1] += TWO_POINT_CONVERSION_POINTS;
+	}
 }
 
 /*
@@ -1607,10 +1630,14 @@ void AwardTwoPointConversion(struct game_data* game_data)
 */
 void AwardTouchdown(struct game_data* game_data)
 {
-	if(game_data->team_in_possession == 1)
+	if(game_data->team_in_possession == 1){
 		game_data->team_1_score += TOUCHDOWN_POINTS;
-	else if (game_data->team_in_possession == 2)
+		game_data->quarter_scores[0][game_data->quarter - 1] += TOUCHDOWN_POINTS;
+	}
+	else if (game_data->team_in_possession == 2){
 		game_data->team_2_score += TOUCHDOWN_POINTS;
+		game_data->quarter_scores[1][game_data->quarter - 1] += TOUCHDOWN_POINTS;
+	}
 
 	game_data->extra_point_needed = true;
 	
@@ -1630,10 +1657,14 @@ void AwardTouchdown(struct game_data* game_data)
 */
 void AwardSafety(struct game_data* game_data)
 {
-	if (game_data->team_in_possession == 1)
+	if (game_data->team_in_possession == 1){
 		game_data->team_2_score += SAFETY_POINTS;
-	else if (game_data->team_in_possession == 2)
+		game_data->quarter_scores[1][game_data->quarter - 1] += SAFETY_POINTS;
+	}
+	else if (game_data->team_in_possession == 2){
 		game_data->team_1_score += SAFETY_POINTS;
+		game_data->quarter_scores[0][game_data->quarter - 1] += SAFETY_POINTS;
+	}
 
 	ConsoleShowGameScreen(game_data, "Safety Scored!", GAME_SPEED * 50);
 	
@@ -1851,16 +1882,28 @@ void EndOfGame(struct game_data* game_data)
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", game_data->team_1_name);
 		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
+			game_data->team_records[0][WINS]++;
+			game_data->team_records[1][LOSSES]++;
+		}
 	}
 	else if (game_data->team_2_score > game_data->team_1_score)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", game_data->team_2_name);
 		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
+			game_data->team_records[0][LOSSES]++;
+			game_data->team_records[1][WINS]++;
+		}
 	}
 	else
 	{
 		ConsoleShowGameScreen(game_data, "It's a tie!", GAME_SPEED * 20);
+		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
+			game_data->team_records[0][DRAWS]++;
+			game_data->team_records[1][DRAWS]++;
+		}
 	}
 
 	GameStats(game_data);// print all the game stats? player stats, quarter stats, yards, downs etc

@@ -319,7 +319,7 @@ void PrintSideline(void) {
 	printf("\n\r");
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	for (int i = 0; i < (END_ZONE_WIDTH + FIELD_WIDTH + END_ZONE_WIDTH - 1); i++) {
-		printf("-");
+		printf("=");
 	}
 }
 

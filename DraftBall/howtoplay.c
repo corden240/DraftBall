@@ -36,6 +36,9 @@ static void ShowRulesGeneral()
 	snprintf(buffer, sizeof(buffer), "Games consist of 4 quarters with %d plays, timeouts add 1 play to the clock", PLAYS_PER_QUARTER);
 	PrintTextWithDelays(buffer);
 
+	printf("\r\n\r\n                            ");
+	PrintTextWithDelays("Cards are shown as As = Ace of Spades, Th = Ten of Hearts and 4d = 4 of Diamonds");
+
 	printf("\r\n\r\n                                        ");
 	printf("               ");
 	SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
