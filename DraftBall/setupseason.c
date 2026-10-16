@@ -207,7 +207,7 @@ void SeasonDataConstructor(struct season_data* season_data, struct total_data* t
 */
 void SetupSeason(struct season_data* season_data, struct total_data* total_data)
 {
-	SeasonDataConstructor(season_data, total_data);  // TODO: send total_data in with this to transfer settings in?
+	SeasonDataConstructor(season_data, total_data);
 
 	SetTeamNamesSeason(season_data);
 

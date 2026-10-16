@@ -258,7 +258,7 @@ void SetTeamStartLine(struct game_data* game_data)
 */
 void SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data)
 {
-	TwoMinDriveGameDataConstructor(game_data, total_data);  // TODO: send total_data in with this to transfer settings in?
+	TwoMinDriveGameDataConstructor(game_data, total_data);
 
 	SetTeamNamesTwoMinDrive(game_data);
 

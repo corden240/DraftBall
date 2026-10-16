@@ -37,7 +37,19 @@ static void ShowRulesGeneral()
 	PrintTextWithDelays(buffer);
 
 	printf("\r\n\r\n                            ");
-	PrintTextWithDelays("Cards are shown as As = Ace of Spades, Th = Ten of Hearts and 4d = 4 of Diamonds");
+	PrintTextWithDelays("Cards are shown as ");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_GREEN);
+	PrintTextWithDelays("Ac");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	PrintTextWithDelays(" = Ace of Clubs, ");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_RED);
+	PrintTextWithDelays("Th");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	PrintTextWithDelays(" = Ten of Hearts and ");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
+	PrintTextWithDelays("4d");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	PrintTextWithDelays(" = 4 of Diamonds");
 
 	printf("\r\n\r\n                                        ");
 	printf("               ");

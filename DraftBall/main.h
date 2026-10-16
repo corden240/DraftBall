@@ -140,30 +140,34 @@ enum play_types {
 };
 
 enum quarterback_stats {
-	COMPLETE_PASSES,
-	ATTEMPTED_PASSES,
-	YARDS, // all yards from throws, not from running the ball
-	TOUCHDOWNS, // TDs thrown
-	INTERCEPTIONS_THROWN,
-	SACKS1,
-	SACKS2,
+	QB_COMPLETE_PASSES,
+	QB_ATTEMPTED_PASSES,
+	QB_YARDS, // all yards from throws, not from running the ball
+	QB_AVERAGE,
+	QB_TOUCHDOWNS, // TDs thrown
+	QB_INTERCEPTIONS_THROWN,
+	QB_SACKS,
+	QB_SACK_YARDS_LOST,
+	QB_RATING,
 	NUMBER_OF_QUARTERBACK_STATS,
 };
 
 enum runningback_stats {
-	CARRIES,
-	YARDS,
-	TOUCHDOWNS,
-	LONGEST_RUN_LENGTH,
+	RB_CARRIES,
+	RB_YARDS,
+	RB_TOUCHDOWNS,
+	RB_AVERAGE,
+	RB_LONGEST_PLAY,
 	NUMBER_OF_RUNNINGBACK_STATS,
 };
 
 enum receiver_stats {
-	RECEPTIONS,
-	YARDS,
-	TOUCHDOWNS,
-	LONGEST_PLAY,
-	TARGETS,
+	WR_RECEPTIONS,
+	WR_YARDS,
+	WR_AVERAGE,
+	WR_TOUCHDOWNS,
+	WR_LONGEST_PLAY,
+	WR_TARGETS,
 	NUMBER_OF_RECEIVER_STATS,
 };
 
@@ -230,8 +234,6 @@ struct game_data {
 	int quarterback_stats[NUMBER_OF_QB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QUARTERBACK_STATS];
 	int runningback_stats[NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RUNNINGBACK_STATS];
 	int receiver_stats[NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RECEIVER_STATS];
-
-	// store other calculated stats as well
 };
 
 struct season_data {

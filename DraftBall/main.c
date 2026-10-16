@@ -95,7 +95,7 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			system("cls");
 			struct game_data game_data;		
 			SetupTwoMinDrive(&game_data, total_data);
-			PlayGame(&game_data); // TODO: needs to leave if lose the ball, needs to be only one player
+			PlayGame(&game_data); // TODO: needs to be only one player
 		}
 		else if (menu_outcome == 3) // how to play page
 		{

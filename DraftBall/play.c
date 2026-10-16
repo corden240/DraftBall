@@ -29,6 +29,30 @@ int GetTimeoutTeam(struct game_data* game_data);
 void GameStats(struct game_data* game_data);
 
 /*
+* NAME:        LimitYardsToTouchdown
+* DESCRIPTION: take yards gained and cap to td line
+* INPUTS:      game_data, yards
+* OUTPUTS:     yards
+*/
+static int LimitYardsToTouchdown(struct game_data* game_data, int yards)
+{
+	if (yards <= 0)
+		return yards;
+
+	int yards_to_goal;
+
+	if (GetDirectionOfPlay(game_data) == 1)
+		yards_to_goal = (END_ZONE_WIDTH + FIELD_WIDTH) - game_data->line_of_scrimmage;
+	else
+		yards_to_goal = game_data->line_of_scrimmage - END_ZONE_WIDTH;
+
+	if (yards_to_goal < 0)
+		yards_to_goal = 0;
+
+	return yards < yards_to_goal ? yards : yards_to_goal;
+}
+
+/*
 * NAME:        ClearAllCards
 * DESCRIPTION: clear o_cards and d_cards
 * INPUTS:      game_data
@@ -249,6 +273,7 @@ int TotalYardsDefence(struct game_data* game_data)
 */
 void Interception(struct game_data* game_data)
 {
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_INTERCEPTIONS_THROWN]++;
 	SwitchPossession(game_data);
 	ResetLineOfFirstDown(game_data);
 	game_data->down = 0;
@@ -353,9 +378,12 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 			snprintf(buf, sizeof(buf), "Face Card! %d extra cards", ofr_o_value);
 			ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
 		}
-		yards = (game_data->o_cards[i] & VALUE);
+		yards = LimitYardsToTouchdown(game_data, (game_data->o_cards[i] & VALUE));
 		MoveLineOfScrimmage(game_data, yards);
 		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 5);
+
+		if(game_data->pass_play)
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yards;
 
 		if (TouchdownScored(game_data))
 			return;
@@ -418,9 +446,10 @@ void PlayPass(struct game_data* game_data)
 			&& (((game_data->o_cards[i + 1] & RED) && (game_data->o_cards[0] & RED))
 				|| ((game_data->o_cards[i + 1] & BLACK) && (game_data->o_cards[0] & BLACK)))) // If it is the same rank and colour as card O1 then it is a sack
 		{
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_SACKS]++;
 			ConsoleShowGameScreen(game_data, "QB sacked ", GAME_SPEED * 20);
 			ClearAllCards(game_data);
-			DrawCards(game_data, game_data->team_in_possession, QB_SACK_CARDS_TO_DRAW, true);// draw for sack loss yardage
+			DrawCards(game_data, game_data->team_in_possession, QB_SACK_CARDS_TO_DRAW, true); // draw for sack loss yardage
 
 			if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES) || ((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES))
 			{
@@ -445,12 +474,13 @@ void PlayPass(struct game_data* game_data)
 			else
 				sack_yards = -((sack_yards + 1) / 2);
 
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_SACK_YARDS_LOST] += abs(sack_yards);
+
 			char buf2[256];
-			snprintf(buf2, sizeof(buf2), "%d yards lost ", sack_yards);
+			snprintf(buf2, sizeof(buf2), "%d yards lost ", -sack_yards);
 			ConsoleShowGameScreen(game_data, buf2, 0);
 
-			MoveLineOfScrimmage(game_data, -sack_yards);
-			ResetLineOfFirstDown(game_data);
+			MoveLineOfScrimmage(game_data, sack_yards);
 
 			if (game_data->fumble)
 				Fumble(game_data);
@@ -463,10 +493,11 @@ void PlayPass(struct game_data* game_data)
 			snprintf(buf6, sizeof(buf6), "Pass to %s incomplete ", GetTargetPlayerName(game_data));
 			ConsoleShowGameScreen(game_data, buf6, GAME_SPEED * 20);
 			ClearAllCards(game_data);
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if incomplete then pass attempted
 			return;
 		}
 	}
-
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if intercepted or completed then pass attempted
 	DrawCards(game_data, game_data->team_not_in_possession, 1, true); // defence draws 1
 	int catch_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
 
@@ -482,7 +513,12 @@ void PlayPass(struct game_data* game_data)
 	else if (game_data->interception)
 		snprintf(buf3, sizeof(buf3), "Interception on a %d yard throw ", catch_yards);
 	else
+	{
 		snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_COMPLETE_PASSES]++;
+	}
+
+	catch_yards = LimitYardsToTouchdown(game_data, catch_yards);
 
 	ConsoleShowGameScreen(game_data, buf3, GAME_SPEED * 10);
 
@@ -502,6 +538,7 @@ void PlayPass(struct game_data* game_data)
 			return;
 		}
 	}
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += catch_yards; // if not an interception then add yards
 
 	char buf4[256];
 
@@ -542,14 +579,15 @@ void PlayPass(struct game_data* game_data)
 			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 		}
-
-		Fumble(game_data);
 	}
 
 	int yac_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
 
 	if (yac_yards < 0)
 		yac_yards = 0;
+
+	yac_yards = LimitYardsToTouchdown(game_data, yac_yards);
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yac_yards; // if not an interception then add yards
 
 	MoveLineOfScrimmage(game_data, yac_yards);
 
@@ -1638,6 +1676,9 @@ void AwardTouchdown(struct game_data* game_data)
 		game_data->team_2_score += TOUCHDOWN_POINTS;
 		game_data->quarter_scores[1][game_data->quarter - 1] += TOUCHDOWN_POINTS;
 	}
+
+	if (game_data->pass_play)
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_TOUCHDOWNS]++;
 
 	game_data->extra_point_needed = true;
 	
