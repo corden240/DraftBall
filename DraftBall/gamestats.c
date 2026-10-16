@@ -181,7 +181,7 @@ void GameStatsRow3(struct game_data* game_data, int left_buffer)
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	char team_1_record[32];
 	char team_2_record[32];
-	if (game_data->current_game_mode == 2)
+	if (game_data->current_game_mode == 1)
 	{
 		if (game_data->team_records[0][DRAWS] == 0)
 			snprintf(team_1_record, sizeof(team_1_record), "%d-%d",
@@ -204,7 +204,7 @@ void GameStatsRow3(struct game_data* game_data, int left_buffer)
 				game_data->team_records[1][DRAWS]);
 	}
 
-	if (game_data->current_game_mode == 2) {
+	if (game_data->current_game_mode == 1) {
 		printf("%*c", (left_buffer - findLen(team_1_record) - 2), ' ');
 		printf("%s", team_1_record);
 	}
@@ -217,7 +217,7 @@ void GameStatsRow3(struct game_data* game_data, int left_buffer)
 		game_data->quarter_scores[1][2],
 		game_data->quarter_scores[1][3]);
 
-	if (game_data->current_game_mode == 2)
+	if (game_data->current_game_mode == 1)
 		printf("%s", team_2_record);
 
 	printf("                \r\n");
