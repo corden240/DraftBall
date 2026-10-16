@@ -1274,6 +1274,9 @@ void ResetForKickoff(struct game_data* game_data)
 	game_data->kickoff_needed = true;
 	game_data->down = 0;
 
+	if(game_data->kickoff_needed)
+		game_data->drive_over = true;
+
 	if (GetDirectionOfPlay(game_data) == 1)
 	{
 		game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
