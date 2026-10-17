@@ -666,6 +666,8 @@ void PlayRun(struct game_data* game_data)
 			yards_gained = (difference + 1) / 2; // rounding up
 	}
 
+	game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
+
 	MoveLineOfScrimmage(game_data, yards_gained);
 	
 	if (game_data->fumble)
