@@ -36,9 +36,43 @@ void GameStats(struct game_data* game_data);
 */
 int GetRBID(int formation, int matchup)
 {
-	return 1;
+	// []       []  []       []
+	// 
+	// []         []     []  []
+	// 
+	// []  []            []  []
+
+	if ((formation == 1 && matchup == 2) || (formation == 2 && matchup == 2))
+		return 0;
+	else if (formation == 1 && matchup == 3) 
+		return 1;
+	return -1; // TODO: add a break point here for debug
 }
 
+/*
+* NAME:        GetWRID
+* DESCRIPTION: returns current WR id
+* INPUTS:      formation and matchup number
+* OUTPUTS:     0/1/2/3
+*/
+int GetWRID(int formation, int matchup)
+{
+	// []       []  []       []
+	// 
+	// []         []     []  []
+	// 
+	// []  []            []  []
+
+	if ((formation == 1 && matchup == 1) || (formation == 2 && matchup == 1) || (formation == 3 && matchup == 1))
+		return 0;
+	else if ((formation == 1 && matchup == 4) || (formation == 2 && matchup == 3) || (formation == 3 && matchup == 2))
+		return 1;
+	else if ((formation == 2 && matchup == 4) || (formation == 3 && matchup == 4))
+		return 2;
+	else if ((formation == 3 && matchup == 4))
+		return 3;
+	return -1; // TODO: add a break point here for debug
+}
 
 /*
 * NAME:        LimitYardsToTouchdown
