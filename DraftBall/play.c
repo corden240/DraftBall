@@ -1839,6 +1839,19 @@ void ResolveEndOfPlay(struct game_data* game_data)
 		ConsoleShowGameScreen(game_data, "Ace of Spades used, reshuffling...", GAME_SPEED * 20);
 	}
 
+	if(game_data->pass_play)
+		if((game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
+			- game_data->current_players_yards_pre_snap) > game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY])
+			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY] 
+				= (game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
+			- game_data->current_players_yards_pre_snap);
+	else if (game_data->run_play)
+		if((game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
+			- game_data->current_players_yards_pre_snap) > game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY])
+			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY] 
+				= (game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
+			- game_data->current_players_yards_pre_snap);
+	
 	game_data->fumble = false;
 	game_data->interception = false;
 	game_data->show_O_D_Both = 0;
