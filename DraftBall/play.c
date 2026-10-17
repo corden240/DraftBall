@@ -1733,6 +1733,9 @@ void AwardTouchdown(struct game_data* game_data)
 	if (game_data->pass_play)
 		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_TOUCHDOWNS]++;
 
+	if(game_data->run_play)
+		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_TOUCHDOWNS]++;
+
 	game_data->extra_point_needed = true;
 	
 	char buf[256];
