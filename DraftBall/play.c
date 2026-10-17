@@ -29,6 +29,18 @@ int GetTimeoutTeam(struct game_data* game_data);
 void GameStats(struct game_data* game_data);
 
 /*
+* NAME:        GetRBID
+* DESCRIPTION: returns current running backs id
+* INPUTS:      formation and matchup number
+* OUTPUTS:     0/1
+*/
+int GetRBID(int formation, int matchup)
+{
+	return 1;
+}
+
+
+/*
 * NAME:        LimitYardsToTouchdown
 * DESCRIPTION: take yards gained and cap to td line
 * INPUTS:      game_data, yards
