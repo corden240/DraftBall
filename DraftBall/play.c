@@ -958,10 +958,13 @@ void PlayNormal(struct game_data* game_data)
 	}
 
 	game_data->matchup_number = GetMatchupNumber(game_data); // Show all 8 cards and "O: pick which of the 4 match ups to play"
-	
+
 	SetRunOrPassPlay(game_data);
 
-	// meter here? player being targetted/given the ball
+	if(game_data->pass_play)
+		game_data->current_players_yards_pre_snap = game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS];
+	else if (game_data->run_play)
+		game_data->current_players_yards_pre_snap = game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS];
 	
 	// store 2 head to head cards
 	int O1 = game_data->o_cards_in_position[game_data->matchup_number - 1];
