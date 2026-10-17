@@ -430,6 +430,8 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 
 		if(game_data->pass_play)
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yards;
+		if(game_data->run_play)
+			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards;
 
 		if (TouchdownScored(game_data))
 			return;
@@ -713,7 +715,7 @@ void PlayRun(struct game_data* game_data)
 	}
 
 	game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
-
+	game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
 	MoveLineOfScrimmage(game_data, yards_gained);
 	
 	if (game_data->fumble)
