@@ -235,7 +235,7 @@ struct game_data {
 	int runningback_stats[NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RUNNINGBACK_STATS];
 	int receiver_stats[NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RECEIVER_STATS];
 
-	int current_players_longest_play;
+	int current_players_yards_pre_snap;
 };
 
 struct season_data {
