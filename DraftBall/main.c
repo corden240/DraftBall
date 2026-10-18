@@ -34,6 +34,7 @@ void TotalDataConstructor(struct total_data* total_data)
 	total_data->game_speed = 0;
 	total_data->current_game_mode = 0;
 	total_data->current_menu_selection = 0;
+	total_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
 }
 
 /*
