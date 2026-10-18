@@ -228,6 +228,7 @@ struct game_data {
 	int current_game_mode;
 	bool fouls;
 	bool drive_over;   /* two-minute drill: defense gained possession */
+	int plays_per_quarter;
 
 	/*game stats data*/
 	bool playoffs; // true if we are currently in the playoff part of the season, use to not add to record
@@ -250,6 +251,7 @@ struct season_data {
 
 	int current_game_mode;
 	bool fouls;
+	int plays_per_quarter;
 };
 
 struct total_data {
