@@ -1,4 +1,4 @@
-#include <math.h>
+plays_remaining_in_quarter#include <math.h>
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>   /* srand, rand, atoi */
@@ -1970,7 +1970,7 @@ void DoPlay(struct game_data* game_data)
 		}
 		case PLAY_TYPE_TIMEOUT:
 		{
-			if (game_data->plays_remaining_in_quarter > (PLAYS_PER_QUARTER - 2))
+			if (game_data->plays_remaining_in_quarter > (game_data->plays_per_quarter - 2))
 				retry = true;
 			else
 				retry = PlayTimeout(game_data);
@@ -2025,7 +2025,7 @@ void EndOfQuarter(struct game_data* game_data)
 		TableWeightEnableAll(player_2_deck);
 		TableWeightEnableAll(shared_deck);
 	}
-	game_data->plays_remaining_in_quarter = PLAYS_PER_QUARTER;
+	game_data->plays_remaining_in_quarter = game_data->plays_per_quarter;
 }
 
 /*
@@ -2084,7 +2084,7 @@ void PlayGame(struct game_data* game_data)
 		{
 			if (game_data->quarter == 1 || game_data->quarter == 3)
 			{
-				if (game_data->plays_remaining_in_quarter == PLAYS_PER_QUARTER) {
+				if (game_data->plays_remaining_in_quarter == game_data->plays_per_quarter) {
 					game_data->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
 					game_data->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
 				}
