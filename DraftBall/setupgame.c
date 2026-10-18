@@ -425,7 +425,7 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	game_data->team_1_score = 0;
 	game_data->team_2_score = 0;
 	game_data->quarter = 1;
-	game_data->plays_remaining_in_quarter = PLAYS_PER_QUARTER;
+	game_data->plays_remaining_in_quarter = total_data->plays_per_quarter;
 	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		game_data->shuffle_deck_needed[i] = 0;
 	}
