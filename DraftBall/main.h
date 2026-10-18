@@ -257,6 +257,7 @@ struct total_data {
 	int game_speed;
 	int current_game_mode;
 	int current_menu_selection;
+	int plays_per_quarter;
 };
 
 struct table_weight {
