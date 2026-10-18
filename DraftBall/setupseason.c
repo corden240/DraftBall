@@ -196,6 +196,7 @@ void SeasonDataConstructor(struct season_data* season_data, struct total_data* t
 {
 	season_data->fouls = total_data->fouls;
 	season_data->current_game_mode = total_data->current_game_mode;
+	season_data->plays_per_quarter = total_data->plays_per_quarter;
 }
 
 
