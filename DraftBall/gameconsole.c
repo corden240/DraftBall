@@ -409,10 +409,18 @@ void ShowGameInfo(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void PrintCard(int card)
+void PrintCard(int card, bool invert)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	if((card & SUIT) == CLUBS)
+	if((card & SUIT) == CLUBS && invert)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREEN);
+	else if ((card & SUIT) == DIAMONDS && invert)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_LIGHTBLUE);
+	else if ((card & SUIT) == HEARTS && invert)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
+	else if ((card & SUIT) == SPADES && invert)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+	else if((card & SUIT) == CLUBS)
 		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_GREEN);
 	else if ((card & SUIT) == DIAMONDS)
 		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_LIGHTBLUE);
@@ -438,7 +446,7 @@ void PrintOCards(struct game_data* game_data)
 			printf("O: ");
 		if (!game_data->o_cards[i])
 			break;
-		PrintCard(game_data->o_cards[i]);
+		PrintCard(game_data->o_cards[i], game_data->o_cards_to_flash[i]);
 		if (game_data->o_cards[i + 1])
 			printf(", ");
 	}
@@ -459,7 +467,7 @@ void PrintDCards(struct game_data* game_data)
 			printf("D: ");
 		if (!game_data->d_cards[i])
 			break;
-		PrintCard(game_data->d_cards[i]);
+		PrintCard(game_data->d_cards[i], game_data->d_cards_to_flash[i]);
 		if (game_data->d_cards[i + 1])
 			printf(", ");
 	}
@@ -493,9 +501,9 @@ ShowCardsInFormation(struct game_data* game_data, int offence_or_defence)
 		//if (game_data->show_O_D_Both == 3)
 		//	Sleep(GAME_SPEED * 5);
 		if (offence_or_defence == 1 && game_data->o_cards_in_position[i])
-			PrintCard(game_data->o_cards_in_position[i]);
+			PrintCard(game_data->o_cards_in_position[i], false);
 		else if (offence_or_defence == 2 && game_data->d_cards_in_position[i])
-			PrintCard(game_data->d_cards_in_position[i]);
+			PrintCard(game_data->d_cards_in_position[i], false);
 		else
 			printf("[]");
 	}
