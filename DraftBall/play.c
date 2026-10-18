@@ -428,8 +428,10 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 		MoveLineOfScrimmage(game_data, yards);
 		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 5);
 
-		if(game_data->pass_play)
+		if(game_data->pass_play){
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yards;
+			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += yards;
+		}
 		if(game_data->run_play)
 			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards;
 
@@ -461,6 +463,8 @@ void PlayPass(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "Pass play ", GAME_SPEED * 10);
 
+	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TARGETS]++;
+	
 	for (int i = 0; i < PASS_PLAY_MAX_CARDS_TO_DRAW; i++)
 	{
 		if (i > 0)
@@ -564,6 +568,7 @@ void PlayPass(struct game_data* game_data)
 	{
 		snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
 		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_COMPLETE_PASSES]++;
+		game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_RECEPTIONS]++;
 	}
 
 	catch_yards = LimitYardsToTouchdown(game_data, catch_yards);
@@ -587,6 +592,7 @@ void PlayPass(struct game_data* game_data)
 		}
 	}
 	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += catch_yards; // if not an interception then add yards
+	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += catch_yards;
 
 	char buf4[256];
 
@@ -636,6 +642,7 @@ void PlayPass(struct game_data* game_data)
 
 	yac_yards = LimitYardsToTouchdown(game_data, yac_yards);
 	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yac_yards; // if not an interception then add yards
+	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += yac_yards;
 
 	MoveLineOfScrimmage(game_data, yac_yards);
 
@@ -1733,8 +1740,10 @@ void AwardTouchdown(struct game_data* game_data)
 		game_data->quarter_scores[1][game_data->quarter - 1] += TOUCHDOWN_POINTS;
 	}
 
-	if (game_data->pass_play)
+	if (game_data->pass_play){
 		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_TOUCHDOWNS]++;
+		game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TOUCHDOWNS]++;
+	}
 
 	if(game_data->run_play)
 		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_TOUCHDOWNS]++;
