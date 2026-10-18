@@ -26,7 +26,7 @@
 #define NUMBER_OF_TEAMS_PER_GAME (2)
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
-#define YARDS_PER_FIRST_DOWN (10)
+#define DEFAULT_PLAYS_PER_QUARTER (15) // TODO: search for PLAYS_PER_QUARTER all caps in all files to check not still used
 #define PLAYS_PER_QUARTER (10)
 #define NUMBER_OF_QUARTERS (4)
 #define NUMBER_OF_QB_NAMES_PER_TEAM (1)
