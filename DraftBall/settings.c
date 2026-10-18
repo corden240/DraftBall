@@ -23,7 +23,7 @@ static void ShowSettingsOptions(int current_menu_selection, bool first_text, str
 	printf("             ");
 	PrintTextWithDelays("Settings");
 
-	for (int i = 0; i < RULES_OPTIONS_NUMBER; i++)
+	for (int i = 0; i < SETTINGS_OPTIONS_NUMBER; i++)
 	{
 		printf("\r\n\r\n                                        ");
 		if (i == 0)
@@ -47,6 +47,22 @@ static void ShowSettingsOptions(int current_menu_selection, bool first_text, str
 			printf("Off");
 		}
 		else if (i == 1)
+		{
+			printf("           ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Quarter Length");
+			else
+				printf("Quarter Length");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("    ");
+			SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("%2d", total_data->plays_per_quarter);
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+		}
+		else if (i == 2)
 		{
 			printf("           ");
 			if (current_menu_selection == i)
