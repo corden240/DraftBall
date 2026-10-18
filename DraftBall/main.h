@@ -205,6 +205,8 @@ struct game_data {
 	bool players_named;
 	int o_cards[CARDS_IN_A_DECK];
 	int d_cards[CARDS_IN_A_DECK];
+	int o_cards_to_flash[CARDS_IN_A_DECK];
+	int d_cards_to_flash[CARDS_IN_A_DECK];
 	bool kickoff_needed;
 	bool extra_point_needed;
 	int play_type;
