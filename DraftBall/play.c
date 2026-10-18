@@ -484,7 +484,9 @@ void PlayPass(struct game_data* game_data)
 
 		if ((game_data->o_cards[i + 1] & VALUE) == ACE && (game_data->o_cards[i + 1] & SUIT) == SPADES)
 		{
+			game_data->o_cards_to_flash[i + 1] = true;
 			ConsoleShowGameScreen(game_data, "Pass intercepted ", GAME_SPEED * 20);
+			game_data->o_cards_to_flash[i + 1] = false;
 			if (game_data->extra_point_needed)
 				return;
 			game_data->interception = true;
@@ -543,7 +545,11 @@ void PlayPass(struct game_data* game_data)
 		{
 			char buf6[256];
 			snprintf(buf6, sizeof(buf6), "Pass to %s incomplete ", GetTargetPlayerName(game_data));
+			game_data->o_cards_to_flash[i + 1] = true;
+			game_data->o_cards_to_flash[0] = true;
 			ConsoleShowGameScreen(game_data, buf6, GAME_SPEED * 20);
+			game_data->o_cards_to_flash[i + 1] = false;
+			game_data->o_cards_to_flash[0] = false;
 			ClearAllCards(game_data);
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if incomplete then pass attempted
 			return;
