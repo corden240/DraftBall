@@ -440,7 +440,9 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 
 		if ((game_data->o_cards[i] & VALUE) == ACE && (game_data->o_cards[i] & SUIT) == SPADES)
 		{
+			game_data->o_cards_to_flash[i] = true;
 			ConsoleShowGameScreen(game_data, "Ball fumbled", GAME_SPEED * 20);
+			game_data->o_cards_to_flash[i] = false;
 			Fumble(game_data);
 			return;
 		}
@@ -509,7 +511,12 @@ void PlayPass(struct game_data* game_data)
 			{
 				char buffer[256];
 				snprintf(buffer, sizeof(buffer), "%s fumbled the ball", GetQBName(game_data));
+				int card = 0;
+				if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES))
+					card = 1;
+				game_data->o_cards_to_flash[card] = true;
 				ConsoleShowGameScreen(game_data, buffer, GAME_SPEED * 20);
+				game_data->o_cards_to_flash[card] = false; // could move this to below the next console show game screen
 				game_data->fumble = true;
 				ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
 				if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
