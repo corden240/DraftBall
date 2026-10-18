@@ -516,7 +516,7 @@ void PlayPass(struct game_data* game_data)
 					card = 1;
 				game_data->o_cards_to_flash[card] = true;
 				ConsoleShowGameScreen(game_data, buffer, GAME_SPEED * 20);
-				game_data->o_cards_to_flash[card] = false; // could move this to below the next console show game screen
+				game_data->o_cards_to_flash[card] = false; // TODO: could move this to below the next console show game screen
 				game_data->fumble = true;
 				ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
 				if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
@@ -630,8 +630,21 @@ void PlayPass(struct game_data* game_data)
 	if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES) || ((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
 	{
 		char buffer[256];
+		int card = 0;
+		if (((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
+			card = 1;
+
+		if(card)
+			game_data->d_cards_to_flash[0] = true;
+		else
+			game_data->o_cards_to_flash[0] = true;
+			
 		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(game_data), ConvertLosToYardLine(game_data));
 		ConsoleShowGameScreen(game_data, buffer, GAME_SPEED * 20);
+		if(card)
+			game_data->d_cards_to_flash[0] = false;
+		else
+			game_data->o_cards_to_flash[0] = false;
 		game_data->fumble = true;
 		ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
 		if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
@@ -699,7 +712,19 @@ void PlayRun(struct game_data* game_data)
 	
 	if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES) || ((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES)) // If O2 OR D2 is the Ace of spades then draw a replacement for that card and then go to Fumble
 	{
+		int card = 0;
+		if (((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES))
+			card = 1;
+
+		if(card)
+			game_data->d_cards_to_flash[1] = true;
+		else
+			game_data->o_cards_to_flash[1] = true;
 		ConsoleShowGameScreen(game_data, "Ball fumbled ", GAME_SPEED * 20);
+		if(card)
+			game_data->d_cards_to_flash[1] = false;
+		else
+			game_data->o_cards_to_flash[1] = false;
 		game_data->fumble = true;
 		ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
 		if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES))
