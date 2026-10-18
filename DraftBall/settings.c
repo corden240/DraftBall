@@ -107,6 +107,14 @@ int SettingsMenuOutcome(struct total_data* total_data) {
 				else
 					current_menu_selection = 0;
 				break;
+			case 75: // left arrow
+				if (current_menu_selection == 1 && total_data->plays_per_quarter > MIN_PLAYS_PER_QUARTER)
+					total_data->plays_per_quarter -= STEPS_PLAYS_PER_QUARTER;
+				break;
+			case 77: // right arrow
+				if (current_menu_selection == 1 && total_data->plays_per_quarter < MAX_PLAYS_PER_QUARTER)
+					total_data->plays_per_quarter += STEPS_PLAYS_PER_QUARTER;
+				break;
 			default:
 				break;
 			}
