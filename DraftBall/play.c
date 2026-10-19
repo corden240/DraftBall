@@ -838,13 +838,13 @@ int GetFormation(struct game_data* game_data)
 int GetMatchupNumber(struct game_data* game_data)
 {
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 4): ", GetTeamName(game_data, game_data->team_in_possession));
+	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 5): ", GetTeamName(game_data, game_data->team_in_possession));
 	ConsoleShowGameScreen(game_data, buf, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 	int pick = atoi(input);
-	if (pick < 1 || pick > 4)
+	if (pick < 1 || pick > 5)
 		pick = 1;
 	return pick;
 }
@@ -900,6 +900,11 @@ void SetRunOrPassPlay(struct game_data* game_data)
 	// 
 	// []  []            []  []
 
+	if(game_data->matchup_number == 5){ // qb scramble is a run
+		game_data->run_play = 1;
+		game_data->pass_play = 0;
+	}
+	
 	if (game_data->formation == 1)
 	{
 		if(game_data->matchup_number == 2 || game_data->matchup_number == 3)
@@ -1008,13 +1013,20 @@ void PlayNormal(struct game_data* game_data)
 
 	if(game_data->pass_play)
 		game_data->current_players_yards_pre_snap = game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS];
-	else if (game_data->run_play)
+	else if (game_data->run_play && game_data->matchup_number != 5)
 		game_data->current_players_yards_pre_snap = game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS];
-	
+	else if (game_data->run_play)
+		game_data->current_players_yards_pre_snap = game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS];
+
 	// store 2 head to head cards
 	int O1 = game_data->o_cards_in_position[game_data->matchup_number - 1];
 	int D1 = game_data->d_cards_in_position[game_data->matchup_number - 1];
 
+	if (game_data->matchup_number == 5){
+		O1 = (FIVE | SPADES | BLACK);
+		D1 = (FIVE | SPADES | BLACK);
+	}
+	
 	ClearAllCards(game_data);
 
 	game_data->o_cards[0] = O1;
