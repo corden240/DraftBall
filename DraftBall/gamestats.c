@@ -289,6 +289,16 @@ void GameStatsRow6(struct game_data* game_data)
 */
 void GameStatsRB(struct game_data* game_data, int left_buffer, int team_selected, int game_stats_name_widths[NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM + NUMBER_OF_WR_NAMES_PER_TEAM + 1])
 {
+	// Print qb runnning stats first
+	printf("%*c", (left_buffer - game_stats_name_widths[team_selected][1] - 1), ' ');
+	printf("%s      %2d   %2d   %2d  %2d   %2d                     \r\n",
+	team_selected ? game_data->team_2_qb_names[0] : game_data->team_1_qb_names[0],
+	game_data->quarterback_stats[team_selected][QB_RUNNING_CARRIES],
+	game_data->quarterback_stats[team_selected][QB_RUNNING_YARDS],
+	game_data->quarterback_stats[team_selected][QB_RUNNING_AVERAGE],
+	game_data->quarterback_stats[team_selected][QB_RUNNING_TOUCHDOWNS],
+	game_data->quarterback_stats[team_selected][QB_RUNNING_LONGEST_PLAY]);
+	
 	for (int i = 0; i < NUMBER_OF_RB_NAMES_PER_TEAM; i++)
 	{
 		printf("%*c", (left_buffer - game_stats_name_widths[team_selected][2 + i] - 1), ' ');
