@@ -432,9 +432,12 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yards;
 			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += yards;
 		}
-		if(game_data->run_play)
+		
+		if(game_data->run_play && game_data->matchup_number != 5)
 			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards;
-
+		else if (game_data->run_play)
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards;
+		
 		if (TouchdownScored(game_data))
 			return;
 
@@ -706,6 +709,7 @@ void PlayPass(struct game_data* game_data)
 void PlayRun(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "Run play ", GAME_SPEED * 10);
+	//TODO: alternative text, "QB Scramble"
 
 	DrawCards(game_data, game_data->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
 	DrawCards(game_data, game_data->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
@@ -735,9 +739,9 @@ void PlayRun(struct game_data* game_data)
 		}
 		else if ((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES)
 		{
-		game_data->d_cards[1] = 0;
-		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
-		DrawCards(game_data, game_data->team_not_in_possession, 1, true);
+			game_data->d_cards[1] = 0;
+			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 		}
 	}
 
@@ -758,9 +762,22 @@ void PlayRun(struct game_data* game_data)
 		else
 			yards_gained = (difference + 1) / 2; // rounding up
 	}
-
-	game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
-	game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
+	
+	if(game_data->matchup_number == 5)
+	{
+		if(yards_gained < 0)
+			yards_gained = 0;
+		// TODO: announce qb threw the ball away before being sacked
+		// here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
+	}
+	else
+	{
+		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
+		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
+	}
+	
 	MoveLineOfScrimmage(game_data, yards_gained);
 	
 	if (game_data->fumble)
