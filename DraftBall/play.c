@@ -1821,9 +1821,11 @@ void AwardTouchdown(struct game_data* game_data)
 		game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TOUCHDOWNS]++;
 	}
 
-	if(game_data->run_play)
+	if(game_data->run_play && game_data->matchup_number != 5)
 		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_TOUCHDOWNS]++;
-
+	else if (game_data->run_play)
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_TOUCHDOWNS]++;
+		
 	game_data->extra_point_needed = true;
 	
 	char buf[256];
@@ -1930,12 +1932,17 @@ void ResolveEndOfPlay(struct game_data* game_data)
 			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY] 
 				= (game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
 			- game_data->current_players_yards_pre_snap);
-	else if (game_data->run_play)
+	else if (game_data->run_play && game_data->matchup_number != 5)
 		if((game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
 			- game_data->current_players_yards_pre_snap) > game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY])
 			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY] 
 				= (game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
 			- game_data->current_players_yards_pre_snap);
+	else if (game_data->run_play)
+		if((game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] 
+			- game_data->current_players_yards_pre_snap) > game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY])
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY] 
+				= (game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] - game_data->current_players_yards_pre_snap);
 	
 	game_data->fumble = false;
 	game_data->interception = false;
