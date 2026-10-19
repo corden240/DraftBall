@@ -1275,9 +1275,15 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 	// []         []     []  []
 	// 
 	// []  []            []  []
+
+	if(game_data->matchup_number == 5)
+		return game_data->
 	
 	if (game_data->team_in_possession == 1)
 	{
+		if(game_data->matchup_number == 5)
+			return game_data->team_1_qb_names[0];
+			
 		if (game_data->matchup_number == 1)
 			return game_data->team_1_wr_names[0];
 		else if ((game_data->formation == 1 && game_data->matchup_number == 4) || (game_data->formation == 2 && game_data->matchup_number == 3) || (game_data->formation == 3 && game_data->matchup_number == 2))
@@ -1293,6 +1299,9 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 	}
 	else
 	{
+		if(game_data->matchup_number == 5)
+			return game_data->team_2_qb_names[0];
+		
 		if (game_data->matchup_number == 1)
 			return game_data->team_2_wr_names[0];
 		else if ((game_data->formation == 1 && game_data->matchup_number == 4) || (game_data->formation == 2 && game_data->matchup_number == 3) || (game_data->formation == 3 && game_data->matchup_number == 2))
