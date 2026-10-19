@@ -76,7 +76,7 @@ void FillMissingGameData(struct game_data* game_data)
 
 			/* RB_AVERAGE is an int field, so this remains a whole-number average. */
 			game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_AVERAGE] =
-				game_data->quarterback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_YARDS] / carries;
+				game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_YARDS] / carries;
 		}
 	}
 
@@ -96,6 +96,20 @@ void FillMissingGameData(struct game_data* game_data)
 			game_data->receiver_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][WR_AVERAGE] =
 				game_data->receiver_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][WR_YARDS] / receptions;
 		}
+	}
+
+	for (int team = 0; team < NUMBER_OF_TEAMS_PER_GAME; team++)
+	{
+		int carries = game_data->quarterback_stats[team][QB_RUNNING_CARRIES];
+
+		if (carries == 0)
+		{
+			game_data->quarterback_stats[team][QB_RUNNING_AVERAGE] = 0;	
+			continue;
+		}
+		/* QB_RUNNING_AVERAGE is an int field, so this remains a whole-number average. */
+		game_data->quarterback_stats[team][QB_RUNNING_AVERAGE] =
+		game_data->quarterback_stats[team][QB_RUNNING_YARDS] / carries;
 	}
 }
 
