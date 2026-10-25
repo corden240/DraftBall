@@ -33,7 +33,7 @@ static void ShowRulesGeneral()
 
 	printf("\r\n                            ");
 	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "Games consist of 4 quarters with %d plays, timeouts add 1 play to the clock", PLAYS_PER_QUARTER);
+	snprintf(buffer, sizeof(buffer), "Games consist of 4 quarters with %d plays, timeouts add 1 play to the clock", DEFAULT_PLAYS_PER_QUARTER);
 	PrintTextWithDelays(buffer);
 
 	printf("\r\n\r\n                            ");

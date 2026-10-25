@@ -80,6 +80,8 @@
 
 #define PASS_PLAY_MAX_CARDS_TO_DRAW (10)
 
+#define YARDS_PER_FIRST_DOWN (10)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
 

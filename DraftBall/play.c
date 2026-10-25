@@ -1,4 +1,4 @@
-plays_remaining_in_quarter#include <math.h>
+#include <math.h>
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>   /* srand, rand, atoi */
@@ -1276,9 +1276,6 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 	// 
 	// []  []            []  []
 
-	if(game_data->matchup_number == 5)
-		return game_data->
-	
 	if (game_data->team_in_possession == 1)
 	{
 		if(game_data->matchup_number == 5)
