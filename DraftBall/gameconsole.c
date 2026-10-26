@@ -396,10 +396,10 @@ void ShowGameInfo(struct game_data* game_data)
 	printf("                                                  ");
 
 	switch (game_data->down) {
-	case 1: { printf("%dst & %d", game_data->down, distance); break; }
-	case 2: { printf("%dnd & %d", game_data->down, distance); break; }
-	case 3: { printf("%drd & %d", game_data->down, distance); break; }
-	case 4: { printf("%dth & %d", game_data->down, distance); break; }
+	case 1: { printf("%dst & %d ", game_data->down, distance); break; }
+	case 2: { printf("%dnd & %d ", game_data->down, distance); break; }
+	case 3: { printf("%drd & %d ", game_data->down, distance); break; }
+	case 4: { printf("%dth & %d ", game_data->down, distance); break; }
 	}
 }
 

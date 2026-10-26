@@ -66,7 +66,7 @@ void FillMissingGameData(struct game_data* game_data)
 	{
 		for (int i = 0; i < NUMBER_OF_RB_NAMES_PER_TEAM; i++)
 		{
-			int carries = game_data->runningback_stats[team][RB_CARRIES];
+			int carries = game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_CARRIES];
 
 			if (carries == 0)
 			{
@@ -84,17 +84,17 @@ void FillMissingGameData(struct game_data* game_data)
 	{
 		for (int i = 0; i < NUMBER_OF_WR_NAMES_PER_TEAM; i++)
 		{
-			int receptions = game_data->receiver_stats[team][WR_RECEPTIONS];
+			int receptions = game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_RECEPTIONS];
 
 			if (receptions == 0)
 			{
-				game_data->receiver_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][WR_AVERAGE] = 0;
+				game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_AVERAGE] = 0;
 				continue;
 			}
 
 			/* WR_AVERAGE is an int field, so this remains a whole-number average. */
-			game_data->receiver_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][WR_AVERAGE] =
-				game_data->receiver_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][WR_YARDS] / receptions;
+			game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_AVERAGE] =
+				game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_YARDS] / receptions;
 		}
 	}
 
@@ -216,14 +216,12 @@ void GameStatsRow3(struct game_data* game_data, int left_buffer)
 				game_data->team_records[1][WINS],
 				game_data->team_records[1][LOSSES],
 				game_data->team_records[1][DRAWS]);
-	}
-
-	if (game_data->current_game_mode == 1) {
+		
 		printf("%*c", (left_buffer - findLen(team_1_record) - 2), ' ');
 		printf("%s", team_1_record);
 	}
 	else
-		printf("%*c", (left_buffer + 3), ' ');
+		printf("%*c", (left_buffer - 2), ' ');
 
 	printf("      T2  %2d  %2d  %2d  %2d    ",
 		game_data->quarter_scores[1][0],
@@ -362,7 +360,7 @@ void ShowGameStats(int selected, struct game_data* game_data)
 
 	int team_selected = selected;
 	if (team_selected == 2)
-		team_selected = 1;
+		team_selected = 0;
 
 	int left_buffer = 45, right_buffer = 20;
 	int game_stats_name_widths[NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM  + NUMBER_OF_WR_NAMES_PER_TEAM + 1];

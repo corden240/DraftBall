@@ -23,6 +23,7 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	game_data->team_2_score = 0;
 	game_data->quarter = NUMBER_OF_QUARTERS;
 	game_data->plays_remaining_in_quarter = TWO_MIN_DRIVE_PLAYS;
+	game_data->plays_per_quarter = total_data->plays_per_quarter;
 	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		game_data->shuffle_deck_needed[i] = 0;
 	}
@@ -111,6 +112,12 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 		for (int j = 0; j < NUMBER_OF_RECEIVER_STATS; j++) {
 			game_data->receiver_stats[i][j] = 0;
 		}
+	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->o_cards_to_flash[i] = false;
+	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->d_cards_to_flash[i] = false;
 	}
 }
 

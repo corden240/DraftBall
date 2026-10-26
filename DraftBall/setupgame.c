@@ -426,6 +426,7 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	game_data->team_2_score = 0;
 	game_data->quarter = 1;
 	game_data->plays_remaining_in_quarter = total_data->plays_per_quarter;
+	game_data->plays_per_quarter = total_data->plays_per_quarter;
 	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		game_data->shuffle_deck_needed[i] = 0;
 	}
@@ -512,6 +513,14 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 			game_data->receiver_stats[i][j] = 0;
 		}
 	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->o_cards_to_flash[i] = false;
+	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->d_cards_to_flash[i] = false;
+	}
+
+	game_data->drive_over = false;
 }
 
 /*

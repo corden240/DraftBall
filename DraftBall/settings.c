@@ -21,7 +21,11 @@ static void ShowSettingsOptions(int current_menu_selection, bool first_text, str
 
 	printf("\r\n\r\n                                        ");
 	printf("             ");
-	PrintTextWithDelays("Settings");
+
+	if (first_text)
+		PrintTextWithDelays("Settings");
+	else
+		printf("Settings");
 
 	for (int i = 0; i < SETTINGS_OPTIONS_NUMBER; i++)
 	{
@@ -48,18 +52,49 @@ static void ShowSettingsOptions(int current_menu_selection, bool first_text, str
 		}
 		else if (i == 1)
 		{
-			printf("           ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Quarter Length");
+				PrintTextWithDelays("Plays per quarter");
 			else
-				printf("Quarter Length");
+				printf("Plays per quarter");
 
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf("    ");
-			SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
-			printf("%2d", total_data->plays_per_quarter);
+			printf("     ");
+
+			if(total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("5");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + STEPS_PLAYS_PER_QUARTER)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("10");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 2))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("15");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 3))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("20");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + ((5) * 4))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("25");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (total_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 5))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("30");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 		}
 		else if (i == 2)
@@ -110,18 +145,24 @@ int SettingsMenuOutcome(struct total_data* total_data) {
 			case 75: // left arrow
 				if (current_menu_selection == 1 && total_data->plays_per_quarter > MIN_PLAYS_PER_QUARTER)
 					total_data->plays_per_quarter -= STEPS_PLAYS_PER_QUARTER;
+				else if (current_menu_selection == 0 && total_data->fouls == false)
+					total_data->fouls = true;
 				break;
 			case 77: // right arrow
 				if (current_menu_selection == 1 && total_data->plays_per_quarter < MAX_PLAYS_PER_QUARTER)
 					total_data->plays_per_quarter += STEPS_PLAYS_PER_QUARTER;
+				else if (current_menu_selection == 0 && total_data->fouls == true)
+					total_data->fouls = false;
 				break;
 			default:
 				break;
 			}
 		}
 		else if (ch == 13) {// Enter key
-			game_chosen = true;
-			return current_menu_selection;
+			if (current_menu_selection == SETTINGS_OPTIONS_NUMBER) {
+				game_chosen = true;
+				return current_menu_selection;
+			}
 		}
 		else
 			;
