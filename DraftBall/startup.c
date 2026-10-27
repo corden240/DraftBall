@@ -541,9 +541,9 @@ void MenuScreen(struct total_data* total_data, bool first_text)
 * INPUTS:      none
 * OUTPUTS:     none
 */
-void Startup(struct menu_choices* menu) {
+void Startup(struct total_Data* total_data) {
 	
 	LoadingScreen();
 	TransitionToMenuScreen();
-	MenuScreen(menu, true);
+	MenuScreen(total_data, true);
 }

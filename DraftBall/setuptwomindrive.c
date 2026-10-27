@@ -129,7 +129,7 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 */
 void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Would you like to pick team colours? y/n ", 0);
+	ConsoleShowGameScreen(game_data, "Would you like to pick team colours? y/n ", true, 0);
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 
@@ -138,7 +138,7 @@ void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 		bool team_1_colour_done = false;
 		bool team_2_colour_done = false;
 		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 1 (1 - 8): ", 0);
+			ConsoleShowGameScreen(game_data, "Enter colour for Team 1 (1-8): ", true, 0);
 			char input1[16];
 			fgets(input1, sizeof(input1), stdin);
 			int team_1_colour = atoi(input1);
@@ -148,7 +148,7 @@ void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 				team_1_colour = 8;
 			game_data->team_1_colour = team_1_colour;
 
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", 0);
+			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
 			char input2[16];
 			fgets(input2, sizeof(input2), stdin);
 			if (input2[0] == 'Y' || input2[0] == 'y')
@@ -156,7 +156,7 @@ void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 		} while (!team_1_colour_done);
 
 		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 2 (1 - 8): ", 0);
+			ConsoleShowGameScreen(game_data, "Enter colour for Team 2 (1-8): ", true, 0);
 			char input3[16];
 			fgets(input3, sizeof(input3), stdin);
 			int team_2_colour = atoi(input3);
@@ -166,7 +166,7 @@ void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 				team_2_colour = 8;
 			game_data->team_2_colour = team_2_colour;
 
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", 0);
+			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
 			char input4[16];
 			fgets(input4, sizeof(input4), stdin);
 			if (input4[0] == 'Y' || input4[0] == 'y')
@@ -185,7 +185,7 @@ void SetTeamColoursTwoMinDrive(struct game_data* game_data)
 */
 void SetTeamNamesTwoMinDrive(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Would you like to name your teams? y/n ", 0);
+	ConsoleShowGameScreen(game_data, "Would you like to name your teams? y/n ", true, 0);
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 
@@ -194,13 +194,13 @@ void SetTeamNamesTwoMinDrive(struct game_data* game_data)
 		strcpy(game_data->team_1_name, " ");
 		strcpy(game_data->team_2_name, " ");
 
-		ConsoleShowGameScreen(game_data, "Enter name for Team 1: ", 0);
+		ConsoleShowGameScreen(game_data, "Enter name for Team 1: ", true, 0);
 		fgets(game_data->team_1_name, sizeof(game_data->team_1_name), stdin);
 		game_data->team_1_name[strcspn(game_data->team_1_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, "Enter name for Team 2: ", 0);
+		ConsoleShowGameScreen(game_data, "Enter name for Team 2: ", true, 0);
 		fgets(game_data->team_2_name, sizeof(game_data->team_2_name), stdin);
 		game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, 0, 0);
+		ConsoleShowGameScreen(game_data, 0, true, 0);
 	}
 	else
 		game_data->players_named = false;
@@ -216,7 +216,7 @@ void SetTeamDeficit(struct game_data* game_data)
 {
 	bool score_set = false;
 	do {
-		ConsoleShowGameScreen(game_data, "Is the deficit 2/6/7: ", 0);
+		ConsoleShowGameScreen(game_data, "Is the deficit 2/6/7: ", true, 0);
 		char input[16];
 		fgets(input, sizeof(input), stdin);
 		int choice = atoi(input);
@@ -227,7 +227,7 @@ void SetTeamDeficit(struct game_data* game_data)
 			score_set = true;
 		}
 		else
-			ConsoleShowGameScreen(game_data, "Invalid response ", 0);
+			ConsoleShowGameScreen(game_data, "Invalid response ", true, 0);
 	} while (!score_set);
 }
 
@@ -241,7 +241,7 @@ void SetTeamStartLine(struct game_data* game_data)
 {
 	bool yards_set = false;
 	do {
-		ConsoleShowGameScreen(game_data, "How many yards to the end zone? ", 0);
+		ConsoleShowGameScreen(game_data, "How many yards to the end zone? ", true, 0);
 		char input[16];
 		fgets(input, sizeof(input), stdin);
 		int choice = atoi(input);
@@ -253,7 +253,7 @@ void SetTeamStartLine(struct game_data* game_data)
 			yards_set = true;
 		}
 		else
-			ConsoleShowGameScreen(game_data, "Invalid response, must be 100 > yards > 0 ", 0);
+			ConsoleShowGameScreen(game_data, "Invalid response, must be 100 > yards > 0 ", true, 0);
 	} while (!yards_set);
 }
 

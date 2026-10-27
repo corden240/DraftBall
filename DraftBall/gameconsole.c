@@ -586,10 +586,10 @@ void ShowCards(struct game_data* game_data)
 /*
 * NAME:        ShowText
 * DESCRIPTION: prints text given to function
-* INPUTS:      game_data, text to display
+* INPUTS:      game_data, text to display, bool text_delay
 * OUTPUTS:     none
 */
-void ShowText(struct game_data* game_data, char txt[1000])
+void ShowText(struct game_data* game_data, char txt[1000], bool text_delay)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -598,17 +598,18 @@ void ShowText(struct game_data* game_data, char txt[1000])
 	for (int i = 0; i < MAX_STRING_lENGTH && txt[i] != '\0'; i++)
 	{
 		printf("%c", txt[i]);
-		Sleep(GAME_SPEED / 5);
+		if(text_delay)
+			Sleep(GAME_SPEED / 5);
 	}
 }
 
 /*
 * NAME:        ConsoleShowGameScreen
 * DESCRIPTION: updates the whole screen with current data
-* INPUTS:      game_data, text to display, pause time, wait for keypress
+* INPUTS:      game_data, text to display, pause time, text_delay, wait for keypress
 * OUTPUTS:     none
 */
-void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], int pause) // if called this asking a question to the player, make sure to called getch straight after
+void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], bool text_delay, int pause) // if called this asking a question to the player, make sure to called getch straight after
 {
 	ResetScreen();     // go to top left of screen and clear it
 	ShowTopInfo(game_data);  // draw score at top of screen with play clock
@@ -616,7 +617,7 @@ void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], int paus
 	ShowGameInfo(game_data); // then write down and distance numbers
 	ShowCards(game_data);    // card drawn info?
 	if(txt)
-		ShowText(game_data, txt);// then draw text sent to function
+		ShowText(game_data, txt, text_delay);// then draw text sent to function
 	if(pause)
 		Sleep(pause);      // pause for a bit if needed)
 }

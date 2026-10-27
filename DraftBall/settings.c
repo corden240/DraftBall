@@ -159,7 +159,7 @@ int SettingsMenuOutcome(struct total_data* total_data) {
 			}
 		}
 		else if (ch == 13) {// Enter key
-			if (current_menu_selection == SETTINGS_OPTIONS_NUMBER) {
+			if (current_menu_selection == (SETTINGS_OPTIONS_NUMBER - 1)) {
 				game_chosen = true;
 				return current_menu_selection;
 			}
@@ -168,6 +168,7 @@ int SettingsMenuOutcome(struct total_data* total_data) {
 			;
 		// any other key: ignored, loop waits for another press
 	} while (!game_chosen);
+	return -1;
 }
 
 /*

@@ -469,6 +469,7 @@ int HowToPlayMenuOutcome() {
 			;
 		// any other key: ignored, loop waits for another press
 	} while (!game_chosen);
+	return -1;
 }
 
 /*

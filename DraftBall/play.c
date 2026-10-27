@@ -174,7 +174,7 @@ int DrawOneCard(struct game_data* game_data, struct table_weight* deck)
 	if (TableWeightTotalWeight(deck) <= 0)
 	{
 		TableWeightEnableAll(deck);
-		ConsoleShowGameScreen(game_data, "Deck empty, reshuffling...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Deck empty, reshuffling...", true, GAME_SPEED * 20);
 	}
 
 	int card = TableWeightDecision(deck, false);
@@ -212,7 +212,7 @@ void DrawCards(struct game_data* game_data, int team_to_draw, int num, bool shar
 		else
 			hand[start + i] = DrawOneCard(game_data, player_2_deck);
 
-		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 8); // show cards drawn
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
 	}
 }
 
@@ -228,8 +228,8 @@ void RedrawCards(struct game_data* game_data, int team_to_draw, int num)
 		return;
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Replace the low or high cards (1 - 2): ");
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 2);
+	snprintf(buf, sizeof(buf), "Replace the low or high cards (1-2): ");
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int hilo = 0;
 	char input[16];
@@ -277,8 +277,11 @@ void RedrawCards(struct game_data* game_data, int team_to_draw, int num)
 			for (int k = 0; k < num_to_replace; k++)
 			{
 				int idx = indices[k];
+				game_data->o_cards_to_flash[idx] = true;
+				ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8);
 				game_data->o_cards[idx] = DrawOneCard(game_data, shared_deck);
-				ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 8); // show cards drawn
+				ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
+				ClearFlashCards(game_data);
 			}
 		}
 		else /* hilo == 2 */
@@ -287,8 +290,11 @@ void RedrawCards(struct game_data* game_data, int team_to_draw, int num)
 			for (int k = 0; k < num_to_replace; k++)
 			{
 				int idx = indices[hand_size - 1 - k];
+				game_data->o_cards_to_flash[idx] = true;
+				ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8);
 				game_data->o_cards[idx] = DrawOneCard(game_data, shared_deck);
-				ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 8); // show cards drawn
+				ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
+				ClearFlashCards(game_data);
 			}
 		}
 	}
@@ -352,19 +358,19 @@ void Fumble(struct game_data* game_data)
 	int save_team_started_with_ball = game_data->team_in_possession;
 	do {
 		ClearAllCards(game_data);
-		ConsoleShowGameScreen(game_data, "Drawing fumble cards ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Drawing fumble cards ", true, GAME_SPEED * 20);
 		DrawCards(game_data, game_data->team_in_possession, 1, true);
 		DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 
 		if ((game_data->o_cards[0] & SUIT) == (game_data->d_cards[0] & SUIT))
 		{
-			ConsoleShowGameScreen(game_data, "Same suit, ball moves, new cards needed ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Same suit, ball moves, new cards needed ", true, GAME_SPEED * 20);
 			MoveLineOfScrimmage(game_data, TotalYardsOffence(game_data) - TotalYardsDefence(game_data));
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 20);
 		}
 		else if ((game_data->o_cards[0] & VALUE) == (game_data->d_cards[0] & VALUE))
 		{
-			ConsoleShowGameScreen(game_data, "Draw, new cards needed ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Draw, new cards needed ", true, GAME_SPEED * 20);
 		}
 		else
 		{
@@ -377,7 +383,7 @@ void Fumble(struct game_data* game_data)
 
 			char buf4[256];
 			snprintf(buf4, sizeof(buf4), "The %s recovered the ball at the %d yard line ", GetTeamName(game_data, game_data->team_in_possession), ConvertLosToYardLine(game_data));
-			ConsoleShowGameScreen(game_data, buf4, GAME_SPEED * 30);
+			ConsoleShowGameScreen(game_data, buf4, true, GAME_SPEED * 30);
 			fumble_resolved = true;
 		}
 	} while (!fumble_resolved);
@@ -385,7 +391,7 @@ void Fumble(struct game_data* game_data)
 	if (save_team_started_with_ball != game_data->team_in_possession && SafetyScored(game_data))
 	{
 		// team recovers ball in their own end zone after opponents fumble
-		ConsoleShowGameScreen(game_data, "Ball recovered in own end zone, touchback issued ", 0);
+		ConsoleShowGameScreen(game_data, "Ball recovered in own end zone, touchback issued ", true, 0);
 		ResetLineOfScrimmage(game_data);
 		ResetLineOfFirstDown(game_data);
 		game_data->down = 0;
@@ -400,7 +406,7 @@ void Fumble(struct game_data* game_data)
 */
 void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 {
-	ConsoleShowGameScreen(game_data, "Open field run!", GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, "Open field run!", true, GAME_SPEED * 20);
 
 	int ofr_o_value = (offence_1 & VALUE) - 10;
 
@@ -422,7 +428,7 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Drawing %d cards...", cards_to_draw);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
 	int yards = 0;
 
@@ -440,12 +446,12 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 			game_data->o_cards_to_flash[i] = true;
 			char buf[256];
 			snprintf(buf, sizeof(buf), "Face Card! %d extra cards", ofr_o_value);
-			ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
 		}
 		yards = LimitYardsToTouchdown(game_data, (game_data->o_cards[i] & VALUE));
 		MoveLineOfScrimmage(game_data, yards);
-		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 5);
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 5);
 
 		if(game_data->pass_play){
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yards;
@@ -463,7 +469,7 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 		if ((game_data->o_cards[i] & VALUE) == ACE && (game_data->o_cards[i] & SUIT) == SPADES)
 		{
 			game_data->o_cards_to_flash[i] = true;
-			ConsoleShowGameScreen(game_data, "Ball fumbled", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Ball fumbled", true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
 			Fumble(game_data);
 			return;
@@ -472,7 +478,7 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "OFR yards = %d  ", TotalYardsOffence(game_data));
-	ConsoleShowGameScreen(game_data, buf2, GAME_SPEED * 30);
+	ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 30);
 
 	return;
 }
@@ -485,7 +491,7 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 */
 void PlayPass(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Pass play ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, "Pass play ", true, GAME_SPEED * 10);
 
 	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TARGETS]++;
 	
@@ -495,7 +501,7 @@ void PlayPass(struct game_data* game_data)
 		{
 			char buf[256];
 			snprintf(buf, sizeof(buf), "Sum = %d, draw a card? y/n ", TotalYardsOffence(game_data));
-			ConsoleShowGameScreen(game_data, buf, 0);
+			ConsoleShowGameScreen(game_data, buf, true, 0);
 
 			char input[16];
 			fgets(input, sizeof(input), stdin);
@@ -509,14 +515,14 @@ void PlayPass(struct game_data* game_data)
 		if ((game_data->o_cards[i + 1] & VALUE) == ACE && (game_data->o_cards[i + 1] & SUIT) == SPADES)
 		{
 			game_data->o_cards_to_flash[i + 1] = true;
-			ConsoleShowGameScreen(game_data, "Pass intercepted ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Pass intercepted ", true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
 			if (game_data->extra_point_needed) // if interception was during the extra point the play ends
 				return;
 			game_data->interception = true;
-			ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
 			game_data->o_cards[i + 1] = 0;
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_in_possession, 1, true);
 			break;
 		}
@@ -528,7 +534,7 @@ void PlayPass(struct game_data* game_data)
 			
 			game_data->o_cards_to_flash[0] = true;
 			game_data->o_cards_to_flash[i + 1] = true;
-			ConsoleShowGameScreen(game_data, "QB sacked ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "QB sacked ", true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
 			ClearAllCards(game_data);
 			DrawCards(game_data, game_data->team_in_possession, QB_SACK_CARDS_TO_DRAW, true); // draw for sack loss yardage
@@ -541,16 +547,16 @@ void PlayPass(struct game_data* game_data)
 				if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES))
 					card = 1;
 				game_data->o_cards_to_flash[card] = true;
-				ConsoleShowGameScreen(game_data, buffer, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, buffer, true, GAME_SPEED * 20);
 				ClearFlashCards(game_data); // TODO: could move this to below the next console show game screen
 				game_data->fumble = true;
-				ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
 				if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
 				{
 					game_data->o_cards[0] = game_data->o_cards[1];
 				}
 				game_data->o_cards[1] = 0;
-				ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+				ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 				DrawCards(game_data, game_data->team_in_possession, 1, true);
 			}
 
@@ -565,7 +571,7 @@ void PlayPass(struct game_data* game_data)
 
 			char buf2[256];
 			snprintf(buf2, sizeof(buf2), "%d yards lost ", -sack_yards);
-			ConsoleShowGameScreen(game_data, buf2, 0);
+			ConsoleShowGameScreen(game_data, buf2, true, 0);
 
 			MoveLineOfScrimmage(game_data, sack_yards);
 
@@ -580,7 +586,7 @@ void PlayPass(struct game_data* game_data)
 			snprintf(buf6, sizeof(buf6), "Pass to %s incomplete ", GetTargetPlayerName(game_data));
 			game_data->o_cards_to_flash[i + 1] = true;
 			game_data->o_cards_to_flash[0] = true;
-			ConsoleShowGameScreen(game_data, buf6, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, buf6, true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
 			ClearAllCards(game_data);
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if incomplete then pass attempted
@@ -611,7 +617,7 @@ void PlayPass(struct game_data* game_data)
 
 	catch_yards = LimitYardsToTouchdown(game_data, catch_yards);
 
-	ConsoleShowGameScreen(game_data, buf3, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, buf3, true, GAME_SPEED * 10);
 
 	MoveLineOfScrimmage(game_data, catch_yards);
 
@@ -622,7 +628,7 @@ void PlayPass(struct game_data* game_data)
 		if (SafetyScored(game_data))
 		{
 			// if intercepted in own end zone, force a touchback as otherwise they could run and fumble which causes all sorts of issues
-			ConsoleShowGameScreen(game_data, "Ball caught in own end zone, touchback issued ", 0);
+			ConsoleShowGameScreen(game_data, "Ball caught in own end zone, touchback issued ", true, 0);
 			ResetLineOfScrimmage(game_data);
 			ResetLineOfFirstDown(game_data);
 			game_data->down = 0;
@@ -640,14 +646,14 @@ void PlayPass(struct game_data* game_data)
 		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTeamName(game_data, game_data->team_in_possession), ConvertLosToYardLine(game_data));
 	else
 		snprintf(buf4, sizeof(buf4), "%s caught the ball at the %d", GetTargetPlayerName(game_data), ConvertLosToYardLine(game_data));
-	ConsoleShowGameScreen(game_data, buf4, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf4, true, GAME_SPEED * 20);
 
 	ClearAllCards(game_data);
 
 	if (TouchdownScored(game_data))
 		return;
 
-	ConsoleShowGameScreen(game_data, "YAC draw", GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, "YAC draw", true, GAME_SPEED * 20);
 
 	DrawCards(game_data, game_data->team_in_possession, 1, true);
 	DrawCards(game_data, game_data->team_not_in_possession, 1, true);
@@ -665,20 +671,20 @@ void PlayPass(struct game_data* game_data)
 			game_data->o_cards_to_flash[0] = true;
 			
 		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(game_data), ConvertLosToYardLine(game_data));
-		ConsoleShowGameScreen(game_data, buffer, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, buffer, true, GAME_SPEED * 20);
 		ClearFlashCards(game_data);
 		game_data->fumble = true;
-		ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
 		if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
 		{
 			game_data->o_cards[0] = 0;
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_in_possession, 1, true);
 		}
 		else
 		{
 			game_data->d_cards[0] = 0;
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 		}
 	}
@@ -697,7 +703,7 @@ void PlayPass(struct game_data* game_data)
 	if (TouchdownScored(game_data))
 	{
 		if (game_data->fumble)
-			ConsoleShowGameScreen(game_data, "End zone reached before fumble! ", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "End zone reached before fumble! ", true, GAME_SPEED * 20);
 		return;
 	}
 	
@@ -717,7 +723,7 @@ void PlayPass(struct game_data* game_data)
 	{
 		char buf5[256];
 		snprintf(buf5, sizeof(buf5), "%d yards after catch ", yac_yards);
-		ConsoleShowGameScreen(game_data, buf5, GAME_SPEED * 10);
+		ConsoleShowGameScreen(game_data, buf5, true, GAME_SPEED * 10);
 	}
 }
 
@@ -729,7 +735,7 @@ void PlayPass(struct game_data* game_data)
 */
 void PlayRun(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Run play ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, "Run play ", true, GAME_SPEED * 10);
 	//TODO: alternative text, "QB Scramble"
 
 	DrawCards(game_data, game_data->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
@@ -745,20 +751,20 @@ void PlayRun(struct game_data* game_data)
 			game_data->d_cards_to_flash[1] = true;
 		else
 			game_data->o_cards_to_flash[1] = true;
-		ConsoleShowGameScreen(game_data, "Ball fumbled ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Ball fumbled ", true, GAME_SPEED * 20);
 		ClearFlashCards(game_data);
 		game_data->fumble = true;
-		ConsoleShowGameScreen(game_data, "Replacing card... ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
 		if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES))
 		{
 			game_data->o_cards[1] = 0;
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_in_possession, 1, true);
 		}
 		else if ((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES)
 		{
 			game_data->d_cards[1] = 0;
-			ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 		}
 	}
@@ -805,14 +811,14 @@ void PlayRun(struct game_data* game_data)
 
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%d yards gained before %s fumbled", yards_gained, GetTargetPlayerName(game_data));
-		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 30);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 30);
 		Fumble(game_data);
 		return;
 	}
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s gained %d yards ", GetTargetPlayerName(game_data), yards_gained);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 30);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 30);
 
 	if (TouchdownScored(game_data))
 		return;
@@ -860,7 +866,7 @@ int GetFormation(struct game_data* game_data)
 	// []         []     []  []
 	// 
 	// []  []            []  []
-	ConsoleShowGameScreen(game_data, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1 - 3): ", GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1-3): ", true, GAME_SPEED * 10);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -879,8 +885,8 @@ int GetFormation(struct game_data* game_data)
 int GetMatchupNumber(struct game_data* game_data)
 {
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1 - 5): ", GetTeamName(game_data, game_data->team_in_possession));
-	ConsoleShowGameScreen(game_data, buf, 0);
+	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1-5): ", GetTeamName(game_data, game_data->team_in_possession));
+	ConsoleShowGameScreen(game_data, buf, true, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -905,8 +911,11 @@ void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 		do {
 			retry = false;
 			char buf[256];
-			snprintf(buf, sizeof(buf), "What position (1 - %d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
-			ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 1);
+			snprintf(buf, sizeof(buf), "What position (1-%d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
+			if(i == 0)
+				ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 1);
+			else
+				ConsoleShowGameScreen(game_data, buf, false, GAME_SPEED * 1);
 
 			char input[16];
 			fgets(input, sizeof(input), stdin);
@@ -915,7 +924,7 @@ void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 			if (pick < 1 || pick > NORMAL_PLAY_CARDS_TO_DRAW || (offence_or_defence == 1 && game_data->o_cards_in_position[pick - 1]) || (offence_or_defence == 2 && game_data->d_cards_in_position[pick - 1]))
 			{
 				retry = true;
-				ConsoleShowGameScreen(game_data, "Invalid position chosen, choose again.", GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "Invalid position chosen, choose again.", true, GAME_SPEED * 20);
 			}
 
 		} while (retry);
@@ -923,7 +932,7 @@ void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 			game_data->o_cards_in_position[pick - 1] = game_data->o_cards[i];
 		else if (offence_or_defence == 2)
 			game_data->d_cards_in_position[pick - 1] = game_data->d_cards[i];
-		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 1);
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 1);
 	}
 }
 
@@ -989,7 +998,7 @@ void PlayNormal(struct game_data* game_data)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, press enter to draw", GetTeamName(game_data, game_data->team_in_possession));
-	ConsoleShowGameScreen(game_data, buf, 0);
+	ConsoleShowGameScreen(game_data, buf, true, 0);
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -999,7 +1008,7 @@ void PlayNormal(struct game_data* game_data)
 	game_data->formation = GetFormation(game_data); // O: pick layout/formation/personnel
 	game_data->show_O_D_Both = 1;
 
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
 
 	PutCardsInFormation(game_data, 1); // Offence place cards in positions, send 1 for offence
 	
@@ -1007,7 +1016,7 @@ void PlayNormal(struct game_data* game_data)
 	
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(game_data, game_data->team_not_in_possession));
-	ConsoleShowGameScreen(game_data, buf2, 0);
+	ConsoleShowGameScreen(game_data, buf2, true, 0);
 
 	char input2[16];
 	fgets(input2, sizeof(input2), stdin);
@@ -1023,7 +1032,7 @@ void PlayNormal(struct game_data* game_data)
 	PutCardsInFormation(game_data, 2); // Defence place cards in positions, send 1 for Defence
 	
 	game_data->show_O_D_Both = 0; // cover both sets of cards
-	ConsoleShowGameScreen(game_data, "Press enter to reveal matchups", GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, "Press enter to reveal matchups", true, GAME_SPEED * 10);
 	char input3[16];
 	fgets(input3, sizeof(input3), stdin);
 
@@ -1040,12 +1049,12 @@ void PlayNormal(struct game_data* game_data)
 		game_data->o_cards_in_position[i] = 0;
 		game_data->d_cards_in_position[i] = 0;
 	}
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
 	{
 		game_data->o_cards_in_position[i] = save_o_cards[i];
 		game_data->d_cards_in_position[i] = save_d_cards[i];
-		ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 	}
 
 	game_data->matchup_number = GetMatchupNumber(game_data); // Show all 8 cards and "O: pick which of the 4 match ups to play"
@@ -1073,7 +1082,7 @@ void PlayNormal(struct game_data* game_data)
 	game_data->o_cards[0] = O1;
 	game_data->d_cards[0] = D1;
 	
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 
 	if(game_data->pass_play)
 		PlayPass(game_data);
@@ -1091,7 +1100,7 @@ int GetPuntCardsToRedraw(struct game_data* game_data) {
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(game_data), PUNT_REDRAW_MAX_CARDS);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -1115,8 +1124,8 @@ int GetPuntCardsToRedraw(struct game_data* game_data) {
 */
 int GetPuntCardsToDraw(struct game_data* game_data) {
 	char buf[256];
-	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", PUNT_MAX_CARDS);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 2);
+	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1-%d): ", PUNT_MAX_CARDS);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -1142,7 +1151,7 @@ int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(game_data), FIELD_GOAL_REDRAW_MAX_CARDS);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 2);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -1166,8 +1175,8 @@ int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
 */
 int GetFieldGoalCardsToDraw(struct game_data* game_data) {
 	//char buf[256];
-	//snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1 - %d): ", FIELD_GOAL_MAX_CARDS);
-	//ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 2);
+	//snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1-%d): ", FIELD_GOAL_MAX_CARDS);
+	//ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 	//
 	int num = 0;
 	//char input[16];
@@ -1192,7 +1201,7 @@ int GetFieldGoalCardsToDraw(struct game_data* game_data) {
 */
 bool TouchBack(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Would you like to action a touchback? y/n ", 0);
+	ConsoleShowGameScreen(game_data, "Would you like to action a touchback? y/n ", true, 0);
 	char input[16];
 	fgets(input, sizeof(input), stdin);
 
@@ -1224,7 +1233,7 @@ void PlayPuntReturn(struct game_data* game_data)
 		}
 	}
 
-	ConsoleShowGameScreen(game_data, "Punt return...", GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, "Punt return...", true, GAME_SPEED * 20);
 
 	// Receiver draws two cards and the punter draws one card from the shared deck
 	DrawCards(game_data, game_data->team_in_possession, PUNT_RETURN_OFFENCE_CARDS_TO_DRAW, true);
@@ -1237,11 +1246,11 @@ void PlayPuntReturn(struct game_data* game_data)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Return yards = %d  ", yards);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 30);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 30);
 
 	MoveLineOfScrimmage(game_data, yards); // move line of scrimmage 
 
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 20);
 
 	// if O2 is a face card and larger than D1 the go to Open field run
 	if ((game_data->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & FACE) && ((game_data->o_cards[PUNT_RETURN_OFFENCE_CARDS_TO_DRAW - 1] & VALUE) > (game_data->d_cards[PUNT_RETURN_DEFENCE_CARDS_TO_DRAW - 1] & VALUE)))
@@ -1349,7 +1358,7 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 */
 void PlayPunt(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Punting...", GAME_SPEED * 20); // announce punt
+	ConsoleShowGameScreen(game_data, "Punting...", true, GAME_SPEED * 20); // announce punt
 
 	DrawCards(game_data, game_data->team_in_possession, GetPuntCardsToDraw(game_data), true);// draw 1-5 cards
 
@@ -1358,7 +1367,7 @@ void PlayPunt(struct game_data* game_data)
 	int total_yards = TotalYardsOffence(game_data);
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Total Yards: %d", total_yards);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
 
 	MoveLineOfScrimmage(game_data, total_yards);
 
@@ -1374,11 +1383,11 @@ void PlayPunt(struct game_data* game_data)
 	else
 		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(game_data));
 
-	ConsoleShowGameScreen(game_data, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
 
 	SwitchPossession(game_data);
 
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 
 	PlayPuntReturn(game_data);
 }
@@ -1477,7 +1486,7 @@ void PlayExtraPoint(struct game_data* game_data)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Attempting extra point. %d yards needed. ", field_goal_distance);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
 	DrawCards(game_data, game_data->team_in_possession, GetFieldGoalCardsToDraw(game_data), true);// draw 1-5 cards
 
@@ -1490,11 +1499,11 @@ void PlayExtraPoint(struct game_data* game_data)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
-	ConsoleShowGameScreen(game_data, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
 
 	if (total_yards >= field_goal_distance)
 	{
-		ConsoleShowGameScreen(game_data, "Extra Point Scored!", GAME_SPEED * 50); // resolve, scored
+		ConsoleShowGameScreen(game_data, "Extra Point Scored!", true, GAME_SPEED * 50); // resolve, scored
 		if (game_data->team_in_possession == 1)
 		{
 			game_data->team_1_score += EXTRA_POINT_POINTS;
@@ -1508,7 +1517,7 @@ void PlayExtraPoint(struct game_data* game_data)
 	}
 	else if (total_yards < field_goal_distance)
 	{
-		ConsoleShowGameScreen(game_data, "Missed Extra Point", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Missed Extra Point", true, GAME_SPEED * 20);
 	}
 	
 	ResetForKickoff(game_data);
@@ -1530,7 +1539,7 @@ void PlayFieldGoal(struct game_data* game_data)
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Attempting a %d yard field goal.", field_goal_distance);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
 	DrawCards(game_data, game_data->team_in_possession, GetFieldGoalCardsToDraw(game_data), true);// draw 1-5 cards
 
@@ -1543,11 +1552,11 @@ void PlayFieldGoal(struct game_data* game_data)
 
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "Total distance: %d yards", total_yards);
-	ConsoleShowGameScreen(game_data, buf2, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
 
 	if (total_yards >= field_goal_distance)
 	{
-		ConsoleShowGameScreen(game_data, "Field Goal Scored!", GAME_SPEED * 50); // resolve, scored
+		ConsoleShowGameScreen(game_data, "Field Goal Scored!", true, GAME_SPEED * 50); // resolve, scored
 		if (game_data->team_in_possession == 1) {
 			game_data->team_1_score += FIELD_GOAL_POINTS;
 			game_data->quarter_scores[0][game_data->quarter - 1] += FIELD_GOAL_POINTS;
@@ -1560,8 +1569,8 @@ void PlayFieldGoal(struct game_data* game_data)
 	}
 	else if (total_yards < field_goal_distance)
 	{
-		TurnoverOnDowns(game_data, true); // turnover at line of scrimmage + 10 if missed
-		ConsoleShowGameScreen(game_data, "Missed field goal, turnover at LoS + 10", GAME_SPEED * 20);
+		TurnoverOnDowns(game_data, true); // turnover at line of scrimmage if missed
+		ConsoleShowGameScreen(game_data, "Missed field goal, turnover at LoS", true, GAME_SPEED * 20);
 	}
 }
 
@@ -1573,7 +1582,7 @@ void PlayFieldGoal(struct game_data* game_data)
 */
 void PlayKneel(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "QB Kneel executed. Play over.", GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, "QB Kneel executed. Play over.", true, GAME_SPEED * 20);
 }
 
 /*
@@ -1594,7 +1603,7 @@ bool PlayTimeout(struct game_data* game_data)
 	
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s timeout used", GetTeamName(game_data, team));
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
 	//
 
@@ -1610,17 +1619,17 @@ bool PlayTimeout(struct game_data* game_data)
 		else
 			game_data->team_2_timeouts_remaining++;
 
-		ConsoleShowGameScreen(game_data, 0, ANIMATE_SPEED);
+		ConsoleShowGameScreen(game_data, 0, true, ANIMATE_SPEED);
 
 		if (team == 1)
 			game_data->team_1_timeouts_remaining--;
 		else
 			game_data->team_2_timeouts_remaining--;
 
-		ConsoleShowGameScreen(game_data, 0, ANIMATE_SPEED);
+		ConsoleShowGameScreen(game_data, 0, true, ANIMATE_SPEED);
 	}
 
-	ConsoleShowGameScreen(game_data, 0, GAME_SPEED * 10);
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 	game_data->plays_remaining_in_quarter += 2;
 	game_data->down -= 1;
 	return false;
@@ -1635,7 +1644,7 @@ bool PlayTimeout(struct game_data* game_data)
 int GetTimeoutTeam(struct game_data* game_data)
 {
 	int team = 0;
-	ConsoleShowGameScreen(game_data, "Which team called timeout? (1 - 2): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(game_data, "Which team called timeout? (1-2): ", true, GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		team = atoi(input);
@@ -1657,7 +1666,7 @@ int GetTimeoutTeam(struct game_data* game_data)
 int GetPlayType(struct game_data* game_data)
 {
 	int play_type = 0;
-	ConsoleShowGameScreen(game_data, "Pick game type (1 - 5): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(game_data, "Pick game type (1-5): ", true, GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		play_type = atoi(input);
@@ -1703,7 +1712,7 @@ void AnnounceDown(struct game_data* game_data)
 
 	len += snprintf(buf + len, sizeof(buf) - len, "%s down", down_str);
 
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 }
 
 /*
@@ -1811,7 +1820,7 @@ bool FirstDownScored(struct game_data* game_data)
 */
 void AwardTwoPointConversion(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "2 Point Conversion Scored!", GAME_SPEED * 50); // resolve, scored
+	ConsoleShowGameScreen(game_data, "2 Point Conversion Scored!", true, GAME_SPEED * 50); // resolve, scored
 	if (game_data->team_in_possession == 1){
 		game_data->team_1_score += TWO_POINT_CONVERSION_POINTS;
 		game_data->quarter_scores[0][game_data->quarter - 1] += TWO_POINT_CONVERSION_POINTS;
@@ -1856,7 +1865,7 @@ void AwardTouchdown(struct game_data* game_data)
 		snprintf(buf, sizeof(buf), "Touch Down Scored by %s!", GetTargetPlayerName(game_data));
 	else
 		snprintf(buf, sizeof(buf), "Touch Down Scored");
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 50);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 50);
 }
 
 /*
@@ -1876,7 +1885,7 @@ void AwardSafety(struct game_data* game_data)
 		game_data->quarter_scores[0][game_data->quarter - 1] += SAFETY_POINTS;
 	}
 
-	ConsoleShowGameScreen(game_data, "Safety Scored!", GAME_SPEED * 50);
+	ConsoleShowGameScreen(game_data, "Safety Scored!", true, GAME_SPEED * 50);
 	
 	ResetForKickoff(game_data);
 }
@@ -1890,7 +1899,7 @@ void AwardSafety(struct game_data* game_data)
 int GetOneOrTwoPointConversion(struct game_data* game_data)
 {
 	int points = 1;
-	ConsoleShowGameScreen(game_data, "Extra point attempt (1 - 2): ", GAME_SPEED * 2);
+	ConsoleShowGameScreen(game_data, "Extra point attempt (1-2): ", true, GAME_SPEED * 2);
 	char input[16];
 	if (fgets(input, sizeof(input), stdin)) {
 		points = atoi(input);
@@ -1915,7 +1924,7 @@ void ResolveEndOfPlay(struct game_data* game_data)
 		if (TouchdownScored(game_data)) // if in the end zone
 			AwardTwoPointConversion(game_data); // 2 point conversion attempted
 		else
-			ConsoleShowGameScreen(game_data, "Missed Extra Points", GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Missed Extra Points", true, GAME_SPEED * 20);
 
 		ResetForKickoff(game_data);
 		game_data->down = 0;
@@ -1934,7 +1943,7 @@ void ResolveEndOfPlay(struct game_data* game_data)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%s first down achieved", GetTeamName(game_data, game_data->team_in_possession));
-		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 30);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 30);
 		ResetLineOfFirstDown(game_data);
 		game_data->down = 0;
 	}
@@ -1946,7 +1955,7 @@ void ResolveEndOfPlay(struct game_data* game_data)
 	if (!GetTableValOnOff(shared_deck, (ACE | SPADES | BLACK | DECK_SHARED))) // if Ace of spades is disabled in shared deck, shuffle that deck
 	{
 		TableWeightEnableAll(shared_deck);
-		ConsoleShowGameScreen(game_data, "Ace of Spades used, reshuffling...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Ace of Spades used, reshuffling...", true, GAME_SPEED * 20);
 	}
 
 	if (game_data->pass_play)
@@ -2064,7 +2073,7 @@ void DoPlay(struct game_data* game_data)
 		}
 		}
 		if(retry)
-			ConsoleShowGameScreen(game_data, "Invalid play type. Please pick a number between 1 and 5.", GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
+			ConsoleShowGameScreen(game_data, "Invalid play type. Please pick a number between 1 and 5.", true, GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
 		if (retry || !game_data->play_type)
 			game_data->play_type = GetPlayType(game_data); // player picks what to do: normal play, punt, field goal, kneel, timeout
 	} while (retry);
@@ -2082,12 +2091,12 @@ void EndOfQuarter(struct game_data* game_data)
 {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "End of quarter %d.", game_data->quarter);
-	ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
 	if (game_data->quarter == 1 || game_data->quarter == 3)
 	{
 		SwitchEnds(game_data);
-		ConsoleShowGameScreen(game_data, "Switching ends...", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Switching ends...", true, GAME_SPEED * 20);
 	}
 	else if (game_data->quarter == 2)
 	{
@@ -2098,9 +2107,9 @@ void EndOfQuarter(struct game_data* game_data)
 
 		char buf2[256];
 		snprintf(buf2, sizeof(buf2), "The %s will receive the ball to start the second half.",(game_data->team_started_with_possession - 1) ? game_data->team_1_name : game_data->team_2_name);
-		ConsoleShowGameScreen(game_data, buf2, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
 
-		ConsoleShowGameScreen(game_data, "All decks shuffled at half time ", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "All decks shuffled at half time ", true, GAME_SPEED * 20);
 
 		TableWeightEnableAll(player_1_deck); // shuffle all decks at half time
 		TableWeightEnableAll(player_2_deck);
@@ -2118,12 +2127,12 @@ void EndOfQuarter(struct game_data* game_data)
 */
 void EndOfGame(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Game Over!", GAME_SPEED * 20);
+	ConsoleShowGameScreen(game_data, "Game Over!", true, GAME_SPEED * 20);
 	if (game_data->team_1_score > game_data->team_2_score)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", game_data->team_1_name);
-		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
 			game_data->team_records[0][WINS]++;
 			game_data->team_records[1][LOSSES]++;
@@ -2133,7 +2142,7 @@ void EndOfGame(struct game_data* game_data)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), "The %s win!", game_data->team_2_name);
-		ConsoleShowGameScreen(game_data, buf, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
 			game_data->team_records[0][LOSSES]++;
 			game_data->team_records[1][WINS]++;
@@ -2141,7 +2150,7 @@ void EndOfGame(struct game_data* game_data)
 	}
 	else
 	{
-		ConsoleShowGameScreen(game_data, "It's a tie!", GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "It's a tie!", true, GAME_SPEED * 20);
 		if (game_data->playoffs == false && game_data->current_game_mode == 1) {
 			game_data->team_records[0][DRAWS]++;
 			game_data->team_records[1][DRAWS]++;

@@ -285,7 +285,7 @@ struct card_name {
 extern struct card_name card_names[];
 
 /* Prototypes */
-void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], int pause);
+void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], bool text_delay, int pause);
 void TableWeightEnableAll(struct table_weight* table);
 int TableWeightDecision(struct table_weight* table, bool enable_all);
 const char* CardName(int card);
