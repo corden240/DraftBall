@@ -36,12 +36,6 @@ void GameStats(struct game_data* game_data);
 */
 int GetRBID(int formation, int matchup)
 {
-	// []       []  []       []
-	// 
-	// []         []     []  []
-	// 
-	// []  []            []  []
-
 	if ((formation == 1 && matchup == 2) || (formation == 2 && matchup == 2))
 		return 0;
 	else if (formation == 1 && matchup == 3) 
@@ -57,12 +51,6 @@ int GetRBID(int formation, int matchup)
 */
 int GetWRID(int formation, int matchup)
 {
-	// []       []  []       []
-	// 
-	// []         []     []  []
-	// 
-	// []  []            []  []
-
 	if ((formation == 1 && matchup == 1) || (formation == 2 && matchup == 1) || (formation == 3 && matchup == 1))
 		return 0;
 	else if ((formation == 1 && matchup == 4) || (formation == 2 && matchup == 3) || (formation == 3 && matchup == 2))
@@ -399,15 +387,13 @@ void Fumble(struct game_data* game_data)
 }
 
 /*
-* NAME:        OpenFieldRun
-* DESCRIPTION: execute the play
-* INPUTS:      game_data
-* OUTPUTS:     none
+* NAME:        GetOfrCardsToDraw
+* DESCRIPTION: find card number
+* INPUTS:      o card, d card
+* OUTPUTS:     int
 */
-void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
+int GetOfrCardsToDraw(int offence_1, int defence_1)
 {
-	ConsoleShowGameScreen(game_data, "Open field run!", true, GAME_SPEED * 20);
-
 	int ofr_o_value = (offence_1 & VALUE) - 10;
 
 	if (ofr_o_value < 0)
@@ -423,6 +409,21 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 	if (cards_to_draw < 0 || cards_to_draw > 3)
 		printf("Error in OFR cards to draw");
 
+	return cards_to_draw;
+}
+
+/*
+* NAME:        OpenFieldRun
+* DESCRIPTION: execute the play
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
+{
+	ConsoleShowGameScreen(game_data, "Open field run!", true, GAME_SPEED * 20);
+
+	int cards_to_draw = GetOfrCardsToDraw(offence_1, defence_1);
+
 	ClearAllCards(game_data);
 	ClearFlashCards(game_data);
 
@@ -430,7 +431,7 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 	snprintf(buf, sizeof(buf), "Drawing %d cards...", cards_to_draw);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 
-	int yards = 0;
+	int yards = 0, ofr_o_value = 0;
 
 	for (int i = 0; i < cards_to_draw; i++)
 	{
@@ -484,17 +485,13 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 }
 
 /*
-* NAME:        PlayPass
-* DESCRIPTION: execute the play
+* NAME:        DrawPassCards
+* DESCRIPTION: draw all cards needed
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void PlayPass(struct game_data* game_data)
+void DrawPassCards(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Pass play ", true, GAME_SPEED * 10);
-
-	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TARGETS]++;
-	
 	for (int i = 0; i < PASS_PLAY_MAX_CARDS_TO_DRAW; i++)
 	{
 		if (i > 0)
@@ -531,7 +528,7 @@ void PlayPass(struct game_data* game_data)
 				|| ((game_data->o_cards[i + 1] & BLACK) && (game_data->o_cards[0] & BLACK)))) // If it is the same rank and colour as card O1 then it is a sack
 		{
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_SACKS]++;
-			
+
 			game_data->o_cards_to_flash[0] = true;
 			game_data->o_cards_to_flash[i + 1] = true;
 			ConsoleShowGameScreen(game_data, "QB sacked ", true, GAME_SPEED * 20);
@@ -593,8 +590,16 @@ void PlayPass(struct game_data* game_data)
 			return;
 		}
 	}
-	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if intercepted or completed then pass attempted
-	DrawCards(game_data, game_data->team_not_in_possession, 1, true); // defence draws 1
+}
+
+/*
+* NAME:        GetPassCatchYards
+* DESCRIPTION: find pass air yards
+* INPUTS:      game_data
+* OUTPUTS:     yards
+*/
+int GetPassCatchYards(struct game_data* game_data)
+{
 	int catch_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
 
 	char buf3[256];
@@ -618,6 +623,87 @@ void PlayPass(struct game_data* game_data)
 	catch_yards = LimitYardsToTouchdown(game_data, catch_yards);
 
 	ConsoleShowGameScreen(game_data, buf3, true, GAME_SPEED * 10);
+
+	return catch_yards;
+}
+
+/*
+* NAME:        CheckForYacFumble
+* DESCRIPTION: check fumble
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void CheckForYacFumble(struct game_data* game_data)
+{
+	if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES) || ((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
+	{
+		char buffer[256];
+		int card = 0;
+		if (((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
+			card = 1;
+
+		if (card)
+			game_data->d_cards_to_flash[0] = true;
+		else
+			game_data->o_cards_to_flash[0] = true;
+
+		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(game_data), ConvertLosToYardLine(game_data));
+		ConsoleShowGameScreen(game_data, buffer, true, GAME_SPEED * 20);
+		ClearFlashCards(game_data);
+		game_data->fumble = true;
+		ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
+		if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
+		{
+			game_data->o_cards[0] = 0;
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
+			DrawCards(game_data, game_data->team_in_possession, 1, true);
+		}
+		else
+		{
+			game_data->d_cards[0] = 0;
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
+			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
+		}
+	}
+}
+
+/*
+* NAME:        GetYacYards
+* DESCRIPTION: get yards from cards
+* INPUTS:      game_data
+* OUTPUTS:     yards
+*/
+int GetYacYards(struct game_data* game_data)
+{
+	int yac_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
+
+	if (yac_yards < 0)
+		yac_yards = 0;
+
+	yac_yards = LimitYardsToTouchdown(game_data, yac_yards);
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yac_yards; // if not an interception then add yards
+	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += yac_yards;
+	return yac_yards;
+}
+
+/*
+* NAME:        PlayPass
+* DESCRIPTION: execute the play
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void PlayPass(struct game_data* game_data)
+{
+	ConsoleShowGameScreen(game_data, "Pass play ", true, GAME_SPEED * 10);
+
+	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TARGETS]++;
+	
+	DrawPassCards(game_data);
+	
+	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if intercepted or completed then pass attempted
+	DrawCards(game_data, game_data->team_not_in_possession, 1, true); // defence draws 1
+
+	int catch_yards = GetPassCatchYards(game_data);
 
 	MoveLineOfScrimmage(game_data, catch_yards);
 
@@ -658,46 +744,9 @@ void PlayPass(struct game_data* game_data)
 	DrawCards(game_data, game_data->team_in_possession, 1, true);
 	DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 
-	if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES) || ((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
-	{
-		char buffer[256];
-		int card = 0;
-		if (((game_data->d_cards[0] & VALUE) == ACE && (game_data->d_cards[0] & SUIT) == SPADES))
-			card = 1;
+	CheckForYacFumble(game_data);
 
-		if(card)
-			game_data->d_cards_to_flash[0] = true;
-		else
-			game_data->o_cards_to_flash[0] = true;
-			
-		snprintf(buffer, sizeof(buffer), "%s fumbled the ball at the %d", GetTargetPlayerName(game_data), ConvertLosToYardLine(game_data));
-		ConsoleShowGameScreen(game_data, buffer, true, GAME_SPEED * 20);
-		ClearFlashCards(game_data);
-		game_data->fumble = true;
-		ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
-		if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
-		{
-			game_data->o_cards[0] = 0;
-			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
-			DrawCards(game_data, game_data->team_in_possession, 1, true);
-		}
-		else
-		{
-			game_data->d_cards[0] = 0;
-			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
-			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
-		}
-	}
-
-	int yac_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
-
-	if (yac_yards < 0)
-		yac_yards = 0;
-
-	yac_yards = LimitYardsToTouchdown(game_data, yac_yards);
-	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_YARDS] += yac_yards; // if not an interception then add yards
-	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS] += yac_yards;
-
+	int yac_yards = GetYacYards(game_data);
 	MoveLineOfScrimmage(game_data, yac_yards);
 
 	if (TouchdownScored(game_data))
@@ -726,30 +775,35 @@ void PlayPass(struct game_data* game_data)
 		ConsoleShowGameScreen(game_data, buf5, true, GAME_SPEED * 10);
 	}
 }
-
 /*
-* NAME:        PlayRun
+* NAME:        AnnouncePlayRun
 * DESCRIPTION: execute the play
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void PlayRun(struct game_data* game_data)
+void AnnouncePlayRun(struct game_data* game_data)
 {
-	if (game_data->matchup_number == 5) 
+	if (game_data->matchup_number == 5)
 		ConsoleShowGameScreen(game_data, "QB scramble ", true, GAME_SPEED * 10);
 	else
 		ConsoleShowGameScreen(game_data, "Run play ", true, GAME_SPEED * 10);
+}
 
-	DrawCards(game_data, game_data->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
-	DrawCards(game_data, game_data->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
-	
+/*
+* NAME:        CheckForRunFumble
+* DESCRIPTION: is there a fumble
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void CheckForRunFumble(struct game_data* game_data)
+{
 	if (((game_data->o_cards[1] & VALUE) == ACE && (game_data->o_cards[1] & SUIT) == SPADES) || ((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES)) // If O2 OR D2 is the Ace of spades then draw a replacement for that card and then go to Fumble
 	{
 		int card = 0;
 		if (((game_data->d_cards[1] & VALUE) == ACE && (game_data->d_cards[1] & SUIT) == SPADES))
 			card = 1;
 
-		if(card)
+		if (card)
 			game_data->d_cards_to_flash[1] = true;
 		else
 			game_data->o_cards_to_flash[1] = true;
@@ -770,7 +824,16 @@ void PlayRun(struct game_data* game_data)
 			DrawCards(game_data, game_data->team_not_in_possession, 1, true);
 		}
 	}
+}
 
+/*
+* NAME:        RunPlayYardsGained
+* DESCRIPTION: get yards from cards
+* INPUTS:      game_data
+* OUTPUTS:     yards
+*/
+int RunPlayYardsGained(struct game_data* game_data)
+{
 	int yards_gained = 0;
 	int difference = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
 
@@ -784,11 +847,52 @@ void PlayRun(struct game_data* game_data)
 	else
 	{
 		if (difference % 2 == 0)
-			yards_gained =  difference / 2;
+			yards_gained = difference / 2;
 		else
 			yards_gained = (difference + 1) / 2; // rounding up
 	}
+	return yards_gained;
+}
+
+/*
+* NAME:        UpdateCarriesYardsStats
+* DESCRIPTION: updates stats
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void UpdateCarriesYardsStats(struct game_data* game_data)
+{
+	if (game_data->matchup_number == 5)
+	{
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
+		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
+	}
+	else
+	{
+		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
+		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
+	}
+}
+
+/*
+* NAME:        PlayRun
+* DESCRIPTION: execute the play
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void PlayRun(struct game_data* game_data)
+{
+	AnnouncePlayRun(game_data);
+
+	DrawCards(game_data, game_data->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
+	DrawCards(game_data, game_data->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
 	
+	CheckForRunFumble(game_data);
+
+	int yards_gained = RunPlayYardsGained(game_data);
+	
+	UpdateCarriesYardsStats(game_data);
+
 	if(game_data->matchup_number == 5)
 	{
 		if (yards_gained < 0)
@@ -799,13 +903,6 @@ void PlayRun(struct game_data* game_data)
 			ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 		}
 		// TODO: FOULS here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
-		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
-		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
-	}
-	else
-	{
-		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
-		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
 	}
 	
 	MoveLineOfScrimmage(game_data, yards_gained);
@@ -869,11 +966,6 @@ void PlayTwoPointConversion(struct game_data* game_data)
 */
 int GetFormation(struct game_data* game_data)
 {
-	// []       []  []       []
-	// 
-	// []         []     []  []
-	// 
-	// []  []            []  []
 	ConsoleShowGameScreen(game_data, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1-3): ", true, GAME_SPEED * 10);
 
 	char input[16];
@@ -952,12 +1044,6 @@ void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 */
 void SetRunOrPassPlay(struct game_data* game_data)
 {
-	// []       []  []       []
-	// 
-	// []         []     []  []
-	// 
-	// []  []            []  []
-
 	if(game_data->matchup_number == 5){ // qb scramble is a run
 		game_data->run_play = 1;
 		game_data->pass_play = 0;
@@ -995,8 +1081,62 @@ void SetRunOrPassPlay(struct game_data* game_data)
 		game_data->pass_play = 1;
 		game_data->run_play = 0;
 	}
-}
 
+	if (game_data->pass_play)
+		game_data->current_players_yards_pre_snap = game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS];
+	else if (game_data->run_play && game_data->matchup_number != 5)
+		game_data->current_players_yards_pre_snap = game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS];
+	else if (game_data->run_play)
+		game_data->current_players_yards_pre_snap = game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS];
+}
+/*
+* NAME:        ShowMatchups
+* DESCRIPTION: display the 4 o and d cards
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void ShowMatchups(struct game_data* game_data)
+{
+	// save off cards
+	int save_o_cards[] = { 0,0,0,0 };
+	int save_d_cards[] = { 0,0,0,0 };
+
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
+	{
+		save_o_cards[i] = game_data->o_cards_in_position[i];
+		save_d_cards[i] = game_data->d_cards_in_position[i];
+		game_data->o_cards_in_position[i] = 0;
+		game_data->d_cards_in_position[i] = 0;
+	}
+	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
+	{
+		game_data->o_cards_in_position[i] = save_o_cards[i];
+		game_data->d_cards_in_position[i] = save_d_cards[i];
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
+	}
+}
+/*
+* NAME:        StoreHeadToHeadCards
+* DESCRIPTION: find and store the 2 cards to be used
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void StoreHeadToHeadCards(struct game_data* game_data)
+{
+	int O1 = game_data->o_cards_in_position[game_data->matchup_number - 1];
+	int D1 = game_data->d_cards_in_position[game_data->matchup_number - 1];
+
+	if (game_data->matchup_number == 5) {
+		O1 = (FIVE | SPADES | BLACK);
+		D1 = (FIVE | SPADES | BLACK);
+	}
+
+	ClearAllCards(game_data);
+
+	game_data->o_cards[0] = O1;
+	game_data->d_cards[0] = D1;
+}
 /*
 * NAME:        PlayNormal
 * DESCRIPTION: execute the play
@@ -1018,15 +1158,12 @@ void PlayNormal(struct game_data* game_data)
 	game_data->show_O_D_Both = 1;
 
 	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
-
-	PutCardsInFormation(game_data, 1); // Offence place cards in positions, send 1 for offence
-	
+	PutCardsInFormation(game_data, 1); // Offence place cards in positions, send 1 for offence	
 	game_data->show_O_D_Both = 0; // Cover offence cards
 	
 	char buf2[256];
 	snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(game_data, game_data->team_not_in_possession));
 	ConsoleShowGameScreen(game_data, buf2, true, 0);
-
 	char input2[16];
 	fgets(input2, sizeof(input2), stdin);
 
@@ -1047,49 +1184,13 @@ void PlayNormal(struct game_data* game_data)
 
 	game_data->show_O_D_Both = 3;
 
-	// save off cards
-	int save_o_cards[] = { 0,0,0,0 };
-	int save_d_cards[] = { 0,0,0,0 };
-	
-	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
-	{
-		save_o_cards[i] = game_data->o_cards_in_position[i];
-		save_d_cards[i] = game_data->d_cards_in_position[i];
-		game_data->o_cards_in_position[i] = 0;
-		game_data->d_cards_in_position[i] = 0;
-	}
-	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
-	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
-	{
-		game_data->o_cards_in_position[i] = save_o_cards[i];
-		game_data->d_cards_in_position[i] = save_d_cards[i];
-		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
-	}
+	ShowMatchups(game_data);
 
 	game_data->matchup_number = GetMatchupNumber(game_data); // Show all 8 cards and "O: pick which of the 4 match ups to play"
 
 	SetRunOrPassPlay(game_data);
-
-	if(game_data->pass_play)
-		game_data->current_players_yards_pre_snap = game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS];
-	else if (game_data->run_play && game_data->matchup_number != 5)
-		game_data->current_players_yards_pre_snap = game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS];
-	else if (game_data->run_play)
-		game_data->current_players_yards_pre_snap = game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS];
-
-	// store 2 head to head cards
-	int O1 = game_data->o_cards_in_position[game_data->matchup_number - 1];
-	int D1 = game_data->d_cards_in_position[game_data->matchup_number - 1];
-
-	if (game_data->matchup_number == 5){
-		O1 = (FIVE | SPADES | BLACK);
-		D1 = (FIVE | SPADES | BLACK);
-	}
 	
-	ClearAllCards(game_data);
-
-	game_data->o_cards[0] = O1;
-	game_data->d_cards[0] = D1;
+	StoreHeadToHeadCards(game_data);
 	
 	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10);
 
@@ -1183,23 +1284,7 @@ int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
 * OUTPUTS:     int
 */
 int GetFieldGoalCardsToDraw(struct game_data* game_data) {
-	//char buf[256];
-	//snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1-%d): ", FIELD_GOAL_MAX_CARDS);
-	//ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
-	//
-	int num = 0;
-	//char input[16];
-	//if (fgets(input, sizeof(input), stdin)) {
-	//	num = atoi(input);
-	//}
-	//
-	//if (num > FIELD_GOAL_MAX_CARDS)
-	//	num = FIELD_GOAL_MAX_CARDS;
-	//else if (num < 1)
-	//	num = 1;
-
-	num = 6; // why would anyone not want to draw all 6 cards?
-	return num;
+	return FIELD_GOAL_MAX_CARDS; // why would anyone not want to draw all 6 cards?
 }
 
 /*
@@ -1314,12 +1399,6 @@ const char* GetQBName(struct game_data* game_data)
 */
 const char* GetTargetPlayerName(struct game_data* game_data)
 {
-	// []       []  []       []
-	// 
-	// []         []     []  []
-	// 
-	// []  []            []  []
-
 	if (game_data->team_in_possession == 1)
 	{
 		if(game_data->matchup_number == 5)
@@ -1382,13 +1461,9 @@ void PlayPunt(struct game_data* game_data)
 
 	char buf2[256];
 	if ((GetDirectionOfPlay(game_data) == 1) && (game_data->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH)))
-	{
 		snprintf(buf2, sizeof(buf2), "Ball caught %d yards into the end zone", abs(ConvertLosToYardLine(game_data)));
-	}
 	else if ((GetDirectionOfPlay(game_data) == 2) && (game_data->line_of_scrimmage <= END_ZONE_WIDTH))
-	{
 		snprintf(buf2, sizeof(buf2), "Ball caught %d yards into the end zone", abs(ConvertLosToYardLine(game_data)));
-	}	
 	else
 		snprintf(buf2, sizeof(buf2), "Ball caught at the %d", ConvertLosToYardLine(game_data));
 
@@ -1606,15 +1681,13 @@ bool PlayTimeout(struct game_data* game_data)
 	int team = GetTimeoutTeam(game_data);
 	
 	if (team == 1 && !game_data->team_1_timeouts_remaining)
-		return true;
+		return true; // need to retry
 	else if (team == 2 && !game_data->team_2_timeouts_remaining)
-		return true;
+		return true; // need to retry
 	
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s timeout used", GetTeamName(game_data, team));
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
-
-	//
 
 	if (team == 1)
 		game_data->team_1_timeouts_remaining--;
@@ -1919,6 +1992,65 @@ int GetOneOrTwoPointConversion(struct game_data* game_data)
 }
 
 /*
+* NAME:        UpdateLongestPlayStats
+* DESCRIPTION: update stat for longest play 
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void UpdateLongestPlayStats(struct game_data* game_data)
+{
+	if (game_data->pass_play)
+	{
+		if ((game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
+			- game_data->current_players_yards_pre_snap) > game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY])
+		{
+			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY]
+				= (game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
+					- game_data->current_players_yards_pre_snap);
+		}
+	}
+	else if (game_data->run_play && game_data->matchup_number != 5)
+	{
+		if ((game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
+			- game_data->current_players_yards_pre_snap) > game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY])
+		{
+			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY]
+				= (game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
+					- game_data->current_players_yards_pre_snap);
+		}
+	}
+	else if (game_data->run_play)
+	{
+		if ((game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS]
+			- game_data->current_players_yards_pre_snap) > game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY])
+		{
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY]
+				= (game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] - game_data->current_players_yards_pre_snap);
+		}
+	}
+}
+
+/*
+* NAME:        ResetDataEndOfPlay
+* DESCRIPTION: resets data
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+ResetDataEndOfPlay(struct game_data* game_data)
+{
+	game_data->current_players_yards_pre_snap = 0;
+	game_data->fumble = false;
+	game_data->interception = false;
+	game_data->show_O_D_Both = 0;
+	game_data->pass_play = 0;
+	game_data->run_play = 0;
+	game_data->matchup_number = 0;
+	game_data->formation = 0;
+	game_data->play_type = 0;
+	ClearAllCards(game_data);
+}
+
+/*
 * NAME:        ResolveEndOfPlay
 * DESCRIPTION: resolve first down, touchdown etc
 * INPUTS:      game_data
@@ -1967,73 +2099,19 @@ void ResolveEndOfPlay(struct game_data* game_data)
 		ConsoleShowGameScreen(game_data, "Ace of Spades used, reshuffling...", true, GAME_SPEED * 20);
 	}
 
-	if (game_data->pass_play)
-	{
-		if ((game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
-			- game_data->current_players_yards_pre_snap) > game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY])
-		{
-			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_LONGEST_PLAY]
-				= (game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_YARDS]
-					- game_data->current_players_yards_pre_snap);
-		}
-	}
-	else if (game_data->run_play && game_data->matchup_number != 5)
-	{
-		if ((game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
-			- game_data->current_players_yards_pre_snap) > game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY])
-		{
-			game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_LONGEST_PLAY]
-				= (game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS]
-					- game_data->current_players_yards_pre_snap);
-		}
-	}
-	else if (game_data->run_play)
-	{
-		if ((game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS]
-			- game_data->current_players_yards_pre_snap) > game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY])
-		{
-			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_LONGEST_PLAY]
-				= (game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] - game_data->current_players_yards_pre_snap);
-		}
-	}
+	UpdateLongestPlayStats(game_data);
 	
-	game_data->current_players_yards_pre_snap = 0;
-	game_data->fumble = false;
-	game_data->interception = false;
-	game_data->show_O_D_Both = 0;
-	game_data->pass_play = 0;
-	game_data->run_play = 0;
-	game_data->matchup_number = 0;
-	game_data->formation = 0;
-	game_data->play_type = 0;
-	ClearAllCards(game_data);
+	ResetDataEndOfPlay(game_data);
 }
 
 /*
-* NAME:        DoPlay
-* DESCRIPTION: find and then action each play
+* NAME:        ExecutePlay
+* DESCRIPTION: action the play
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void DoPlay(struct game_data* game_data)
+void ExecutePlay(struct game_data* game_data)
 {
-	if (game_data->kickoff_needed)
-	{
-		game_data->play_type = 2; // always punt on first play of each half
-		game_data->kickoff_needed = false;
-	}
-	else if (game_data->extra_point_needed)
-	{
-		if (GetOneOrTwoPointConversion(game_data) == 2) // ask player if 1 or 2 point conversion?
-			game_data->play_type = 1;						  // 2 pt attempt
-		else
-			game_data->play_type = 3;						  // 1 pt attempt
-	}
-	else
-	{
-		AnnounceDown(game_data);
-	}
-
 	bool retry = false;
 	if (!game_data->play_type)
 		game_data->play_type = GetPlayType(game_data);
@@ -2081,11 +2159,39 @@ void DoPlay(struct game_data* game_data)
 			break;
 		}
 		}
-		if(retry)
+		if (retry)
 			ConsoleShowGameScreen(game_data, "Invalid play type. Please pick a number between 1 and 5.", true, GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
 		if (retry || !game_data->play_type)
 			game_data->play_type = GetPlayType(game_data); // player picks what to do: normal play, punt, field goal, kneel, timeout
 	} while (retry);
+}
+
+/*
+* NAME:        DoPlay
+* DESCRIPTION: find and then action each play
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void DoPlay(struct game_data* game_data)
+{
+	if (game_data->kickoff_needed)
+	{
+		game_data->play_type = 2; // always punt on first play of each half
+		game_data->kickoff_needed = false;
+	}
+	else if (game_data->extra_point_needed)
+	{
+		if (GetOneOrTwoPointConversion(game_data) == 2) // ask player if 1 or 2 point conversion?
+			game_data->play_type = 1;						  // 2 pt attempt
+		else
+			game_data->play_type = 3;						  // 1 pt attempt
+	}
+	else
+	{
+		AnnounceDown(game_data);
+	}
+
+	ExecutePlay(game_data);
 
 	ResolveEndOfPlay(game_data);
 }
@@ -2168,7 +2274,6 @@ void EndOfGame(struct game_data* game_data)
 
 	GameStats(game_data);// print all the game stats? player stats, quarter stats, yards, downs etc
 }
-
 
 /*
 * NAME:        PlayGame
