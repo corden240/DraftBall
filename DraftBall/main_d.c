@@ -245,3 +245,27 @@ struct card_name card_names[] =
 	{(QUEEN |   SPADES), "Qs"},
 	{(KING  |   SPADES), "Ks"},
 };
+
+struct table_weight los_fouls_chance[] = {
+	{0,   14000, true},
+	{1,    1000, true},
+	{0, -1, false}
+};
+
+struct table_weight int_grounding_fouls_chance[] = {
+	{0,   14000, true},
+	{1,    1000, true},
+	{0, -1, false}
+};
+
+struct table_weight pass_interference_chance[] = {
+	{0,   14/*000*/, true},
+	{1,    1000, true},
+	{0, -1, false}
+};
+
+struct table_weight fifty_fifty_chance[] = {
+	{0,    1000, true},
+	{1,    1000, true},
+	{0, -1, false}
+};

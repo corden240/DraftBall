@@ -485,12 +485,106 @@ void OpenFieldRun(struct game_data* game_data, int offence_1, int defence_1)
 }
 
 /*
+* NAME:        PlaceBallOneYardLine
+* DESCRIPTION: put LoS on 1 yard line
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void PlaceBallOneYardLine(struct game_data* game_data)
+{
+	if (GetDirectionOfPlay(game_data) == 1)
+	{
+		game_data->line_of_scrimmage = END_ZONE_WIDTH + FIELD_WIDTH - 1;
+	}
+	else
+	{
+		game_data->line_of_scrimmage = END_ZONE_WIDTH - 1;
+	}
+	ResetLineOfFirstDown(game_data);
+}
+
+/*
+* NAME:        ShowFlagThrown
+* DESCRIPTION: alert screen to flag thrown
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void ShowFlagThrown(struct game_data* game_data)
+{
+	game_data->flag_thrown = true;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = false;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = true;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = false;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = true;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = false;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = true;
+	ConsoleShowGameScreen(game_data, "                            ", false, GAME_SPEED * 2);
+	game_data->flag_thrown = false;
+	ConsoleShowGameScreen(game_data, "                            ", false, 0);
+
+	game_data->flag_thrown = false;
+}
+
+/*
+* NAME:        PassInterferenceFoul
+* DESCRIPTION: check for PI
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void PassInterferenceFoul(struct game_data* game_data)
+{
+	if (game_data->fouls)
+	{
+		if (TableWeightDecision(pass_interference_chance, true))
+		{
+			ShowFlagThrown(game_data);
+
+			// false start, offence
+			ConsoleShowGameScreen(game_data, "Pass interference", true, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Pass interference, defence", false, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Pass interference, defence, spot foul", false, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Pass interference, defence, spot foul, 1st down", false, GAME_SPEED * 20);
+			
+			DrawCards(game_data, game_data->team_not_in_possession, 1, true); // defence draws 1
+
+			int yards = GetPassCatchYards(game_data, true);
+			if (yards < 0)
+				yards = 0;
+			
+			MoveLineOfScrimmage(game_data, yards);
+
+			if (TouchdownScored(game_data))
+			{
+				ConsoleShowGameScreen(game_data, "Foul commited in the end zone", true, GAME_SPEED * 10);
+				ConsoleShowGameScreen(game_data, "Ball placed at the 1 yard line", true, GAME_SPEED * 10);
+				PlaceBallOneYardLine(game_data);
+			}
+			else
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Foul commited at the %d yard line", ConvertLosToYardLine(game_data));
+				ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
+			}
+
+			game_data->down = 0;
+			return true;
+		}
+	}
+}
+
+/*
 * NAME:        DrawPassCards
 * DESCRIPTION: draw all cards needed
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void DrawPassCards(struct game_data* game_data)
+bool DrawPassCards(struct game_data* game_data)
 {
 	for (int i = 0; i < PASS_PLAY_MAX_CARDS_TO_DRAW; i++)
 	{
@@ -575,7 +669,7 @@ void DrawPassCards(struct game_data* game_data)
 			if (game_data->fumble)
 				Fumble(game_data);
 
-			return;
+			return true;
 		}
 		else if ((game_data->o_cards[i + 1] & SUIT) == ((game_data->o_cards[0] & SUIT))) // If it is the same suit as card O1 then the pass is incomplete
 		{
@@ -585,44 +679,51 @@ void DrawPassCards(struct game_data* game_data)
 			game_data->o_cards_to_flash[0] = true;
 			ConsoleShowGameScreen(game_data, buf6, true, GAME_SPEED * 20);
 			ClearFlashCards(game_data);
+			
+			PassInterferenceFoul(game_data);
+			
 			ClearAllCards(game_data);
 			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if incomplete then pass attempted
-			return;
+	
+			return true;
 		}
 	}
+	return false;
 }
 
 /*
 * NAME:        GetPassCatchYards
 * DESCRIPTION: find pass air yards
-* INPUTS:      game_data
+* INPUTS:      game_data, PI
 * OUTPUTS:     yards
 */
-int GetPassCatchYards(struct game_data* game_data)
+int GetPassCatchYards(struct game_data* game_data, bool pass_interference)
 {
 	int catch_yards = TotalYardsOffence(game_data) - TotalYardsDefence(game_data);
 
 	char buf3[256];
-	if (catch_yards < 0)
-	{
-		if (catch_yards % 2 == 0)
-			catch_yards = catch_yards / 2;
+	if (!pass_interference) {
+		if (catch_yards < 0)
+		{
+			if (catch_yards % 2 == 0)
+				catch_yards = catch_yards / 2;
+			else
+				catch_yards = (catch_yards + 1) / 2;
+			snprintf(buf3, sizeof(buf3), "%d yards lost ", catch_yards);
+		}
+		else if (game_data->interception)
+			snprintf(buf3, sizeof(buf3), "Interception on a %d yard throw ", catch_yards);
 		else
-			catch_yards = (catch_yards + 1) / 2;
-		snprintf(buf3, sizeof(buf3), "%d yards lost ", catch_yards);
+		{
+			snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_COMPLETE_PASSES]++;
+			game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_RECEPTIONS]++;
+		}
 	}
-	else if (game_data->interception)
-		snprintf(buf3, sizeof(buf3), "Interception on a %d yard throw ", catch_yards);
-	else
-	{
-		snprintf(buf3, sizeof(buf3), "%d yard catch made ", catch_yards);
-		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_COMPLETE_PASSES]++;
-		game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_RECEPTIONS]++;
-	}
-
 	catch_yards = LimitYardsToTouchdown(game_data, catch_yards);
 
-	ConsoleShowGameScreen(game_data, buf3, true, GAME_SPEED * 10);
+	if (!pass_interference)
+		ConsoleShowGameScreen(game_data, buf3, true, GAME_SPEED * 10);
 
 	return catch_yards;
 }
@@ -698,12 +799,13 @@ void PlayPass(struct game_data* game_data)
 
 	game_data->receiver_stats[GetWRID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_WR_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][WR_TARGETS]++;
 	
-	DrawPassCards(game_data);
+	if (DrawPassCards(game_data))
+		return;
 	
 	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_ATTEMPTED_PASSES]++; // if intercepted or completed then pass attempted
 	DrawCards(game_data, game_data->team_not_in_possession, 1, true); // defence draws 1
 
-	int catch_yards = GetPassCatchYards(game_data);
+	int catch_yards = GetPassCatchYards(game_data, false);
 
 	MoveLineOfScrimmage(game_data, catch_yards);
 
@@ -860,7 +962,7 @@ int RunPlayYardsGained(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void UpdateCarriesYardsStats(struct game_data* game_data)
+void UpdateCarriesYardsStats(struct game_data* game_data, int yards_gained)
 {
 	if (game_data->matchup_number == 5)
 	{
@@ -872,6 +974,30 @@ void UpdateCarriesYardsStats(struct game_data* game_data)
 		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_CARRIES]++;
 		game_data->runningback_stats[GetRBID(game_data->formation, game_data->matchup_number) + (NUMBER_OF_RB_NAMES_PER_TEAM * (game_data->team_in_possession - 1))][RB_YARDS] += yards_gained;
 	}
+}
+
+/*
+* NAME:        IntGroundingFoul
+* DESCRIPTION: check for int grounding foul
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+bool IntGroundingFoul(struct game_data* game_data)
+{
+	if (game_data->fouls && game_data->matchup_number == 5)
+	{
+		if (TableWeightDecision(int_grounding_fouls_chance, true))
+		{
+			ShowFlagThrown(game_data);
+			game_data->flag_thrown = true;
+			ConsoleShowGameScreen(game_data, "          ", true, GAME_SPEED * 5);
+			ConsoleShowGameScreen(game_data, "Intentional grounding", true, GAME_SPEED * 20);
+			ConsoleShowGameScreen(game_data, "Intentional grounding, 10 yard penalty", false, GAME_SPEED * 20);
+			MoveLineOfScrimmage(game_data, FOULS_INT_GROUNDING_YARDS);
+			return true;
+		}
+	}
+	return false;
 }
 
 /*
@@ -891,7 +1017,7 @@ void PlayRun(struct game_data* game_data)
 
 	int yards_gained = RunPlayYardsGained(game_data);
 	
-	UpdateCarriesYardsStats(game_data);
+	UpdateCarriesYardsStats(game_data, yards_gained);
 
 	if(game_data->matchup_number == 5)
 	{
@@ -901,6 +1027,8 @@ void PlayRun(struct game_data* game_data)
 			char buf[256];
 			snprintf(buf, sizeof(buf), "%s threw the ball away ", GetTargetPlayerName(game_data));
 			ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
+
+			IntGroundingFoul(game_data);
 		}
 		// TODO: FOULS here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
 	}
@@ -1137,6 +1265,48 @@ void StoreHeadToHeadCards(struct game_data* game_data)
 	game_data->o_cards[0] = O1;
 	game_data->d_cards[0] = D1;
 }
+
+/*
+* NAME:        LosFouls
+* DESCRIPTION: check for line of scrim fouls
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+bool LosFouls(struct game_data* game_data)
+{
+	if (game_data->fouls && game_data->matchup_number > 0 && game_data->matchup_number < 5)
+	{
+		if (TableWeightDecision(los_fouls_chance, true))
+		{
+			ShowFlagThrown(game_data);
+
+			if (TableWeightDecision(fifty_fifty_chance, true)) // offence or defence
+			{
+				// offside, defence
+				ConsoleShowGameScreen(game_data, "Offside", true, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "Offside, defence", false, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "Offside, defence, 5 yard penalty", false, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "Offside, defence, 5 yard penalty, repeat down", false, GAME_SPEED * 20);
+				MoveLineOfScrimmage(game_data, FOULS_OFFSIDE_YARDS);
+			}
+			else
+			{
+				// false start, offence
+				ConsoleShowGameScreen(game_data, "False start", true, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "False start, offence", false, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "False start, offence, 5 yard penalty", false, GAME_SPEED * 20);
+				ConsoleShowGameScreen(game_data, "False start, offence, 5 yard penalty, repeat down", false, GAME_SPEED * 20);
+				MoveLineOfScrimmage(game_data, FOULS_FALSE_START_YARDS);
+			}
+			game_data->down--;
+			game_data->plays_remaining_in_quarter++;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /*
 * NAME:        PlayNormal
 * DESCRIPTION: execute the play
@@ -1188,6 +1358,9 @@ void PlayNormal(struct game_data* game_data)
 
 	game_data->matchup_number = GetMatchupNumber(game_data); // Show all 8 cards and "O: pick which of the 4 match ups to play"
 
+	if (LosFouls(game_data))
+		return;
+
 	SetRunOrPassPlay(game_data);
 	
 	StoreHeadToHeadCards(game_data);
@@ -1209,7 +1382,7 @@ void PlayNormal(struct game_data* game_data)
 int GetPuntCardsToRedraw(struct game_data* game_data) {
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(game_data), PUNT_REDRAW_MAX_CARDS);
+	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), PUNT_REDRAW_MAX_CARDS);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int num = 0;
@@ -1260,7 +1433,7 @@ int GetPuntCardsToDraw(struct game_data* game_data) {
 int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0 - %d): ", TotalYardsOffence(game_data), FIELD_GOAL_REDRAW_MAX_CARDS);
+	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), FIELD_GOAL_REDRAW_MAX_CARDS);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
 
 	int num = 0;
@@ -1435,7 +1608,68 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 		else if ((game_data->formation == 1 && game_data->matchup_number == 3))
 			return game_data->team_2_rb_names[1];
 	}
-	return -1;
+	return NULL;
+}
+
+/*
+* NAME:        GetOnsideKickCardsToRedraw
+* DESCRIPTION: ask and return how many cards to draw in the onside kick redraw
+* INPUTS:      game_data
+* OUTPUTS:     int
+*/
+int GetOnsideKickCardsToRedraw(struct game_data* game_data) {
+
+	char buf[256];
+	snprintf(buf, sizeof(buf), "Current total: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), ONSIDE_KICK_REDRAW_MAX_CARDS);
+	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
+
+	int num = 0;
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		num = atoi(input);
+	}
+
+	if (num > ONSIDE_KICK_REDRAW_MAX_CARDS)
+		num = ONSIDE_KICK_REDRAW_MAX_CARDS;
+	else if (num < 0)
+		num = 0;
+
+	return num;
+}
+
+/*
+* NAME:        PlayOnsideKick
+* DESCRIPTION: execute the play
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void PlayOnsideKick(struct game_data* game_data)
+{
+	ConsoleShowGameScreen(game_data, "Onside kick...", true, GAME_SPEED * 20); // announce onside kick
+	ConsoleShowGameScreen(game_data, "Value of exactly 20 needed", true, GAME_SPEED * 20); // announce onside kick
+	DrawCards(game_data, game_data->team_in_possession, ONSIDE_KICK_CARDS_TO_DRAW, true); // draw 1-5 cards// onside kick mini game is draw 3 cards, 
+	RedrawCards(game_data, game_data->team_in_possession, GetOnsideKickCardsToRedraw(game_data)); // replace up to 2 of them and need exactly 20 total 
+	
+	int total = TotalYardsOffence(game_data);
+	if (total == ONSIDE_KICK_TARGET_TOTAL) // to recover ball 10 ? yards ahead of LoS or the other team gets ball there instead.
+	{
+		char buf2[256];
+		snprintf(buf2, sizeof(buf2), "Total = %d!", total);
+		ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Ball recovered by the kicking team", true, GAME_SPEED * 20);
+	}
+	else
+	{
+		char buf2[256];
+		snprintf(buf2, sizeof(buf2), "Total = %d", total);
+		ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
+		ConsoleShowGameScreen(game_data, "Receiving team take over", true, GAME_SPEED * 20);
+	}
+	MoveLineOfScrimmage(game_data, ONSIDE_KICK_YARDS);
+	if (total != ONSIDE_KICK_TARGET_TOTAL)
+		SwitchPossession(game_data);
+	game_data->down = 0;
+	ResetLineOfFirstDown(game_data);
 }
 
 /*
@@ -1992,6 +2226,25 @@ int GetOneOrTwoPointConversion(struct game_data* game_data)
 }
 
 /*
+* NAME:        GetKickoffOrOnsideKick
+* DESCRIPTION: ask for and return the conversion type
+* INPUTS:      game_data
+* OUTPUTS:     int 1 = 1 pt attempt, 2 = 2 pt attempt
+*/
+int GetKickoffOrOnsideKick(struct game_data* game_data)
+{
+	int play = 1;
+	ConsoleShowGameScreen(game_data, "Kickoff or Onside Kick? (1-2): ", true, GAME_SPEED * 2);
+	char input[16];
+	if (fgets(input, sizeof(input), stdin)) {
+		play = atoi(input);
+	}
+	if (play != 1 && play != 2)
+		play = 1;
+	return play;
+}
+
+/*
 * NAME:        UpdateLongestPlayStats
 * DESCRIPTION: update stat for longest play 
 * INPUTS:      game_data
@@ -2153,6 +2406,11 @@ void ExecutePlay(struct game_data* game_data)
 				retry = PlayTimeout(game_data);
 			break;
 		}
+		case PLAY_ONSIDE_KICK:
+		{
+			PlayOnsideKick(game_data);
+			break;
+		}
 		default:
 		{
 			retry = true;
@@ -2176,15 +2434,18 @@ void DoPlay(struct game_data* game_data)
 {
 	if (game_data->kickoff_needed)
 	{
-		game_data->play_type = 2; // always punt on first play of each half
+		if(GetKickoffOrOnsideKick(game_data) == 1)
+			game_data->play_type = PLAY_TYPE_PUNT; // punt on kickoff
+		else
+			game_data->play_type = PLAY_ONSIDE_KICK; // or onside kick
 		game_data->kickoff_needed = false;
 	}
 	else if (game_data->extra_point_needed)
 	{
 		if (GetOneOrTwoPointConversion(game_data) == 2) // ask player if 1 or 2 point conversion?
-			game_data->play_type = 1;						  // 2 pt attempt
+			game_data->play_type = PLAY_TYPE_NORMAL;						  // 2 pt attempt
 		else
-			game_data->play_type = 3;						  // 1 pt attempt
+			game_data->play_type = PLAY_TYPE_FIELD_GOAL;						  // 1 pt attempt
 	}
 	else
 	{

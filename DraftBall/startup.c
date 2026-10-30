@@ -13,7 +13,7 @@ void ResetScreen();
 */
 void PrintTextWithDelays(char txt[1000])
 {
-	for (int i = 0; i < MAX_STRING_lENGTH && txt[i] != '\0'; i++)
+	for (int i = 0; i < MAX_STRING_LENGTH && txt[i] != '\0'; i++)
 	{
 		printf("%c", txt[i]);
 		Sleep(10);

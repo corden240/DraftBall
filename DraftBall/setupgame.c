@@ -199,7 +199,7 @@ void CoinToss(struct game_data* game_data)
 	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s won the coin toss! Punt or receive (1 or 2): ",
+	snprintf(buf, sizeof(buf), "%s won the coin toss! Kickoff or receive? (1 or 2): ",
 		(team_that_won_cointoss == 1) ? game_data->team_1_name : game_data->team_2_name);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
 
@@ -521,6 +521,7 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	}
 
 	game_data->drive_over = false;
+	game_data->flag_thrown = false;
 }
 
 /*

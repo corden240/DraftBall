@@ -595,12 +595,16 @@ void ShowText(struct game_data* game_data, char txt[1000], bool text_delay)
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("\r\n\r\n                                                                                             ");
 	printf("\r                                 ");
-	for (int i = 0; i < MAX_STRING_lENGTH && txt[i] != '\0'; i++)
+	if(game_data->flag_thrown)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+
+	for (int i = 0; i < MAX_STRING_LENGTH && txt[i] != '\0'; i++)
 	{
 		printf("%c", txt[i]);
 		if(text_delay)
 			Sleep(GAME_SPEED / 5);
 	}
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 }
 
 /*

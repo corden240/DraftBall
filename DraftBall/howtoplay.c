@@ -235,19 +235,19 @@ static void ShowRulesFumblesandint()
 }
 
 /*
-* NAME:        ShowRulesPunting
+* NAME:        ShowRulesKickoffAndPunting
 * DESCRIPTION: show punt rules
 * INPUTS:      none
 * OUTPUTS:     none
 */
-static void ShowRulesPunting()
+static void ShowRulesKickoffAndPunting()
 {
 	system("cls");
 	ShowMenuTitle();
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	printf("\r\n");
 	printf("\r\n                            ");
-	PrintTextWithDelays("Punting:");
+	PrintTextWithDelays("Kickoffs and Punting:");
 
 	printf("\r\n\r\n                            ");
 	char buffer[256];
@@ -274,14 +274,12 @@ static void ShowRulesPunting()
 	printf("\r\n                            ");
 	PrintTextWithDelays("If O2 is a face card AND it's bigger than D1 then its an open field run");
 
-	printf("\r\n                            ");
-	PrintTextWithDelays("An open field run allows the runner to draw cards for more yards");
-
-	printf("\r\n                            ");
-	PrintTextWithDelays("Jack = 1 card, Queen = 2 cards, King = 3 cards");
-
 	printf("\r\n\r\n                            ");
 	PrintTextWithDelays("Kickoffs work in the same way as punts");
+	printf("\r\n                            ");
+	PrintTextWithDelays("For onside kicks, you draw 3 cards and can replace 2");
+	printf("\r\n                            ");
+	PrintTextWithDelays("A total of exactly 20 is needed for a recovery");
 
 	printf("\r\n\r\n                                        ");
 	printf("               ");
@@ -408,13 +406,13 @@ static void ShowRulesOptions(int current_menu_selection, bool first_text)
 		}
 		else if (i == 4)
 		{
-			printf("              ");
+			printf("        ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Punting");
+				PrintTextWithDelays("Kickoffs and Punting");
 			else
-				printf("Punting");
+				printf("Kickoffs and Punting");
 		}
 		else if (i == 5)
 		{
@@ -512,7 +510,7 @@ void ExecuteHowToPlayMenuChoice(int selection)
 	}
 	else if (selection == 4) // Punting
 	{
-		ShowRulesPunting();
+		ShowRulesKickoffAndPunting();
 	}
 	else if (selection == 5) // Field goals and XPs
 	{

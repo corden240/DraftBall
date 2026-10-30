@@ -119,6 +119,7 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
 		game_data->d_cards_to_flash[i] = false;
 	}
+	game_data->flag_thrown = false;
 }
 
 /*

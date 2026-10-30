@@ -82,11 +82,20 @@
 
 #define YARDS_PER_FIRST_DOWN (10)
 
+#define FOULS_OFFSIDE_YARDS (5)
+#define FOULS_FALSE_START_YARDS (-5)
+#define FOULS_INT_GROUNDING_YARDS (-10)
+
+#define ONSIDE_KICK_CARDS_TO_DRAW (3)
+#define ONSIDE_KICK_REDRAW_MAX_CARDS (2)
+#define ONSIDE_KICK_TARGET_TOTAL (20)
+#define ONSIDE_KICK_YARDS (10)
+
 #define NUMBER_OF_DECKS (3)
 #define CARDS_IN_A_DECK (52)
 
 #define MAX_WEIGHTS_IN_TABLE (1000)
-#define MAX_STRING_lENGTH (1000)
+#define MAX_STRING_LENGTH (1000)
 
 #define VALUE       (0x00000f)
 #define SUIT        (0x0000f0)
@@ -141,7 +150,8 @@ enum play_types {
 	PLAY_TYPE_PUNT = 2,
 	PLAY_TYPE_FIELD_GOAL = 3,
 	PLAY_TYPE_KNEEL = 4,
-	PLAY_TYPE_TIMEOUT = 5
+	PLAY_TYPE_TIMEOUT = 5,
+	PLAY_ONSIDE_KICK = 6
 };
 
 enum quarterback_stats {
@@ -249,6 +259,8 @@ struct game_data {
 	int receiver_stats[NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RECEIVER_STATS];
 
 	int current_players_yards_pre_snap;
+
+	bool flag_thrown;
 };
 
 struct season_data {
@@ -283,7 +295,10 @@ struct card_name {
 	const char* name;
 };
 extern struct card_name card_names[];
-
+extern struct table_weight los_fouls_chance[];
+extern struct table_weight fifty_fifty_chance[];
+extern struct table_weight int_grounding_fouls_chance[];
+extern struct table_weight pass_interference_chance[];
 /* Prototypes */
 void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], bool text_delay, int pause);
 void TableWeightEnableAll(struct table_weight* table);
