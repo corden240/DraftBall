@@ -735,8 +735,10 @@ void PlayPass(struct game_data* game_data)
 */
 void PlayRun(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Run play ", true, GAME_SPEED * 10);
-	//TODO: alternative text, "QB Scramble"
+	if (game_data->matchup_number == 5) 
+		ConsoleShowGameScreen(game_data, "QB scramble ", true, GAME_SPEED * 10);
+	else
+		ConsoleShowGameScreen(game_data, "Run play ", true, GAME_SPEED * 10);
 
 	DrawCards(game_data, game_data->team_in_possession, RUN_PLAY_OFFENCE_CARDS_TO_DRAW, true);
 	DrawCards(game_data, game_data->team_not_in_possession, RUN_PLAY_DEFENCE_CARDS_TO_DRAW, true);
@@ -789,10 +791,14 @@ void PlayRun(struct game_data* game_data)
 	
 	if(game_data->matchup_number == 5)
 	{
-		if(yards_gained < 0)
+		if (yards_gained < 0)
+		{
 			yards_gained = 0;
-		// TODO: announce qb threw the ball away before being sacked
-		// here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
+			char buf[256];
+			snprintf(buf, sizeof(buf), "%s threw the ball away ", GetTargetPlayerName(game_data));
+			ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
+		}
+		// TODO: FOULS here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
 		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
 		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
 	}
@@ -849,6 +855,8 @@ void PlayTwoPointConversion(struct game_data* game_data)
 	{
 		game_data->line_of_scrimmage = END_ZONE_WIDTH + TWO_POINT_CONVERSION_YARDS;
 	}
+
+	game_data->down = 1;
 
 	PlayNormal(game_data); // not fully correct because in a conversion a pick 6 cant happen but it can in PlayNormal, need to guard for this
 }
@@ -953,6 +961,7 @@ void SetRunOrPassPlay(struct game_data* game_data)
 	if(game_data->matchup_number == 5){ // qb scramble is a run
 		game_data->run_play = 1;
 		game_data->pass_play = 0;
+		return;
 	}
 	
 	if (game_data->formation == 1)

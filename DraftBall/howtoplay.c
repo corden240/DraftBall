@@ -29,11 +29,11 @@ static void ShowRulesGeneral()
 	PrintTextWithDelays("The rules are mostly the same as NFL");
 
 	printf("\r\n                            ");
-	PrintTextWithDelays("The only controls needed to play are numbers, arrows and enter");
+	PrintTextWithDelays("The only controls needed to play are numbers, y/n, arrows and enter");
 
 	printf("\r\n                            ");
 	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "Games consist of 4 quarters with %d plays, timeouts add 1 play to the clock", DEFAULT_PLAYS_PER_QUARTER);
+	snprintf(buffer, sizeof(buffer), "Games consist of 4 quarters with %d plays", DEFAULT_PLAYS_PER_QUARTER);
 	PrintTextWithDelays(buffer);
 
 	printf("\r\n\r\n                            ");
@@ -50,6 +50,15 @@ static void ShowRulesGeneral()
 	PrintTextWithDelays("4d");
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	PrintTextWithDelays(" = 4 of Diamonds");
+
+	printf("\r\n\r\n                            ");
+	PrintTextWithDelays("With possession, you pick: Normal Play, Punt, Field Goal, QB Kneel, Timeout");
+	printf("\r\n                            ");
+	PrintTextWithDelays("Normal play contains run plays, pass plays and qb scrambles (matchup 5)");
+	printf("\r\n                            ");
+	PrintTextWithDelays("QB kneel will take 1 play off the clock");
+	printf("\r\n                            ");
+	PrintTextWithDelays("Timeout will add 1 play to the clock");
 
 	printf("\r\n\r\n                                        ");
 	printf("               ");
@@ -109,7 +118,7 @@ static void ShowRulesPass()
 
 	printf("\r\n                            ");
 	PrintTextWithDelays("If O card is a face card AND it is bigger than D card then its an open field run");
-	
+
 	printf("\r\n\r\n                                        ");
 	printf("               ");
 	SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
@@ -167,6 +176,8 @@ static void ShowRulesRun()
 	printf("\r\n                            ");
 	PrintTextWithDelays("Jack = 1 card, Queen = 2 cards, King = 3 cards");
 
+	printf("\r\n\r\n                            ");
+	PrintTextWithDelays("A qb scramble is a run play with identical O and D cards, you can't lose yards");
 
 	printf("\r\n\r\n                                        ");
 	printf("               ");
@@ -347,7 +358,10 @@ static void ShowRulesOptions(int current_menu_selection, bool first_text)
 
 	printf("\r\n\r\n                                        ");
 	printf("            ");
-	PrintTextWithDelays("How To Play");
+	if(first_text)
+		PrintTextWithDelays("How To Play");
+	else
+		printf("How To Play");
 
 	for (int i = 0; i < RULES_OPTIONS_NUMBER; i++)
 	{
