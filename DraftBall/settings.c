@@ -197,7 +197,6 @@ void ExecuteSettingsMenuChoice(int selection, struct total_data* total_data)
 */
 void Settings(struct total_data* total_data)
 {
-	total_data->fouls;
 	system("cls");
 	ShowMenuTitle();
 	ShowSettingsOptions(0, true, total_data);

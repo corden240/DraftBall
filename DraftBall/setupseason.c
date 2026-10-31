@@ -86,8 +86,6 @@ void SetTeamNamesSeason(struct game_data* game_data)
 		game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
 		ConsoleShowGameScreen(game_data, 0, true, 0);
 	}
-	else
-		game_data->players_named = false;
 }
 
 /*

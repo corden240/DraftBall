@@ -3,6 +3,7 @@
 #include <time.h>     /* time() */
 #include "main.h"
 #include <string.h>
+#include <windows.h>
 
 void SwitchPossession(struct game_data* game_data);
 void ResetLineOfFirstDown(struct game_data* game_data);
@@ -10,6 +11,9 @@ void ResetLineOfScrimmage(struct game_data* game_data);
 void PlayGame(struct game_data* game_data);
 int GetDirectionOfPlay(struct game_data* game_data);
 bool OutBackOfEndZone(struct game_data* game_data);
+void ShowMenuTitle();
+void PrintTextWithDelays(char txt[1000]);
+void ResetScreen();
 
 /*
 * NAME:        ResetLineOfScrimmage
@@ -231,97 +235,122 @@ void CoinToss(struct game_data* game_data)
 }
 
 /*
-* NAME:        SetTeamColours
+* NAME:        SetExhibitionTeamColours
 * DESCRIPTION: setup team colours
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetTeamColours(struct game_data* game_data)
+void SetExhibitionTeamColours(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Would you like to pick team colours? y/n ", true, 0);
-	char input[16];
-	fgets(input, sizeof(input), stdin);
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	bool team_1_colour_done = false;
+	bool team_2_colour_done = false;
+	do {
+		system("cls");
+		ResetScreen();
+		ShowMenuTitle();
 
-	if (input[0] == 'Y' || input[0] == 'y')
-	{
-		bool team_1_colour_done = false;
-		bool team_2_colour_done = false;
-		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 1 (1-8): ", true, 0);
-			char input1[16];
-			fgets(input1, sizeof(input1), stdin);
-			int team_1_colour = atoi(input1);
-			if (team_1_colour < 1)
-				team_1_colour = 1;
-			else if (team_1_colour > 8)
-				team_1_colour = 8;
-			game_data->team_1_colour = team_1_colour;
+		printf("\r\n\r\n                                        ");
+		printf("     ");
+		PrintTextWithDelays("Enter colour for Team 1 (1-8): ");
+		char input1[16];
+		fgets(input1, sizeof(input1), stdin);
+		int team_1_colour = atoi(input1);
+		if (team_1_colour < 1)
+			team_1_colour = 1;
+		else if (team_1_colour > 8)
+			team_1_colour = 8;
+		game_data->team_1_colour = team_1_colour;
 
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
-			char input2[16];
-			fgets(input2, sizeof(input2), stdin);
-			if (input2[0] == 'Y' || input2[0] == 'y')
-				team_1_colour_done = true;
-		} while (!team_1_colour_done);
+		system("cls");
+		ResetScreen();
+		ShowMenuTitle();
 
-		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 2 (1-8): ", true, 0);
-			char input3[16];
-			fgets(input3, sizeof(input3), stdin);
-			int team_2_colour = atoi(input3);
-			if (team_2_colour < 1)
-				team_2_colour = 1;
-			else if (team_2_colour > 8)
-				team_2_colour = 8;
-			game_data->team_2_colour = team_2_colour;
+		printf("\r\n\r\n                                        ");
+		printf("   ");
+		SetConsoleTextAttribute(hConsole, game_data->team_1_colour);
+		PrintTextWithDelays("Are you happy with this colour? y/n ");
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+		char input2[16];
+		fgets(input2, sizeof(input2), stdin);
+		if (input2[0] == 'Y' || input2[0] == 'y')
+			team_1_colour_done = true;
+	} while (!team_1_colour_done);
 
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
-			char input4[16];
-			fgets(input4, sizeof(input4), stdin);
-			if (input4[0] == 'Y' || input4[0] == 'y')
-				team_2_colour_done = true;
-		} while (!team_2_colour_done);
-	}
-	else
-		game_data->players_named = false;
+	do {
+		system("cls");
+		ResetScreen();
+		ShowMenuTitle();
+
+		printf("\r\n\r\n                                        ");
+		printf("     ");
+		PrintTextWithDelays("Enter colour for Team 2 (1-8): ");
+		char input3[16];
+		fgets(input3, sizeof(input3), stdin);
+		int team_2_colour = atoi(input3);
+		if (team_2_colour < 1)
+			team_2_colour = 1;
+		else if (team_2_colour > 8)
+			team_2_colour = 8;
+		game_data->team_2_colour = team_2_colour;
+
+		system("cls");
+		ResetScreen();
+		ShowMenuTitle();
+
+		printf("\r\n\r\n                                        ");
+		printf("   ");
+		SetConsoleTextAttribute(hConsole, game_data->team_2_colour);
+		PrintTextWithDelays("Are you happy with this colour? y/n ");
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+		char input4[16];
+		fgets(input4, sizeof(input4), stdin);
+		if (input4[0] == 'Y' || input4[0] == 'y')
+			team_2_colour_done = true;
+	} while (!team_2_colour_done);
+
+	game_data->players_named = true;
 }
 
 /*
-* NAME:        SetTeamNames
+* NAME:        SetExhibitionTeamNames
 * DESCRIPTION: setup team names
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetTeamNames(struct game_data* game_data)
+void SetExhibitionTeamNames(struct game_data* game_data)
 {
-	ConsoleShowGameScreen(game_data, "Would you like to name your teams? y/n ", true, 0);
-	char input[16];
-	fgets(input, sizeof(input), stdin);
+	system("cls");
+	ResetScreen();
+	ShowMenuTitle();
 
-	if (input[0] == 'Y' || input[0] == 'y')
-	{
-		strcpy(game_data->team_1_name, " ");
-		strcpy(game_data->team_2_name, " ");
+	strcpy(game_data->team_1_name, " ");
+	strcpy(game_data->team_2_name, " ");
 
-		ConsoleShowGameScreen(game_data, "Enter name for Team 1: ", true, 0);
-		fgets(game_data->team_1_name, sizeof(game_data->team_1_name), stdin);
-		game_data->team_1_name[strcspn(game_data->team_1_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, "Enter name for Team 2: ", true, 0);
-		fgets(game_data->team_2_name, sizeof(game_data->team_2_name), stdin);
-		game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, 0, true, 0);
-	}
-	else
-		game_data->players_named = false;
+	printf("\r\n\r\n                                        ");
+	printf("       ");
+	PrintTextWithDelays("Enter name for Team 1: ");
+	fgets(game_data->team_1_name, sizeof(game_data->team_1_name), stdin);
+	game_data->team_1_name[strcspn(game_data->team_1_name, "\n")] = '\0';
+	
+	system("cls");
+	ResetScreen();
+	ShowMenuTitle();
+	printf("\r\n\r\n                                        ");
+	printf("       ");
+	PrintTextWithDelays("Enter name for Team 2: ");
+	fgets(game_data->team_2_name, sizeof(game_data->team_2_name), stdin);
+	game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
 }
 
 /*
-* NAME:        GetPlayerNames
+* NAME:        SetExhibitionPlayerNames
 * DESCRIPTION: setup player names
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void SetPlayerNames(struct game_data* game_data)
+void SetExhibitionPlayerNames(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "Would you like to name your players? y/n ", true, 0);
 	char input[16];
@@ -525,6 +554,210 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 }
 
 /*
+* NAME:        ShowExhibitionGameSetupOptions
+* DESCRIPTION: game menu options
+* INPUTS:      current selection, delay or not
+* OUTPUTS:     none
+*/
+static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool first_text, struct game_data* game_data)
+{
+	ResetScreen();
+	ShowMenuTitle();
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	printf("\r\n\r\n                                        ");
+	printf("            ");
+	if (first_text)
+		PrintTextWithDelays("Game Settings");
+	else
+		printf("Game Settings");
+
+	for (int i = 0; i < EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER; i++)
+	{
+		printf("\r\n\r\n                                        ");
+		if (i == 0)
+		{
+			printf("           ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Customise teams");
+			else
+				printf("Customise teams");
+		}
+		else if (i == 1)
+		{
+			printf("          ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Customise players");
+			else
+				printf("Customise players");
+		}
+		else if (i == 2)
+		{
+			printf("          ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Fouls");
+			else
+				printf("Fouls");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("    ");
+			if (game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("On");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" / ");
+			if (!game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("Off");
+		}
+		else if (i == 3)
+		{
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Plays per quarter");
+			else
+				printf("Plays per quarter");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("     ");
+
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("5");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + STEPS_PLAYS_PER_QUARTER)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("10");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 2))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("15");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 3))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("20");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + ((5) * 4))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("25");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->plays_per_quarter == MIN_PLAYS_PER_QUARTER + (STEPS_PLAYS_PER_QUARTER * 5))
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("30");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+		}
+		else if (i == 4)
+		{
+			printf("             ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Start game");
+			else
+				printf("Start game");
+		}
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	}
+}
+
+/*
+* NAME:        ExhibitionSetupMenuOutcome
+* DESCRIPTION: Gets which entry picked
+* INPUTS:      none
+* OUTPUTS:     menu selection
+*/
+int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
+
+	bool game_chosen = false;
+	int current_menu_selection = 0;
+	do {
+		ShowExhibitionGameSetupOptions(current_menu_selection, false, game_data);
+		int ch = getch();
+
+		if (ch == 0 || ch == 224) {   // extended key: read the scan code
+			ch = getch();
+			switch (ch) {
+			case 72: // up arrow
+				if (current_menu_selection > 0) {
+					current_menu_selection--;
+				}
+				else
+					current_menu_selection = (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1);
+				break;
+			case 80: // down arrow
+				if (current_menu_selection < (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1)) {
+					current_menu_selection++;
+				}
+				else
+					current_menu_selection = 0;
+				break;
+			case 75: // left arrow
+				if (current_menu_selection == 3 && game_data->plays_per_quarter > MIN_PLAYS_PER_QUARTER)
+					game_data->plays_per_quarter -= STEPS_PLAYS_PER_QUARTER;
+				else if (current_menu_selection == 2 && game_data->fouls == false)
+					game_data->fouls = true;
+				break;
+			case 77: // right arrow
+				if (current_menu_selection == 3 && game_data->plays_per_quarter < MAX_PLAYS_PER_QUARTER)
+					game_data->plays_per_quarter += STEPS_PLAYS_PER_QUARTER;
+				else if (current_menu_selection == 2 && game_data->fouls == true)
+					game_data->fouls = false;
+				break;
+			default:
+				break;
+			}
+		}
+		else if (ch == 13) {// Enter key
+			if (current_menu_selection == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1) || (current_menu_selection == 0) || (current_menu_selection == 1)) {
+				game_chosen = true;
+				return current_menu_selection;
+			}
+		}
+		else
+			;
+		// any other key: ignored, loop waits for another press
+	} while (!game_chosen);
+	return -1;
+}
+
+/*
+* NAME:        ExecuteExhibitionSetupMenuChoice
+* DESCRIPTION: play out each menu option
+* INPUTS:      selection
+* OUTPUTS:     none
+*/
+void ExecuteExhibitionSetupMenuChoice(int selection, struct game_data* game_data)
+{
+	if (selection == 0) // customise team
+	{
+		SetExhibitionTeamNames(game_data);	
+		SetExhibitionTeamColours(game_data);
+	}
+	else if (selection == 1) // customise players
+	{
+		SetExhibitionPlayerNames(game_data);
+	}
+
+	system("cls");
+}
+
+/*
 * NAME:        SetupExhibitionGame
 * DESCRIPTION: initialises data such as team names, coin toss, starting possession etc
 * INPUTS:      game_data
@@ -534,11 +767,15 @@ void SetupExhibitionGame(struct game_data* game_data, struct total_data* total_d
 {
 	ExhibitionGameDataConstructor(game_data, total_data);
 
-	SetTeamNames(game_data);
-
-	SetTeamColours(game_data);
-
-	SetPlayerNames(game_data);
+	system("cls");
+	ShowMenuTitle();
+	ShowExhibitionGameSetupOptions(0, true, game_data);
+	do {
+		int selection = ExhibitionSetupMenuOutcome(game_data);
+		if (selection == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1))
+			return;
+		ExecuteExhibitionSetupMenuChoice(selection, game_data);
+	} while (1);
 
 	CoinToss(game_data);
 }
