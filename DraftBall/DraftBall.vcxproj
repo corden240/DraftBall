@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="teamdata.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="main_d.prt" />

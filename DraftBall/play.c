@@ -27,6 +27,7 @@ void PlayGame(struct game_data* game_data);
 int ConvertLosToYardLine(struct game_data* game_data);
 int GetTimeoutTeam(struct game_data* game_data);
 void GameStats(struct game_data* game_data);
+void ResetScreen();
 
 /*
 * NAME:        GetRBID

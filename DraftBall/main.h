@@ -15,7 +15,7 @@
 #define MENU_OPTIONS_NUMBER (6)
 
 #define RULES_OPTIONS_NUMBER (7)
-#define EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER (5)
+#define EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER (7)
 
 #define SETTINGS_OPTIONS_NUMBER (3)
 
@@ -262,6 +262,9 @@ struct game_data {
 	int current_players_yards_pre_snap;
 
 	bool flag_thrown;
+
+	bool one_player;
+	bool two_player;
 };
 
 struct season_data {

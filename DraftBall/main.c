@@ -12,7 +12,7 @@ void UnHideCursor();
 void Startup();
 int MenuOutcome(struct total_data* menu);
 void ExhibitionGameDataConstructor(struct game_data* game_data);
-void SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data);
+int SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data);
 void PlayGame(struct game_data* game_data);
 void Settings();
 void SetupSeason(struct season_data* season_data, struct total_data* total_data);
@@ -79,8 +79,8 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			total_data->current_game_mode = 0;
 			system("cls");
 			struct game_data game_data;
-			SetupExhibitionGame(&game_data, total_data);
-			PlayGame(&game_data);
+			if (SetupExhibitionGame(&game_data, total_data) == 1)
+				PlayGame(&game_data);
 		}
 		else if (menu_outcome == 1) // play season
 		{
