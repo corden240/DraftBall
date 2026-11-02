@@ -41,7 +41,7 @@ int GetRBID(int formation, int matchup)
 		return 0;
 	else if (formation == 1 && matchup == 3) 
 		return 1;
-	return -1; // TODO: add a break point here for debug
+	return -1;
 }
 
 /*
@@ -56,11 +56,11 @@ int GetWRID(int formation, int matchup)
 		return 0;
 	else if ((formation == 1 && matchup == 4) || (formation == 2 && matchup == 3) || (formation == 3 && matchup == 2))
 		return 1;
-	else if ((formation == 2 && matchup == 4) || (formation == 3 && matchup == 4))
+	else if ((formation == 2 && matchup == 4) || (formation == 3 && matchup == 3))
 		return 2;
 	else if ((formation == 3 && matchup == 4))
 		return 3;
-	return -1; // TODO: add a break point here for debug
+	return -1;
 }
 
 /*

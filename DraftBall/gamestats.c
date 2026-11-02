@@ -53,6 +53,26 @@ void FillMissingGameData(struct game_data* game_data)
 		float c = ((float)game_data->quarterback_stats[team][QB_TOUCHDOWNS] / attempts) * 20.0f;
 		float d = 2.375f - (((float)game_data->quarterback_stats[team][QB_INTERCEPTIONS_THROWN] / attempts) * 25.0f);
 
+		if (a < 0)
+			a = 0;
+		else if (a > 2.375)
+			a = 2.375;
+
+		if (b < 0)
+			b = 0;
+		else if (b > 2.375)
+			b = 2.375;
+
+		if (c < 0)
+			c = 0;
+		else if (c > 2.375)
+			c = 2.375;
+
+		if (d < 0)
+			d = 0;
+		else if (d > 2.375)
+			d = 2.375;
+
 		float passer_rating = ((a + b + c + d) / 6.0f) * 100.0f;
 		if (passer_rating < 0)
 			passer_rating = 0;
@@ -60,7 +80,6 @@ void FillMissingGameData(struct game_data* game_data)
 			passer_rating = 158.3;
 		game_data->quarterback_stats[team][QB_RATING] = (int)passer_rating;
 	}
-
 
 	for (int team = 0; team < NUMBER_OF_TEAMS_PER_GAME; team++)
 	{

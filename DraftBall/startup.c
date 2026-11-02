@@ -399,16 +399,6 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		}
 		else if (i == 4)
 		{
-			printf("        ");
-			if (total_data->current_menu_selection == i)
-				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
-			if (first_text)
-				PrintTextWithDelays("Settings");
-			else
-				printf("Settings");
-		}
-		else if (i == 5)
-		{
 			printf("          ");
 			if (total_data->current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);

@@ -148,7 +148,6 @@
     <ClCompile Include="play.c" />
     <ClCompile Include="rng.c" />
     <ClCompile Include="season.c" />
-    <ClCompile Include="settings.c" />
     <ClCompile Include="setupgame.c" />
     <ClCompile Include="setupseason.c" />
     <ClCompile Include="setuptwomindrive.c" />

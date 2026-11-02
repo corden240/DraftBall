@@ -104,11 +104,6 @@ void ExecuteMenuChoice(struct total_data* total_data)
 			total_data->current_game_mode = 3;
 			HowToPlay();
 		}
-		else if (menu_outcome == 4) // settings page
-		{
-			total_data->current_game_mode = 4;
-			Settings(total_data);
-		}
 		system("cls");
 	} while (1);
 }

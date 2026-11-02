@@ -261,7 +261,7 @@ struct table_weight int_grounding_fouls_chance[] = {
 };
 
 struct table_weight pass_interference_chance[] = {
-	{0,   14/*000*/, true},
+	{0,   14000, true},
 	{1,    1000, true},
 	{0, -1, false}
 };

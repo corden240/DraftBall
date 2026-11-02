@@ -266,13 +266,16 @@ void ShowTopInfo(struct game_data* game_data)
 
 	printf("\n\r\n\r          ");
 
-	SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
-	printf(" ");// red box = line of scrim
+	if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_YELLOW) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_YELLOW))
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREY);
+	else
+		SetConsoleTextAttribute(hConsole, (game_data->team_in_possession - 1) ? (game_data->team_2_colour << 4) : (game_data->team_1_colour << 4));
+	printf(" ");// box = line of scrim
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of scrimmage   ");
 
-	SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
-	printf(" ");// purple box = line of 1st down
+	SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+	printf(" ");// box = line of 1st down
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of 1st down    ");
 
@@ -349,9 +352,14 @@ void DrawField(struct game_data* game_data)
 			}
 			else {
 				if (i == game_data->line_of_scrimmage)
-					SetConsoleTextAttribute(hConsole, CONSOLE_BG_RED);
+				{
+					if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_YELLOW) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_YELLOW))
+						SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREY);
+					else
+						SetConsoleTextAttribute(hConsole, (game_data->team_in_possession - 1) ? (game_data->team_2_colour << 4) : (game_data->team_1_colour << 4));
+				}
 				else if (i == game_data->line_of_first_down && game_data->play_type != PLAY_TYPE_PUNT && game_data->play_type != PLAY_TYPE_FIELD_GOAL && !game_data->kickoff_needed)
-					SetConsoleTextAttribute(hConsole, CONSOLE_BG_PURPLE);
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
 				else
 					SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 
