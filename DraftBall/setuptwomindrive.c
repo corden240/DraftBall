@@ -3,8 +3,23 @@
 #include <time.h>     /* time() */
 #include "main.h"
 #include <string.h>
+#include <windows.h>
+#include "teamdata.h"
+#include "main_d.prt"
 
 void ResetLineOfFirstDown(struct game_data* game_data);
+void SetupTeamData(struct game_data* game_data);
+void ShowMenuTitle();
+void PrintTextWithDelays(char txt[1000]);
+void ResetScreen();
+int GetTeam1LastID(struct game_data* game_data);
+int GetTeam1CurrentID(struct game_data* game_data);
+int GetTeam1NextID(struct game_data* game_data);
+int GetTeam2LastID(struct game_data* game_data);
+int GetTeam2CurrentID(struct game_data* game_data);
+int GetTeam2NextID(struct game_data* game_data);
+void PrintTeamNameField(HANDLE hConsole, const struct team_data* team, WORD name_attributes);
+void PrintThreeTeamNames(HANDLE hConsole, int last_id, int current_id, int next_id);
 
 /*
 * NAME:        TwoMinDriveGameDataConstructor
@@ -125,89 +140,9 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 
 	game_data->team_1_id = 10;
 	game_data->team_2_id = 21;
-}
 
-/*
-* NAME:        SetTeamColoursTwoMinDrive
-* DESCRIPTION: setup team colours
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void SetTeamColoursTwoMinDrive(struct game_data* game_data)
-{
-	ConsoleShowGameScreen(game_data, "Would you like to pick team colours? y/n ", true, 0);
-	char input[16];
-	fgets(input, sizeof(input), stdin);
-
-	if (input[0] == 'Y' || input[0] == 'y')
-	{
-		bool team_1_colour_done = false;
-		bool team_2_colour_done = false;
-		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 1 (1-8): ", true, 0);
-			char input1[16];
-			fgets(input1, sizeof(input1), stdin);
-			int team_1_colour = atoi(input1);
-			if (team_1_colour < 1)
-				team_1_colour = 1;
-			else if (team_1_colour > 8)
-				team_1_colour = 8;
-			game_data->team_1_colour = team_1_colour;
-
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
-			char input2[16];
-			fgets(input2, sizeof(input2), stdin);
-			if (input2[0] == 'Y' || input2[0] == 'y')
-				team_1_colour_done = true;
-		} while (!team_1_colour_done);
-
-		do {
-			ConsoleShowGameScreen(game_data, "Enter colour for Team 2 (1-8): ", true, 0);
-			char input3[16];
-			fgets(input3, sizeof(input3), stdin);
-			int team_2_colour = atoi(input3);
-			if (team_2_colour < 1)
-				team_2_colour = 1;
-			else if (team_2_colour > 8)
-				team_2_colour = 8;
-			game_data->team_2_colour = team_2_colour;
-
-			ConsoleShowGameScreen(game_data, "Are you happy with this colour? y/n ", true, 0);
-			char input4[16];
-			fgets(input4, sizeof(input4), stdin);
-			if (input4[0] == 'Y' || input4[0] == 'y')
-				team_2_colour_done = true;
-		} while (!team_2_colour_done);
-	}
-	else
-		game_data->players_named = false;
-}
-
-/*
-* NAME:        SetTeamNamesTwoMinDrive
-* DESCRIPTION: setup team names
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void SetTeamNamesTwoMinDrive(struct game_data* game_data)
-{
-	ConsoleShowGameScreen(game_data, "Would you like to name your teams? y/n ", true, 0);
-	char input[16];
-	fgets(input, sizeof(input), stdin);
-
-	if (input[0] == 'Y' || input[0] == 'y')
-	{
-		strcpy(game_data->team_1_name, " ");
-		strcpy(game_data->team_2_name, " ");
-
-		ConsoleShowGameScreen(game_data, "Enter name for Team 1: ", true, 0);
-		fgets(game_data->team_1_name, sizeof(game_data->team_1_name), stdin);
-		game_data->team_1_name[strcspn(game_data->team_1_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, "Enter name for Team 2: ", true, 0);
-		fgets(game_data->team_2_name, sizeof(game_data->team_2_name), stdin);
-		game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
-		ConsoleShowGameScreen(game_data, 0, true, 0);
-	}
+	game_data->two_min_drive_deficit_index = 0;
+	game_data->two_min_drive_yards_index = 0;
 }
 
 /*
@@ -218,21 +153,15 @@ void SetTeamNamesTwoMinDrive(struct game_data* game_data)
 */
 void SetTeamDeficit(struct game_data* game_data)
 {
-	bool score_set = false;
-	do {
-		ConsoleShowGameScreen(game_data, "Is the deficit 2/6/7: ", true, 0);
-		char input[16];
-		fgets(input, sizeof(input), stdin);
-		int choice = atoi(input);
+	int score_difference = 0;
+	if (game_data->two_min_drive_deficit_index == 0)
+		score_difference = TWO_MIN_DRIVE_DEFICIT_0;
+	else if (game_data->two_min_drive_deficit_index == 1)
+		score_difference = TWO_MIN_DRIVE_DEFICIT_1;
+	else if (game_data->two_min_drive_deficit_index == 2)
+		score_difference = TWO_MIN_DRIVE_DEFICIT_2;
 
-		if (choice == 2 || choice == 6 || choice == 7)
-		{
-			game_data->team_2_score = game_data->team_1_score + choice;
-			score_set = true;
-		}
-		else
-			ConsoleShowGameScreen(game_data, "Invalid response ", true, 0);
-	} while (!score_set);
+	game_data->team_2_score = game_data->team_1_score + score_difference;
 }
 
 /*
@@ -243,39 +172,355 @@ void SetTeamDeficit(struct game_data* game_data)
 */
 void SetTeamStartLine(struct game_data* game_data)
 {
-	bool yards_set = false;
-	do {
-		ConsoleShowGameScreen(game_data, "How many yards to the end zone? ", true, 0);
-		char input[16];
-		fgets(input, sizeof(input), stdin);
-		int choice = atoi(input);
+	game_data->line_of_scrimmage = (FIELD_WIDTH - (two_min_drive_yard_options[game_data->two_min_drive_yards_index])) + END_ZONE_WIDTH;
+	ResetLineOfFirstDown(game_data);
+}
 
-		if (choice > 0 && choice < FIELD_WIDTH)
+/*
+* NAME:        ShowTwoMinDriveGameSetupOptions
+* DESCRIPTION: game menu options
+* INPUTS:      current selection, delay or not
+* OUTPUTS:     none
+*/
+static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool first_text, struct game_data* game_data)
+{
+	ResetScreen();
+	ShowMenuTitle();
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	int team_1_last_id = GetTeam1LastID(game_data);
+	int team_1_current_id = GetTeam1CurrentID(game_data);
+	int team_1_next_id = GetTeam1NextID(game_data);
+	int team_2_last_id = GetTeam2LastID(game_data);
+	int team_2_current_id = GetTeam2CurrentID(game_data);
+	int team_2_next_id = GetTeam2NextID(game_data);
+
+	printf("\r\n\r\n                                        ");
+	printf("            ");
+	if (first_text)
+		PrintTextWithDelays("Game Settings");
+	else
+		printf("Game Settings");
+
+	for (int i = 0; i < TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER; i++)
+	{
+		printf("\r\n\r\n                                        ");
+		if (i == 0)
 		{
-			game_data->line_of_scrimmage = (FIELD_WIDTH - choice) + END_ZONE_WIDTH;
-			ResetLineOfFirstDown(game_data);
-			yards_set = true;
+			printf("        ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Players");
+			else
+				printf("Players");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("    ");
+			if (game_data->one_player)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("One");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" / ");
+			if (game_data->two_player)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("Two");
+		}
+		else if (i == 1)
+		{
+			printf(" ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Team 1");
+			else
+				printf("Team 1");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+			PrintThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
+			printf("              ");
+		}
+		else if (i == 2)
+		{
+			printf(" ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Team 2");
+			else
+				printf("Team 2");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+
+			PrintThreeTeamNames(hConsole, team_2_last_id, team_2_current_id, team_2_next_id);
+			printf("              ");
+		}
+		else if (i == 3) // points deficit
+		{
+			printf("      ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Points deficit");
+			else
+				printf("Points deficit");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("     ");
+
+			if (game_data->two_min_drive_deficit_index == 0)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("%d", TWO_MIN_DRIVE_DEFICIT_0);
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->two_min_drive_deficit_index == 1)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("%d", TWO_MIN_DRIVE_DEFICIT_1);
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+			printf("  ");
+			if (game_data->two_min_drive_deficit_index == 2)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("%d", TWO_MIN_DRIVE_DEFICIT_2);
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+		}
+		else if (i == 4) // yards from end zone
+		{
+			printf("   ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Yards to end zone");
+			else
+				printf("Yards to end zone");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("     ");
+			
+			if (game_data->two_min_drive_yards_index > 0)
+				printf("%2d", two_min_drive_yard_options[game_data->two_min_drive_yards_index - 1]);
+			else
+				printf("  ");
+			
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("  ");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("%2d", two_min_drive_yard_options[game_data->two_min_drive_yards_index]);
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("  ");
+
+			if (game_data->two_min_drive_yards_index < (TWO_MIN_DRIVE_YARDS_OPTIONS - 1))
+				printf("%2d", two_min_drive_yard_options[game_data->two_min_drive_yards_index + 1]);
+			else
+				printf("  ");
+
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("  ");
+		}
+		else if (i == 5)
+		{
+			printf("          ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Fouls");
+			else
+				printf("Fouls");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("    ");
+			if (game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("On");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" / ");
+			if (!game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("Off");
+		}
+		else if (i == 6)
+		{
+			printf("             ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Start game");
+			else
+				printf("Start game");
+		}
+		else if (i == 7)
+		{
+			printf("                ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Back");
+			else
+				printf("Back");
+		}
+		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	}
+}
+
+/*
+* NAME:        TwoMinDriveSetupMenuOutcome
+* DESCRIPTION: Gets which entry picked
+* INPUTS:      none
+* OUTPUTS:     menu selection
+*/
+int TwoMinDriveSetupMenuOutcome(struct game_data* game_data) {
+
+	bool game_chosen = false;
+	int current_menu_selection = 0;
+	do {
+		ShowTwoMinDriveGameSetupOptions(current_menu_selection, false, game_data);
+		int ch = getch();
+
+		if (ch == 0 || ch == 224) {   // extended key: read the scan code
+			ch = getch();
+			switch (ch) {
+			case 72: // up arrow
+				if (current_menu_selection > 0) {
+					current_menu_selection--;
+				}
+				else
+					current_menu_selection = (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1);
+				break;
+			case 80: // down arrow
+				if (current_menu_selection < (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1)) {
+					current_menu_selection++;
+				}
+				else
+					current_menu_selection = 0;
+				break;
+			case 75: // left arrow
+				if (current_menu_selection == 0)
+				{
+					if (game_data->two_player)
+					{
+						game_data->one_player = true;
+						game_data->two_player = false;
+					}
+				}
+				else if (current_menu_selection == 1)
+				{
+					if (game_data->team_1_id == 0)
+						game_data->team_1_id = (LEAGUE_TEAM_COUNT - 1);
+					else
+						game_data->team_1_id--;
+				}
+				else if (current_menu_selection == 2)
+				{
+					if (game_data->team_2_id == 0)
+						game_data->team_2_id = (LEAGUE_TEAM_COUNT - 1);
+					else
+						game_data->team_2_id--;
+				}
+				else if (current_menu_selection == 3)
+				{
+					if (game_data->two_min_drive_deficit_index > 0)
+						game_data->two_min_drive_deficit_index--;
+				}
+				else if (current_menu_selection == 4)
+				{
+					if (game_data->two_min_drive_yards_index > 0)
+						game_data->two_min_drive_yards_index--;
+				}
+				else if (current_menu_selection == 5 && game_data->fouls == false)
+					game_data->fouls = true;
+				break;
+			case 77: // right arrow
+				if (current_menu_selection == 0)
+				{
+					if (game_data->one_player)
+					{
+						game_data->one_player = false;
+						game_data->two_player = true;
+					}
+				}
+				else if (current_menu_selection == 1)
+				{
+					if (game_data->team_1_id == (LEAGUE_TEAM_COUNT - 1))
+						game_data->team_1_id = 0;
+					else
+						game_data->team_1_id++;
+				}
+				else if (current_menu_selection == 2)
+				{
+					if (game_data->team_2_id == (LEAGUE_TEAM_COUNT - 1))
+						game_data->team_2_id = 0;
+					else
+						game_data->team_2_id++;
+				}
+				else if (current_menu_selection == 3)
+				{
+					if (game_data->two_min_drive_deficit_index < (TWO_MIN_DRIVE_DEFICIT_OPTIONS - 1))
+						game_data->two_min_drive_deficit_index++;
+				}
+				else if (current_menu_selection == 4)
+				{
+					if (game_data->two_min_drive_yards_index < (TWO_MIN_DRIVE_YARDS_OPTIONS - 1))
+						game_data->two_min_drive_yards_index++;
+				}
+				else if (current_menu_selection == 5 && game_data->fouls == true)
+					game_data->fouls = false;
+				break;
+			default:
+				break;
+			}
+		}
+		else if (ch == 13) {// Enter key
+			if (current_menu_selection == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1) || current_menu_selection == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 2)) {
+				game_chosen = true;
+				return current_menu_selection;
+			}
 		}
 		else
-			ConsoleShowGameScreen(game_data, "Invalid response, must be 100 > yards > 0 ", true, 0);
-	} while (!yards_set);
+			;
+		// any other key: ignored, loop waits for another press
+	} while (!game_chosen);
+	return -1;
+}
+
+/*
+* NAME:        SetupTwoMinDriveMenu
+* DESCRIPTION: initialises data such as team names, coin toss, starting possession etc
+* INPUTS:      game_data
+* OUTPUTS:     start / back
+*/
+int SetupTwoMinDriveMenu(struct game_data* game_data)
+{
+	system("cls");
+	ShowMenuTitle();
+	ShowTwoMinDriveGameSetupOptions(0, true, game_data);
+	do {
+		int selection = TwoMinDriveSetupMenuOutcome(game_data);
+		if (selection == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1) || selection == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 2))
+			return selection;
+		system("cls");
+	} while (1);
+	return -1;
 }
 
 /*
 * NAME:        SetupTwoMinDrive
 * DESCRIPTION: initialises datafor 2 min drive
 * INPUTS:      game_data
-* OUTPUTS:     none
+* OUTPUTS:     start / back
 */
-void SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data)
+int SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data)
 {
 	TwoMinDriveGameDataConstructor(game_data, total_data);
 
-	SetTeamNamesTwoMinDrive(game_data);
+	if (SetupTwoMinDriveMenu(game_data) == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1))
+		return -1;
 
-	SetTeamColoursTwoMinDrive(game_data);
+	SetupTeamData(game_data);
 
 	SetTeamDeficit(game_data);
 
 	SetTeamStartLine(game_data);
+	system("cls");
+	return 1;
 }

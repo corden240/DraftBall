@@ -20,7 +20,7 @@ void SetupSeason(struct season_data* season_data, struct total_data* total_data)
 void PlaySeason(struct season_data* season_data);
 void TwoMinDriveGameDataConstructor(struct game_data* game_data);
 void SeasonDataConstructor(struct season_data* season_data);
-void SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data);
+int SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data);
 void HowToPlay();
 
 /*
@@ -95,9 +95,9 @@ void ExecuteMenuChoice(struct total_data* total_data)
 		{
 			total_data->current_game_mode = 2;
 			system("cls");
-			struct game_data game_data;		
-			SetupTwoMinDrive(&game_data, total_data);
-			PlayGame(&game_data); // TODO: needs to be only one player
+			struct game_data game_data;	
+			if (SetupTwoMinDrive(&game_data, total_data) == 1)
+				PlayGame(&game_data);
 		}
 		else if (menu_outcome == 3) // how to play page
 		{

@@ -24,6 +24,12 @@
 
 #define GAME_STATS_NUMBER (3)
 
+#define TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER (8)
+#define TWO_MIN_DRIVE_DEFICIT_0 (2)
+#define TWO_MIN_DRIVE_DEFICIT_1 (6)
+#define TWO_MIN_DRIVE_DEFICIT_2 (7)
+#define TWO_MIN_DRIVE_DEFICIT_OPTIONS (3)
+#define TWO_MIN_DRIVE_YARDS_OPTIONS (19)
 #define TWO_MIN_DRIVE_PLAYS (5)
 #define TWO_MIN_DRIVE_TIMEOUTS (2)
 
@@ -271,6 +277,9 @@ struct game_data {
 
 	int team_1_id;
 	int team_2_id;
+
+	int two_min_drive_deficit_index;
+	int two_min_drive_yards_index;
 };
 
 struct season_data {

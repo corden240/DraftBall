@@ -1,5 +1,7 @@
 #include "main.h"
 
+int two_min_drive_yard_options[] = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95};
+
 /* per-player decks (terminated by entry with weight < 0) */
 struct table_weight player_1_deck[] = {
 	{(ACE   |    CLUBS | BLACK        | DECK1), 100, true},

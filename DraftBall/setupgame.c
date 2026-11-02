@@ -254,183 +254,6 @@ void CoinToss(struct game_data* game_data)
 }
 
 /*
-* NAME:        SetExhibitionTeamColours
-* DESCRIPTION: setup team colours
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void SetExhibitionTeamColours(struct game_data* game_data)
-{
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-	bool team_1_colour_done = false;
-	bool team_2_colour_done = false;
-	do {
-		ResetScreenReadyForMenuPrint();
-		PrintTextWithDelays("Enter colour for Team 1 (1-8): ");
-		char input1[16];
-		fgets(input1, sizeof(input1), stdin);
-		int team_1_colour = atoi(input1);
-		if (team_1_colour < 1)
-			team_1_colour = 1;
-		else if (team_1_colour > 8)
-			team_1_colour = 8;
-		game_data->team_1_colour = team_1_colour;
-
-		ResetScreenReadyForMenuPrint();
-		SetConsoleTextAttribute(hConsole, game_data->team_1_colour);
-		PrintTextWithDelays("Are you happy with this colour? y/n ");
-		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-		char input2[16];
-		fgets(input2, sizeof(input2), stdin);
-		if (input2[0] == 'Y' || input2[0] == 'y')
-			team_1_colour_done = true;
-	} while (!team_1_colour_done);
-
-	do {
-		ResetScreenReadyForMenuPrint();
-		PrintTextWithDelays("Enter colour for Team 2 (1-8): ");
-		char input3[16];
-		fgets(input3, sizeof(input3), stdin);
-		int team_2_colour = atoi(input3);
-		if (team_2_colour < 1)
-			team_2_colour = 1;
-		else if (team_2_colour > 8)
-			team_2_colour = 8;
-		game_data->team_2_colour = team_2_colour;
-
-		ResetScreenReadyForMenuPrint();
-		SetConsoleTextAttribute(hConsole, game_data->team_2_colour);
-		PrintTextWithDelays("Are you happy with this colour? y/n ");
-		SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-		char input4[16];
-		fgets(input4, sizeof(input4), stdin);
-		if (input4[0] == 'Y' || input4[0] == 'y')
-			team_2_colour_done = true;
-	} while (!team_2_colour_done);
-
-	game_data->players_named = true;
-}
-
-/*
-* NAME:        SetExhibitionTeamNames
-* DESCRIPTION: setup team names
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void SetExhibitionTeamNames(struct game_data* game_data)
-{
-	ResetScreenReadyForMenuPrint();
-
-	strcpy(game_data->team_1_name, " ");
-	strcpy(game_data->team_2_name, " ");
-
-	PrintTextWithDelays("Enter name for Team 1: ");
-	fgets(game_data->team_1_name, sizeof(game_data->team_1_name), stdin);
-	game_data->team_1_name[strcspn(game_data->team_1_name, "\n")] = '\0';
-	
-	ResetScreenReadyForMenuPrint();
-	PrintTextWithDelays("Enter name for Team 2: ");
-	fgets(game_data->team_2_name, sizeof(game_data->team_2_name), stdin);
-	game_data->team_2_name[strcspn(game_data->team_2_name, "\n")] = '\0';
-}
-
-/*
-* NAME:        SetExhibitionPlayerNames
-* DESCRIPTION: setup player names
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void SetExhibitionPlayerNames(struct game_data* game_data)
-{
-	ResetScreenReadyForMenuPrint();
-
-	game_data->players_named = true;
-	strcpy(game_data->team_1_qb_names[0], " ");
-	strcpy(game_data->team_2_qb_names[0], " ");
-
-	strcpy(game_data->team_1_rb_names[0], " ");
-	strcpy(game_data->team_2_rb_names[0], " ");
-	strcpy(game_data->team_1_rb_names[1], " ");
-	strcpy(game_data->team_2_rb_names[1], " ");
-
-	strcpy(game_data->team_1_wr_names[0], " ");
-	strcpy(game_data->team_2_wr_names[0], " ");
-	strcpy(game_data->team_1_wr_names[1], " ");
-	strcpy(game_data->team_2_wr_names[1], " ");
-	strcpy(game_data->team_1_wr_names[2], " ");
-	strcpy(game_data->team_2_wr_names[2], " ");
-	strcpy(game_data->team_1_wr_names[3], " ");
-	strcpy(game_data->team_2_wr_names[3], " ");
-
-	for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
-	{
-		if (i == 0)
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 1 QB Player %d: ", i + 1);
-			PrintTextWithDelays(buf);
-			fgets(game_data->team_1_qb_names[i], sizeof(game_data->team_1_qb_names[i]), stdin);
-			game_data->team_1_qb_names[i][strcspn(game_data->team_1_qb_names[i], "\n")] = '\0';
-		}
-		else if (i < (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM))
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 1 RB Player %d: ", i);
-			printf(buf);
-			fgets(game_data->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], sizeof(game_data->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM]), stdin);
-			game_data->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM][strcspn(game_data->team_1_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], "\n")] = '\0';
-		}
-		else
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 1 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
-			printf(buf);
-			fgets(game_data->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], sizeof(game_data->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)]), stdin);
-			game_data->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)][strcspn(game_data->team_1_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], "\n")] = '\0';
-		}
-	}
-
-	for (int i = 0; i < NUMBER_OF_PLAYER_NAMES_PER_TEAM; i++)
-	{
-		if (i == 0)
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 2 QB Player %d: ", i + 1);
-			printf(buf);
-			fgets(game_data->team_2_qb_names[i], sizeof(game_data->team_2_qb_names[i]), stdin);
-			game_data->team_2_qb_names[i][strcspn(game_data->team_2_qb_names[i], "\n")] = '\0';
-		}
-		else if (i < (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM))
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 2 RB Player %d: ", i);
-			printf(buf);
-			fgets(game_data->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], sizeof(game_data->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM]), stdin);
-			game_data->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM][strcspn(game_data->team_2_rb_names[i - NUMBER_OF_QB_NAMES_PER_TEAM], "\n")] = '\0';
-		}
-		else
-		{
-			ResetScreenReadyForMenuPrint();
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Enter name for Team 2 WR Player %d: ", i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM) + 1);
-			printf(buf);
-			fgets(game_data->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], sizeof(game_data->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)]), stdin);
-			game_data->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)][strcspn(game_data->team_2_wr_names[i - (NUMBER_OF_QB_NAMES_PER_TEAM + NUMBER_OF_RB_NAMES_PER_TEAM)], "\n")] = '\0';
-		}
-	}
-
-	game_data->players_named = true;
-
-	ConsoleShowGameScreen(game_data, 0, true, 0);
-}
-
-/*
 * NAME:        ExhibitionGameDataConstructor
 * DESCRIPTION: starts all of game_data data to default settings
 * INPUTS:      game_data
@@ -549,6 +372,9 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 
 	game_data->team_1_id = 10;
 	game_data->team_2_id = 21;
+
+	game_data->two_min_drive_deficit_index = 0;
+	game_data->two_min_drive_yards_index = 0;
 }
 
 /*
@@ -635,7 +461,7 @@ int GetTeam2NextID(struct game_data* game_data)
 * INPUTS:      hConsole
 * OUTPUTS:     none
 */
-static void PrintTeamNameField(
+void PrintTeamNameField(
 	HANDLE hConsole,
 	const struct team_data* team,
 	WORD name_attributes)
@@ -659,7 +485,7 @@ static void PrintTeamNameField(
 * INPUTS:      ids and hConsole
 * OUTPUTS:     none
 */
-static void PrintThreeTeamNames(
+void PrintThreeTeamNames(
 	HANDLE hConsole,
 	int last_id,
 	int current_id,
@@ -712,7 +538,7 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 		printf("\r\n\r\n                                        ");
 		if (i == 0)
 		{
-			printf("          ");
+			printf("        ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -732,13 +558,13 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 		}
 		else if (i == 1)
 		{
-			printf("           ");
+			printf(" ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Team 1:");
+				PrintTextWithDelays("Team 1");
 			else
-				printf("Team 1:");
+				printf("Team 1");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 			printf(" ");
 			PrintThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
@@ -746,13 +572,13 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 		}
 		else if (i == 2)
 		{
-			printf("          ");
+			printf(" ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Team 2:");
+				PrintTextWithDelays("Team 2");
 			else
-				printf("Team 2:");
+				printf("Team 2");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 			printf(" ");
 
@@ -961,27 +787,6 @@ int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
 }
 
 /*
-* NAME:        ExecuteExhibitionSetupMenuChoice
-* DESCRIPTION: play out each menu option
-* INPUTS:      selection
-* OUTPUTS:     none
-*/
-void ExecuteExhibitionSetupMenuChoice(int selection, struct game_data* game_data)
-{
-	//if (selection == 0) // customise team
-	//{
-	//	SetExhibitionTeamNames(game_data);	
-	//	SetExhibitionTeamColours(game_data);
-	//}
-	//else if (selection == 1) // customise players
-	//{
-	//	SetExhibitionPlayerNames(game_data);
-	//}
-
-	system("cls");
-}
-
-/*
 * NAME:        SetupExhibitionMenu
 * DESCRIPTION: initialises data such as team names, coin toss, starting possession etc
 * INPUTS:      game_data
@@ -996,7 +801,7 @@ int SetupExhibitionMenu(struct game_data* game_data)
 		int selection = ExhibitionSetupMenuOutcome(game_data);
 		if (selection == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1) || selection == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 2))
 			return selection;
-		ExecuteExhibitionSetupMenuChoice(selection, game_data);
+		system("cls");
 	} while (1);
 	return -1;
 }
