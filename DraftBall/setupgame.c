@@ -535,10 +535,10 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 
 	for (int i = 0; i < EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER; i++)
 	{
-		printf("\r\n\r\n                                        ");
+		printf("\r\n\r\n                              ");
 		if (i == 0)
 		{
-			printf("        ");
+			printf("                  ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -558,7 +558,7 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 		}
 		else if (i == 1)
 		{
-			printf(" ");
+			printf("          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -566,13 +566,13 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 			else
 				printf("Team 1");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" ");
+			printf("   ");
 			PrintThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
 			printf("              ");
 		}
 		else if (i == 2)
 		{
-			printf(" ");
+			printf("          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -580,33 +580,14 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 			else
 				printf("Team 2");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" ");
+			printf("   ");
 
 			PrintThreeTeamNames(hConsole, team_2_last_id, team_2_current_id, team_2_next_id);
 			printf("              ");
 		}
 		else if (i == 3)
 		{
-			printf("          ");
-			if (current_menu_selection == i)
-				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
-			if (first_text)
-				PrintTextWithDelays("Fouls");
-			else
-				printf("Fouls");
-			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf("    ");
-			if (game_data->fouls)
-				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
-			printf("On");
-			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" / ");
-			if (!game_data->fouls)
-				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
-			printf("Off");
-		}
-		else if (i == 4)
-		{
+			printf("        ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -651,10 +632,31 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			printf("30");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			
+		}
+		else if (i == 4)
+		{
+			printf("                    ");
+			if (current_menu_selection == i)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			if (first_text)
+				PrintTextWithDelays("Fouls");
+			else
+				printf("Fouls");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf("    ");
+			if (game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("On");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" / ");
+			if (!game_data->fouls)
+				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+			printf("Off");
 		}
 		else if (i == 5)
 		{
-			printf("             ");
+			printf("                       ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -664,7 +666,7 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 		}
 		else if (i == 6)
 		{
-			printf("                ");
+			printf("                          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -730,13 +732,13 @@ int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
 					else
 						game_data->team_2_id--;
 				}
-				else if (current_menu_selection == 3 && game_data->fouls == false)
-					game_data->fouls = true;
-				else if (current_menu_selection == 4 && game_data->plays_per_quarter > MIN_PLAYS_PER_QUARTER)
+				else if (current_menu_selection == 3 && game_data->plays_per_quarter > MIN_PLAYS_PER_QUARTER)
 				{
 					game_data->plays_per_quarter -= STEPS_PLAYS_PER_QUARTER;
 					game_data->plays_remaining_in_quarter = game_data->plays_per_quarter;
 				}
+				else if (current_menu_selection == 4 && game_data->fouls == false)
+					game_data->fouls = true;
 				break;
 			case 77: // right arrow
 				if (current_menu_selection == 0)
@@ -760,14 +762,14 @@ int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
 						game_data->team_2_id = 0;
 					else
 						game_data->team_2_id++;
-				}
-				else if (current_menu_selection == 3 && game_data->fouls == true)
-					game_data->fouls = false;
-				else if (current_menu_selection == 4 && game_data->plays_per_quarter < MAX_PLAYS_PER_QUARTER)
+				}			
+				else if (current_menu_selection == 3 && game_data->plays_per_quarter < MAX_PLAYS_PER_QUARTER)
 				{
 					game_data->plays_per_quarter += STEPS_PLAYS_PER_QUARTER;
 					game_data->plays_remaining_in_quarter = game_data->plays_per_quarter;
 				}
+				else if (current_menu_selection == 4 && game_data->fouls == true)
+					game_data->fouls = false;
 				break;
 			default:
 				break;

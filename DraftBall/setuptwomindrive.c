@@ -142,7 +142,7 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	game_data->team_2_id = 21;
 
 	game_data->two_min_drive_deficit_index = 0;
-	game_data->two_min_drive_yards_index = 0;
+	game_data->two_min_drive_yards_index = 1;
 }
 
 /*
@@ -204,10 +204,10 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 
 	for (int i = 0; i < TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER; i++)
 	{
-		printf("\r\n\r\n                                        ");
+		printf("\r\n\r\n                              ");
 		if (i == 0)
 		{
-			printf("        ");
+			printf("                  ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -227,7 +227,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 		}
 		else if (i == 1)
 		{
-			printf(" ");
+			printf("          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -235,13 +235,13 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 			else
 				printf("Team 1");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" ");
+			printf("   ");
 			PrintThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
 			printf("              ");
 		}
 		else if (i == 2)
 		{
-			printf(" ");
+			printf("          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -249,14 +249,14 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 			else
 				printf("Team 2");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" ");
+			printf("   ");
 
 			PrintThreeTeamNames(hConsole, team_2_last_id, team_2_current_id, team_2_next_id);
 			printf("              ");
 		}
 		else if (i == 3) // points deficit
 		{
-			printf("      ");
+			printf("                ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -286,7 +286,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 		}
 		else if (i == 4) // yards from end zone
 		{
-			printf("   ");
+			printf("             ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -321,7 +321,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 		}
 		else if (i == 5)
 		{
-			printf("          ");
+			printf("                    ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -341,7 +341,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 		}
 		else if (i == 6)
 		{
-			printf("             ");
+			printf("                       ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
@@ -351,7 +351,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 		}
 		else if (i == 7)
 		{
-			printf("                ");
+			printf("                          ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
