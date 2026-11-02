@@ -153,6 +153,7 @@
     <ClCompile Include="setupseason.c" />
     <ClCompile Include="setuptwomindrive.c" />
     <ClCompile Include="startup.c" />
+    <ClCompile Include="teamdata.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />

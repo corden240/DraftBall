@@ -4,6 +4,7 @@
 #include "main.h"
 #include <string.h>
 #include <windows.h>
+#include "teamdata.h"
 
 void SwitchPossession(struct game_data* game_data);
 void ResetLineOfFirstDown(struct game_data* game_data);
@@ -221,7 +222,7 @@ void CoinToss(struct game_data* game_data)
 	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
 
 	char buf[256];
-	snprintf(buf, sizeof(buf), "%s won the coin toss! Kickoff or receive? (1 or 2): ",
+	snprintf(buf, sizeof(buf), "%s won the toss! Kickoff or receive? (1 or 2): ",
 		(team_that_won_cointoss == 1) ? game_data->team_1_name : game_data->team_2_name);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
 
@@ -545,6 +546,139 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 
 	game_data->one_player = true;
 	game_data->two_player = false;
+
+	game_data->team_1_id = 10;
+	game_data->team_2_id = 21;
+}
+
+/*
+* NAME:        GetTeam1LastID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam1LastID(struct game_data* game_data)
+{
+	if (game_data->team_1_id == 0)
+		return (LEAGUE_TEAM_COUNT - 1);
+	else
+		return (game_data->team_1_id - 1);
+}
+
+/*
+* NAME:        GetTeam1CurrentID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam1CurrentID(struct game_data* game_data)
+{
+	return game_data->team_1_id;
+}
+
+/*
+* NAME:        GetTeam1NextID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam1NextID(struct game_data* game_data)
+{
+	if (game_data->team_1_id == (LEAGUE_TEAM_COUNT - 1))
+		return 0;
+	else
+		return (game_data->team_1_id + 1);
+}
+
+/*
+* NAME:        GetTeam2LastID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam2LastID(struct game_data* game_data)
+{
+	if (game_data->team_2_id == 0)
+		return (LEAGUE_TEAM_COUNT - 1);
+	else
+		return (game_data->team_2_id - 1);
+}
+
+/*
+* NAME:        GetTeam2CurrentID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam2CurrentID(struct game_data* game_data)
+{
+	return game_data->team_2_id;
+}
+
+/*
+* NAME:        GetTeam2NextID
+* DESCRIPTION: get correct team id
+* INPUTS:      game data
+* OUTPUTS:     none
+*/
+int GetTeam2NextID(struct game_data* game_data)
+{
+	if (game_data->team_2_id == (LEAGUE_TEAM_COUNT - 1))
+		return 0;
+	else
+		return (game_data->team_2_id + 1);
+}
+
+/*
+* NAME:        PrintTeamNameField
+* DESCRIPTION: print 1 name field
+* INPUTS:      hConsole
+* OUTPUTS:     none
+*/
+static void PrintTeamNameField(
+	HANDLE hConsole,
+	const struct team_data* team,
+	WORD name_attributes)
+{
+	size_t name_length = strlen(team->name);
+
+	if (name_length > TEAM_NAME_FIELD_WIDTH)
+		name_length = TEAM_NAME_FIELD_WIDTH;
+
+	SetConsoleTextAttribute(hConsole, name_attributes);
+	printf("%.*s", (int)name_length, team->name);
+
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	for (size_t i = name_length; i < TEAM_NAME_FIELD_WIDTH; i++)
+		putchar(' ');
+}
+
+/*
+* NAME:        PrintThreeTeamNames
+* DESCRIPTION: print last current and next team names
+* INPUTS:      ids and hConsole
+* OUTPUTS:     none
+*/
+static void PrintThreeTeamNames(
+	HANDLE hConsole,
+	int last_id,
+	int current_id,
+	int next_id)
+{
+	const struct team_data* last = &default_league.teams[last_id];
+	const struct team_data* current = &default_league.teams[current_id];
+	const struct team_data* next = &default_league.teams[next_id];
+
+	PrintTeamNameField(hConsole, last, (WORD)last->colour);
+	putchar(' ');
+
+	PrintTeamNameField(
+		hConsole,
+		current,
+		(WORD)(CONSOLE_TEXT_WHITE | (current->colour << 4)));
+	putchar(' ');
+
+	PrintTeamNameField(hConsole, next, (WORD)next->colour);
 }
 
 /*
@@ -558,6 +692,13 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 	ResetScreen();
 	ShowMenuTitle();
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	int team_1_last_id = GetTeam1LastID(game_data);
+	int team_1_current_id = GetTeam1CurrentID(game_data);
+	int team_1_next_id = GetTeam1NextID(game_data);
+	int team_2_last_id = GetTeam2LastID(game_data);
+	int team_2_current_id = GetTeam2CurrentID(game_data);
+	int team_2_next_id = GetTeam2NextID(game_data);
 
 	printf("\r\n\r\n                                        ");
 	printf("            ");
@@ -595,9 +736,13 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Team 1: ");
+				PrintTextWithDelays("Team 1:");
 			else
-				printf("Team 1: ");
+				printf("Team 1:");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+			PrintThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
+			printf("              ");
 		}
 		else if (i == 2)
 		{
@@ -605,9 +750,14 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Team 2: ");
+				PrintTextWithDelays("Team 2:");
 			else
-				printf("Team 2: ");
+				printf("Team 2:");
+			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+			printf(" ");
+
+			PrintThreeTeamNames(hConsole, team_2_last_id, team_2_current_id, team_2_next_id);
+			printf("              ");
 		}
 		else if (i == 3)
 		{
@@ -742,9 +892,17 @@ int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
 				}
 				else if (current_menu_selection == 1)
 				{
+					if (game_data->team_1_id == 0)
+						game_data->team_1_id = (LEAGUE_TEAM_COUNT - 1);
+					else
+						game_data->team_1_id--;
 				}
 				else if (current_menu_selection == 2)
 				{
+					if (game_data->team_2_id == 0)
+						game_data->team_2_id = (LEAGUE_TEAM_COUNT - 1);
+					else
+						game_data->team_2_id--;
 				}
 				else if (current_menu_selection == 3 && game_data->fouls == false)
 					game_data->fouls = true;
@@ -765,9 +923,17 @@ int ExhibitionSetupMenuOutcome(struct game_data* game_data) {
 				}
 				else if (current_menu_selection == 1)
 				{
+					if (game_data->team_1_id == (LEAGUE_TEAM_COUNT - 1))
+						game_data->team_1_id = 0;
+					else
+						game_data->team_1_id++;
 				}
 				else if (current_menu_selection == 2)
 				{
+					if (game_data->team_2_id == (LEAGUE_TEAM_COUNT - 1))
+						game_data->team_2_id = 0;
+					else
+						game_data->team_2_id++;
 				}
 				else if (current_menu_selection == 3 && game_data->fouls == true)
 					game_data->fouls = false;
@@ -836,6 +1002,57 @@ int SetupExhibitionMenu(struct game_data* game_data)
 }
 
 /*
+* NAME:        SetupTeamData
+* DESCRIPTION: builds team names colours player names etc from decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+void SetupTeamData(struct game_data* game_data)
+{
+	if (game_data == NULL)
+		return;
+
+	if (game_data->team_1_id < 0 ||
+		game_data->team_1_id >= LEAGUE_TEAM_COUNT ||
+		game_data->team_2_id < 0 ||
+		game_data->team_2_id >= LEAGUE_TEAM_COUNT)
+		return;
+
+	const struct team_data* team_1 =
+		&default_league.teams[game_data->team_1_id];
+	const struct team_data* team_2 =
+		&default_league.teams[game_data->team_2_id];
+
+	snprintf(game_data->team_1_name, sizeof game_data->team_1_name,
+		"%s", team_1->name);
+	snprintf(game_data->team_2_name, sizeof game_data->team_2_name,
+		"%s", team_2->name);
+
+	snprintf(game_data->team_1_qb_names[0],
+		sizeof game_data->team_1_qb_names[0], "%s", team_1->qb_name);
+	snprintf(game_data->team_2_qb_names[0],
+		sizeof game_data->team_2_qb_names[0], "%s", team_2->qb_name);
+
+	for (int i = 0; i < NUMBER_OF_RB_NAMES_PER_TEAM; i++) {
+		snprintf(game_data->team_1_rb_names[i],
+			sizeof game_data->team_1_rb_names[i], "%s", team_1->rb_names[i]);
+		snprintf(game_data->team_2_rb_names[i],
+			sizeof game_data->team_2_rb_names[i], "%s", team_2->rb_names[i]);
+	}
+
+	for (int i = 0; i < NUMBER_OF_WR_NAMES_PER_TEAM; i++) {
+		snprintf(game_data->team_1_wr_names[i],
+			sizeof game_data->team_1_wr_names[i], "%s", team_1->wr_names[i]);
+		snprintf(game_data->team_2_wr_names[i],
+			sizeof game_data->team_2_wr_names[i], "%s", team_2->wr_names[i]);
+	}
+
+	game_data->team_1_colour = team_1->colour;
+	game_data->team_2_colour = team_2->colour;
+	game_data->players_named = true;
+}
+
+/*
 * NAME:        SetupExhibitionGame
 * DESCRIPTION: initialises data such as team names, coin toss, starting possession etc
 * INPUTS:      game_data
@@ -847,6 +1064,8 @@ int SetupExhibitionGame(struct game_data* game_data, struct total_data* total_da
 	
 	if (SetupExhibitionMenu(game_data) == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1))
 		return -1;
+
+	SetupTeamData(game_data);
 	
 	CoinToss(game_data);
 	return 1;

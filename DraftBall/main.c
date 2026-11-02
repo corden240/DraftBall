@@ -5,6 +5,7 @@
 #include <time.h>     /* time() */
 #include "main.h"
 #include <string.h>
+#include "teamdata.h"
 
 void ResetScreen();
 void HideCursor();

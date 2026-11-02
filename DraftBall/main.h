@@ -3,6 +3,9 @@
 #include <stddef.h>
 
 
+#define LEAGUE_TEAM_COUNT (32)
+#define TEAM_NAME_FIELD_WIDTH (12)
+
 #define DRAFT_BALL_BALL_FRAMES (9)
 #define LOADING_SCREEN_ANIMATIONS (DRAFT_BALL_BALL_FRAMES * 3)
 #define LOADING_TRANSITION_SCREEN_ANIMATIONS ((DRAFT_BALL_BALL_FRAMES * 2) + 1)
@@ -265,6 +268,9 @@ struct game_data {
 
 	bool one_player;
 	bool two_player;
+
+	int team_1_id;
+	int team_2_id;
 };
 
 struct season_data {

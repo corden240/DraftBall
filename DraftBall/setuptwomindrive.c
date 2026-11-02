@@ -122,6 +122,9 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	game_data->flag_thrown = false;
 	game_data->one_player = true;
 	game_data->two_player = false;
+
+	game_data->team_1_id = 10;
+	game_data->team_2_id = 21;
 }
 
 /*
