@@ -139,6 +139,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cpu.c" />
     <ClCompile Include="gameconsole.c" />
     <ClCompile Include="gamestats.c" />
     <ClCompile Include="howtoplay.c" />

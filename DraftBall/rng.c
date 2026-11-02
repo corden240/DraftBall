@@ -6,6 +6,20 @@
 #include "main.h"
 
 /*
+* NAME:        PcChance
+* DESCRIPTION: return pass or fail on percentage chance
+* INPUTS:      chance
+* OUTPUTS:     pass / fail
+*/
+bool PcChance(int chance)
+{
+	if ((rand() % 1000) < chance)
+		return true;
+	else
+		return false;
+}
+
+/*
 * NAME:        TableWeightTotalWeight
 * DESCRIPTION: return total weight of enabled values
 * INPUTS:      table

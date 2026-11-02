@@ -15,6 +15,7 @@ bool OutBackOfEndZone(struct game_data* game_data);
 void ShowMenuTitle();
 void PrintTextWithDelays(char txt[1000]);
 void ResetScreen();
+void CpuCoinTossDecision(struct game_data* game_data, int team_that_won_cointoss);
 
 /*
 * NAME:        ResetScreenReadyForMenuPrint
@@ -220,6 +221,12 @@ void CoinToss(struct game_data* game_data)
 	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 20);
 
 	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
+
+	if (game_data->one_player && team_that_won_cointoss == 2)
+	{
+		CpuCoinTossDecision(game_data, team_that_won_cointoss);
+		return;
+	}
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s won the toss! Kickoff or receive? (1 or 2): ",

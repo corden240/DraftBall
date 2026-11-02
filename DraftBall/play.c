@@ -28,6 +28,7 @@ int ConvertLosToYardLine(struct game_data* game_data);
 int GetTimeoutTeam(struct game_data* game_data);
 void GameStats(struct game_data* game_data);
 void ResetScreen();
+int CpuPuntOrOnsideKickDecision(struct game_data* game_data);
 
 /*
 * NAME:        GetRBID
@@ -2234,6 +2235,9 @@ int GetOneOrTwoPointConversion(struct game_data* game_data)
 */
 int GetKickoffOrOnsideKick(struct game_data* game_data)
 {
+	if (game_data->one_player && game_data->team_in_possession == 2)
+		return CpuPuntOrOnsideKickDecision(game_data);
+
 	int play = 1;
 	ConsoleShowGameScreen(game_data, "Kickoff or Onside Kick? (1-2): ", true, GAME_SPEED * 2);
 	char input[16];
