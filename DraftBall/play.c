@@ -35,6 +35,12 @@ int CpuOnsideKickCardsToRedrawDecision(struct game_data* game_data, int total);
 bool CpuTimeoutDecision(struct game_data* game_data);
 int CpuPlayTypeDecision(struct game_data* game_data);
 int CpuFieldGoalCardsToRedrawDecision(struct game_data* game_data, int total_yards);
+int CpuFormationDecision(struct game_data* game_data);
+void CpuCardsInOffenceFormationDecision(struct game_data* game_data);
+void CpuCardsInDefenceFormationDecision(struct game_data* game_data);
+int CpuMatchupNumberDecision(struct game_data* game_data);
+
+
 
 /*
 * NAME:        GetRBID
@@ -207,8 +213,8 @@ void DrawCards(struct game_data* game_data, int team_to_draw, int num, bool shar
 			hand[start + i] = DrawOneCard(game_data, player_1_deck);
 		else
 			hand[start + i] = DrawOneCard(game_data, player_2_deck);
-
-		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
+		if (!(game_data->one_player && team_to_draw == 2))
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
 	}
 }
 
@@ -1110,6 +1116,9 @@ void PlayTwoPointConversion(struct game_data* game_data)
 */
 int GetFormation(struct game_data* game_data)
 {
+	if (game_data->one_player && game_data->team_in_possession == 2)
+		return CpuFormationDecision(game_data);
+
 	ConsoleShowGameScreen(game_data, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1-3): ", true, GAME_SPEED * 10);
 
 	char input[16];
@@ -1128,6 +1137,15 @@ int GetFormation(struct game_data* game_data)
 */
 int GetMatchupNumber(struct game_data* game_data)
 {
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		int matchup = CpuMatchupNumberDecision(game_data);
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s, picked matchup %d ", GetTeamName(game_data, game_data->team_in_possession), matchup);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
+		return matchup;
+	}
+
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1-5): ", GetTeamName(game_data, game_data->team_in_possession));
 	ConsoleShowGameScreen(game_data, buf, true, 0);
@@ -1148,35 +1166,46 @@ int GetMatchupNumber(struct game_data* game_data)
 */
 void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 {
-	int pick = 0;
-	bool retry = false;
-	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
-	{	
-		do {
-			retry = false;
-			char buf[256];
-			snprintf(buf, sizeof(buf), "What position (1-%d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
-			if(i == 0)
-				ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 1);
-			else
-				ConsoleShowGameScreen(game_data, buf, false, GAME_SPEED * 1);
+	if (game_data->one_player && game_data->team_in_possession == 2 && offence_or_defence == 1)
+	{
+		CpuCardsInOffenceFormationDecision(game_data);
+	}
+	else if (game_data->one_player && game_data->team_in_possession == 1 && offence_or_defence == 2)
+	{
+		CpuCardsInDefenceFormationDecision(game_data);
+	}
+	else
+	{
+		int pick = 0;
+		bool retry = false;
+		for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++)
+		{
+			do {
+				retry = false;
+				char buf[256];
+				snprintf(buf, sizeof(buf), "What position (1-%d) to place card %d: ", NORMAL_PLAY_CARDS_TO_DRAW, i + 1);
+				if (i == 0)
+					ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 1);
+				else
+					ConsoleShowGameScreen(game_data, buf, false, GAME_SPEED * 1);
 
-			char input[16];
-			fgets(input, sizeof(input), stdin);
-			pick = atoi(input);
+				char input[16];
+				fgets(input, sizeof(input), stdin);
+				pick = atoi(input);
 
-			if (pick < 1 || pick > NORMAL_PLAY_CARDS_TO_DRAW || (offence_or_defence == 1 && game_data->o_cards_in_position[pick - 1]) || (offence_or_defence == 2 && game_data->d_cards_in_position[pick - 1]))
-			{
-				retry = true;
-				ConsoleShowGameScreen(game_data, "Invalid position chosen, choose again.", true, GAME_SPEED * 20);
-			}
+				if (pick < 1 || pick > NORMAL_PLAY_CARDS_TO_DRAW || (offence_or_defence == 1 && game_data->o_cards_in_position[pick - 1]) || (offence_or_defence == 2 && game_data->d_cards_in_position[pick - 1]))
+				{
+					retry = true;
+					ConsoleShowGameScreen(game_data, "Invalid position chosen, choose again.", true, GAME_SPEED * 20);
+				}
 
-		} while (retry);
-		if(offence_or_defence == 1)
-			game_data->o_cards_in_position[pick - 1] = game_data->o_cards[i];
-		else if (offence_or_defence == 2)
-			game_data->d_cards_in_position[pick - 1] = game_data->d_cards[i];
-		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 1);
+			} while (retry);
+			if (offence_or_defence == 1)
+				game_data->o_cards_in_position[pick - 1] = game_data->o_cards[i];
+			else if (offence_or_defence == 2)
+				game_data->d_cards_in_position[pick - 1] = game_data->d_cards[i];
+			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 1);
+		}
 	}
 }
 
@@ -1331,27 +1360,42 @@ bool LosFouls(struct game_data* game_data)
 */
 void PlayNormal(struct game_data* game_data)
 {
-	char buf[256];
-	snprintf(buf, sizeof(buf), "%s, press enter to draw", GetTeamName(game_data, game_data->team_in_possession));
-	ConsoleShowGameScreen(game_data, buf, true, 0);
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		;
+	}
+	else
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s, press enter to draw", GetTeamName(game_data, game_data->team_in_possession));
+		ConsoleShowGameScreen(game_data, buf, true, 0);
 
-	char input[16];
-	fgets(input, sizeof(input), stdin);
+		char input[16];
+		fgets(input, sizeof(input), stdin);
+	}
 
 	DrawCards(game_data, game_data->team_in_possession, NORMAL_PLAY_CARDS_TO_DRAW, false); // O: draw 4 cards
 
 	game_data->formation = GetFormation(game_data); // O: pick layout/formation/personnel
 	game_data->show_O_D_Both = 1;
 
-	ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
+	if (!(game_data->one_player && game_data->team_in_possession == 2))
+		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
 	PutCardsInFormation(game_data, 1); // Offence place cards in positions, send 1 for offence	
 	game_data->show_O_D_Both = 0; // Cover offence cards
 	
-	char buf2[256];
-	snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(game_data, game_data->team_not_in_possession));
-	ConsoleShowGameScreen(game_data, buf2, true, 0);
-	char input2[16];
-	fgets(input2, sizeof(input2), stdin);
+	if (game_data->one_player && game_data->team_in_possession == 1)
+	{
+		;
+	}
+	else
+	{
+		char buf2[256];
+		snprintf(buf2, sizeof(buf2), "%s, press enter to draw", GetTeamName(game_data, game_data->team_not_in_possession));
+		ConsoleShowGameScreen(game_data, buf2, true, 0);
+		char input2[16];
+		fgets(input2, sizeof(input2), stdin);
+	}
 
 	int save_formation = game_data->formation;
 	game_data->formation = 0;

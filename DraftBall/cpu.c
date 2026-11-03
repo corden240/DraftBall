@@ -140,8 +140,8 @@ int CpuPuntCardsToDrawDecision(struct game_data* game_data)
 		return PUNT_MAX_CARDS - 3;
 	else if (yards_to_endzone > 12)
 		return PUNT_MAX_CARDS - 4;
-	else
-		return 1;
+	
+	return 1;
 }
 
 /*
@@ -165,6 +165,7 @@ int CpuPuntCardsToRedrawDecision(struct game_data* game_data, int total_yards)
 		return 1;
 	else
 		return PUNT_REDRAW_MAX_CARDS;
+	return 0;
 }
 
 /*
@@ -179,8 +180,8 @@ int CpuFieldGoalCardsToRedrawDecision(struct game_data* game_data, int total_yar
 
 	if ((yards_to_fg - total_yards) > 0)
 		return FIELD_GOAL_REDRAW_MAX_CARDS;
-	else
-		return 0;
+
+	return 0;
 }
 
 /*
@@ -235,6 +236,8 @@ int CpuOnsideKickCardsToRedrawDecision(struct game_data* game_data, int total)
 
 	if (total < (ONSIDE_KICK_TARGET_TOTAL))
 		return 1;
+
+	return 0;
 }
 
 /*
@@ -299,6 +302,7 @@ bool CpuGoFourthDown(struct game_data* game_data)
 {
 	if (GetYardsToFirstDown(game_data) <= 2 && GetYardsToEndZone(game_data) < 70)
 		return true;
+	return false;
 }
 
 /*
@@ -343,6 +347,7 @@ bool CpuFGDecision(struct game_data* game_data)
 			}
 		}
 	}
+	return false;
 }
 
 /*
@@ -368,6 +373,77 @@ int CpuPlayTypeDecision(struct game_data* game_data)
 		return PLAY_TYPE_FIELD_GOAL;
 	else if (CpuPuntDecision(game_data))
 		return PLAY_TYPE_PUNT;
-	else 
-		return PLAY_TYPE_NORMAL;
+
+	return PLAY_TYPE_NORMAL;
+}
+
+/*
+* NAME:        CpuFormationDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     int
+*/
+int CpuFormationDecision(struct game_data* game_data)
+{
+	return rand() % 3 + 1; // TODO: replace this cpu decision
+}
+
+/*
+* NAME:        CpuCardsInOffenceFormationDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+void CpuCardsInOffenceFormationDecision(struct game_data* game_data)
+{
+	game_data->o_cards_in_position[0] = game_data->o_cards[0]; // TODO: replace this cpu decision
+	game_data->o_cards_in_position[1] = game_data->o_cards[1];
+	game_data->o_cards_in_position[2] = game_data->o_cards[2];
+	game_data->o_cards_in_position[3] = game_data->o_cards[3];
+}
+
+/*
+* NAME:        CpuCardsInDefenceFormationDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+void CpuCardsInDefenceFormationDecision(struct game_data* game_data)
+{
+	game_data->d_cards_in_position[0] = game_data->d_cards[0]; // TODO: replace this cpu decision
+	game_data->d_cards_in_position[1] = game_data->d_cards[1];
+	game_data->d_cards_in_position[2] = game_data->d_cards[2];
+	game_data->d_cards_in_position[3] = game_data->d_cards[3];
+}
+
+/*
+* NAME:        CpuMatchupNumberDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+int CpuMatchupNumberDecision(struct game_data* game_data)
+{
+	int matchup_one_advantage = (game_data->o_cards_in_position[0] & VALUE) - (game_data->d_cards_in_position[0] & VALUE);
+	int matchup_two_advantage = (game_data->o_cards_in_position[1] & VALUE) - (game_data->d_cards_in_position[1] & VALUE);
+	int matchup_three_advantage = (game_data->o_cards_in_position[2] & VALUE) - (game_data->d_cards_in_position[2] & VALUE);
+	int matchup_four_advantage = (game_data->o_cards_in_position[3] & VALUE) - (game_data->d_cards_in_position[3] & VALUE);
+
+	int matchup_advantages[] = { 0, matchup_one_advantage , matchup_two_advantage , matchup_three_advantage , matchup_four_advantage };
+
+	if (matchup_one_advantage < 0 && matchup_two_advantage < 0 && matchup_three_advantage < 0 && matchup_four_advantage < 0)
+		return 5;
+	else
+	{
+		int best_matchup = 1;
+		if (matchup_advantages[2] > matchup_advantages[best_matchup])
+			best_matchup = 2;
+		if (matchup_advantages[3] > matchup_advantages[best_matchup])
+			best_matchup = 3;
+		if (matchup_advantages[4] > matchup_advantages[best_matchup])
+			best_matchup = 4;
+		return best_matchup;
+	}
+
+	// TODO: improve this cpu decision???
 }
