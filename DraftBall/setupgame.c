@@ -16,6 +16,7 @@ void ShowMenuTitle();
 void PrintTextWithDelays(char txt[1000]);
 void ResetScreen();
 void CpuCoinTossDecision(struct game_data* game_data, int team_that_won_cointoss);
+void DisableTeamsDecks(struct game_data* game_data);
 
 /*
 * NAME:        ResetScreenReadyForMenuPrint
@@ -866,6 +867,8 @@ void SetupTeamData(struct game_data* game_data)
 	game_data->team_1_colour = team_1->colour;
 	game_data->team_2_colour = team_2->colour;
 	game_data->players_named = true;
+
+	DisableTeamsDecks(game_data);
 }
 
 /*

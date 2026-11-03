@@ -4,6 +4,7 @@
 #include "main.h"
 #include <string.h>
 
+void SetupTeamData(struct game_data* game_data);
 
 /*
 * NAME:        SetTeamColoursSeason
@@ -213,4 +214,6 @@ void SetupSeason(struct season_data* season_data, struct total_data* total_data)
 	SetTeamColoursSeason(season_data);
 
 	SetPlayerNamesSeason(season_data);
+
+	// SetupTeamData(game_data); // needs to happen before each game that is played 
 }

@@ -447,3 +447,25 @@ int CpuMatchupNumberDecision(struct game_data* game_data)
 
 	// TODO: improve this cpu decision???
 }
+
+/*
+* NAME:        CpuDrawPassCardDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+bool CpuDrawPassCardDecision(struct game_data* game_data, int o_yards, int d_yards, int cards)
+{
+	int distance = o_yards - d_yards; // TODO: improve this cpu decision???
+
+	if (distance > GetYardsToEndZone(game_data) + 5)
+		return false;
+
+	if (distance < 5)
+		return true;
+
+	if (distance < 10 && cards < 4)
+		return true;
+
+	return false;
+}

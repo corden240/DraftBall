@@ -93,6 +93,9 @@ void FillMissingGameData(struct game_data* game_data)
 				continue;
 			}
 
+			if (game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_LONGEST_PLAY] < 0 || game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_LONGEST_PLAY] > 100)
+				game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_LONGEST_PLAY] = 0;
+
 			/* RB_AVERAGE is an int field, so this remains a whole-number average. */
 			game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_AVERAGE] =
 				game_data->runningback_stats[i + (NUMBER_OF_RB_NAMES_PER_TEAM * team)][RB_YARDS] / carries;
@@ -111,6 +114,9 @@ void FillMissingGameData(struct game_data* game_data)
 				continue;
 			}
 
+			if (game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_LONGEST_PLAY] < 0 || game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_LONGEST_PLAY] > 100)
+				game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_LONGEST_PLAY] = 0;
+
 			/* WR_AVERAGE is an int field, so this remains a whole-number average. */
 			game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_AVERAGE] =
 				game_data->receiver_stats[i + (NUMBER_OF_WR_NAMES_PER_TEAM * team)][WR_YARDS] / receptions;
@@ -126,6 +132,10 @@ void FillMissingGameData(struct game_data* game_data)
 			game_data->quarterback_stats[team][QB_RUNNING_AVERAGE] = 0;	
 			continue;
 		}
+
+		if (game_data->quarterback_stats[team][QB_RUNNING_LONGEST_PLAY] < 0 || game_data->quarterback_stats[team][QB_RUNNING_LONGEST_PLAY] > 100)
+			game_data->quarterback_stats[team][QB_RUNNING_LONGEST_PLAY] = 0;
+
 		/* QB_RUNNING_AVERAGE is an int field, so this remains a whole-number average. */
 		game_data->quarterback_stats[team][QB_RUNNING_AVERAGE] =
 		game_data->quarterback_stats[team][QB_RUNNING_YARDS] / carries;

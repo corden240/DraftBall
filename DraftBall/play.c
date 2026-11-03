@@ -5,6 +5,7 @@
 #include <time.h>     /* time() */
 #include "main.h"
 #include <string.h>
+#include "teamdata.h"
 
 void ResetLineOfFirstDown(struct game_data* game_data);
 void SwitchPossession(struct game_data* game_data);
@@ -39,7 +40,7 @@ int CpuFormationDecision(struct game_data* game_data);
 void CpuCardsInOffenceFormationDecision(struct game_data* game_data);
 void CpuCardsInDefenceFormationDecision(struct game_data* game_data);
 int CpuMatchupNumberDecision(struct game_data* game_data);
-
+bool CpuDrawPassCardDecision(struct game_data* game_data, int o_yards, int d_yards, int cards);
 
 
 /*
@@ -165,6 +166,60 @@ void ClearDCards(struct game_data* game_data)
 }
 
 /*
+* NAME:        DisableTeamsDecks
+* DESCRIPTION: pick an available card from the deck
+* INPUTS:      game_data
+* OUTPUTS:     card
+*/
+void DisableTeamsDecks(struct game_data* game_data)
+{
+	const struct team_data* team1 = &default_league.teams[game_data->team_1_id];
+	const struct team_data* team2 = &default_league.teams[game_data->team_2_id];
+
+	if (team1->deck_id > 1)
+	{
+		TableWeightSet(player_1_deck, (TWO | CLUBS | BLACK | DECK1), false);
+		TableWeightSet(player_1_deck, (TWO | DIAMONDS | RED | DECK1), false);
+	}
+	if (team1->deck_id > 2)
+	{
+		TableWeightSet(player_1_deck, (TWO | HEARTS | RED | DECK1), false);
+		TableWeightSet(player_1_deck, (TWO | SPADES | BLACK | DECK1), false);
+	}
+	if (team1->deck_id > 3)
+	{
+		TableWeightSet(player_1_deck, (THREE | CLUBS | BLACK | DECK1), false);
+		TableWeightSet(player_1_deck, (THREE | DIAMONDS | RED | DECK1), false);
+	}
+	if (team1->deck_id > 4)
+	{
+		TableWeightSet(player_1_deck, (THREE | HEARTS | RED | DECK1), false);
+		TableWeightSet(player_1_deck, (THREE | SPADES | BLACK | DECK1), false);
+	}
+
+	if (team2->deck_id > 1)
+	{
+		TableWeightSet(player_2_deck, (TWO | CLUBS | BLACK | DECK2), false);
+		TableWeightSet(player_2_deck, (TWO | DIAMONDS | RED | DECK2), false);
+	}
+	if (team2->deck_id > 2)
+	{
+		TableWeightSet(player_2_deck, (TWO | HEARTS | RED | DECK2), false);
+		TableWeightSet(player_2_deck, (TWO | SPADES | BLACK | DECK2), false);
+	}
+	if (team2->deck_id > 3)
+	{
+		TableWeightSet(player_2_deck, (THREE | CLUBS | BLACK | DECK2), false);
+		TableWeightSet(player_2_deck, (THREE | DIAMONDS | RED | DECK2), false);
+	}
+	if (team2->deck_id > 4)
+	{
+		TableWeightSet(player_2_deck, (THREE | HEARTS | RED | DECK2), false);
+		TableWeightSet(player_2_deck, (THREE | SPADES | BLACK | DECK2), false);
+	}
+}
+
+/*
 * NAME:        DrawOneCard
 * DESCRIPTION: pick an available card from the deck
 * INPUTS:      game_data
@@ -176,6 +231,7 @@ int DrawOneCard(struct game_data* game_data, struct table_weight* deck)
 	if (TableWeightTotalWeight(deck) <= 0)
 	{
 		TableWeightEnableAll(deck);
+		DisableTeamsDecks(game_data);
 		ConsoleShowGameScreen(game_data, "Deck empty, reshuffling...", true, GAME_SPEED * 20);
 	}
 
@@ -352,7 +408,6 @@ void Interception(struct game_data* game_data)
 {
 	game_data->quarterback_stats[game_data->team_in_possession - 1][QB_INTERCEPTIONS_THROWN]++;
 	SwitchPossession(game_data);
-	ResetLineOfFirstDown(game_data);
 	game_data->down = 0;
 }
 
@@ -612,15 +667,23 @@ bool DrawPassCards(struct game_data* game_data)
 	{
 		if (i > 0)
 		{
-			char buf[256];
-			snprintf(buf, sizeof(buf), "Sum = %d, draw a card? y/n ", TotalYardsOffence(game_data));
-			ConsoleShowGameScreen(game_data, buf, true, 0);
+			if (game_data->one_player && game_data->team_in_possession == 2)
+			{
+				if (!CpuDrawPassCardDecision(game_data, TotalYardsOffence(game_data), TotalYardsDefence(game_data), i))
+					break;
+			}
+			else
+			{
+				char buf[256];
+				snprintf(buf, sizeof(buf), "Sum = %d, draw a card? y/n ", TotalYardsOffence(game_data));
+				ConsoleShowGameScreen(game_data, buf, true, 0);
 
-			char input[16];
-			fgets(input, sizeof(input), stdin);
+				char input[16];
+				fgets(input, sizeof(input), stdin);
 
-			if (input[0] == 'N' || input[0] == 'n')
-				break;
+				if (input[0] == 'N' || input[0] == 'n')
+					break;
+			}
 		}
 
 		DrawCards(game_data, game_data->team_in_possession, 1, true);
@@ -831,8 +894,11 @@ void PlayPass(struct game_data* game_data)
 
 	MoveLineOfScrimmage(game_data, catch_yards);
 
+	bool interception_return = false;
+
 	if (game_data->interception)
 	{
+		interception_return = true;
 		Interception(game_data);
 
 		if (SafetyScored(game_data))
@@ -883,6 +949,8 @@ void PlayPass(struct game_data* game_data)
 	if (game_data->fumble)
 	{	
 		Fumble(game_data);
+		if (interception_return && !TouchdownScored(game_data))
+			ResetLineOfFirstDown(game_data);
 		return;
 	}
 
@@ -898,6 +966,8 @@ void PlayPass(struct game_data* game_data)
 		snprintf(buf5, sizeof(buf5), "%d yards after catch ", yac_yards);
 		ConsoleShowGameScreen(game_data, buf5, true, GAME_SPEED * 10);
 	}
+	if (interception_return && !TouchdownScored(game_data))
+		ResetLineOfFirstDown(game_data);
 }
 /*
 * NAME:        AnnouncePlayRun
@@ -1037,8 +1107,8 @@ void PlayRun(struct game_data* game_data)
 	
 	CheckForRunFumble(game_data);
 
-	int yards_gained = RunPlayYardsGained(game_data);
-	
+	int yards_gained = LimitYardsToTouchdown(game_data, RunPlayYardsGained(game_data));
+
 	UpdateCarriesYardsStats(game_data, yards_gained);
 
 	if(game_data->matchup_number == 5)
@@ -1142,7 +1212,7 @@ int GetMatchupNumber(struct game_data* game_data)
 		int matchup = CpuMatchupNumberDecision(game_data);
 		char buf[256];
 		snprintf(buf, sizeof(buf), "%s, picked matchup %d ", GetTeamName(game_data, game_data->team_in_possession), matchup);
-		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 10);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 20);
 		return matchup;
 	}
 
@@ -2660,7 +2730,7 @@ void PlayGame(struct game_data* game_data)
 {
 	for (game_data->quarter; game_data->quarter <= NUMBER_OF_QUARTERS; game_data->quarter++)
 	{
-		for (game_data->plays_remaining_in_quarter; game_data->plays_remaining_in_quarter > 0; game_data->plays_remaining_in_quarter--, game_data->down++)
+		for (game_data->plays_remaining_in_quarter; game_data->plays_remaining_in_quarter > 0 || game_data->extra_point_needed; game_data->plays_remaining_in_quarter--, game_data->down++)
 		{
 			if (game_data->quarter == 1 || game_data->quarter == 3)
 			{
@@ -2676,7 +2746,10 @@ void PlayGame(struct game_data* game_data)
 				}
 			}
 			DoPlay(game_data);
-			if (game_data->drive_over || ((game_data->current_game_mode == 2) && (game_data->team_1_score > game_data->team_2_score)))
+			if (!game_data->extra_point_needed &&
+				(game_data->drive_over ||
+					((game_data->current_game_mode == 2) &&
+						(game_data->team_1_score > game_data->team_2_score))))
 				break;
 		}
 		EndOfQuarter(game_data);
