@@ -143,6 +143,8 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 
 	game_data->two_min_drive_deficit_index = 0;
 	game_data->two_min_drive_yards_index = 1;
+
+	game_data->cpu_called_timeout = false;
 }
 
 /*

@@ -29,6 +29,12 @@ int GetTimeoutTeam(struct game_data* game_data);
 void GameStats(struct game_data* game_data);
 void ResetScreen();
 int CpuPuntOrOnsideKickDecision(struct game_data* game_data);
+int CpuPuntCardsToDrawDecision(struct game_data* game_data);
+int CpuCardsToRedrawHiLoDecision(struct game_data* game_data, int total_yards, int num);
+int CpuOnsideKickCardsToRedrawDecision(struct game_data* game_data, int total);
+bool CpuTimeoutDecision(struct game_data* game_data);
+int CpuPlayTypeDecision(struct game_data* game_data);
+int CpuFieldGoalCardsToRedrawDecision(struct game_data* game_data, int total_yards);
 
 /*
 * NAME:        GetRBID
@@ -216,15 +222,23 @@ void RedrawCards(struct game_data* game_data, int team_to_draw, int num)
 {
 	if (!num)
 		return;
-
-	char buf[256];
-	snprintf(buf, sizeof(buf), "Replace the low or high cards (1-2): ");
-	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
-
 	int hilo = 0;
-	char input[16];
-	if (fgets(input, sizeof(input), stdin)) {
-		hilo = atoi(input);
+
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		hilo = CpuCardsToRedrawHiLoDecision(game_data, TotalYardsOffence(game_data), num);
+		ConsoleShowGameScreen(game_data, "Replacing cards", true, GAME_SPEED * 2);
+	}
+	else
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), "Replace the low or high cards (1-2): ");
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
+
+		char input[16];
+		if (fgets(input, sizeof(input), stdin)) {
+			hilo = atoi(input);
+		}
 	}
 
 	if (hilo == 1 || hilo == 2)
@@ -1383,9 +1397,18 @@ void PlayNormal(struct game_data* game_data)
 */
 int GetPuntCardsToRedraw(struct game_data* game_data) {
 
-	char buf[256];
-	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), PUNT_REDRAW_MAX_CARDS);
-	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		int num = CpuPuntCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
+		char buf[256];
+		snprintf(buf, sizeof(buf), "Redrawing %d cards ", num);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
+		return num;
+	}
+
+	char buf2[256];
+	snprintf(buf2, sizeof(buf2), "Current total Yards: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), PUNT_REDRAW_MAX_CARDS);
+	ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 2);
 
 	int num = 0;
 	char input[16];
@@ -1408,6 +1431,12 @@ int GetPuntCardsToRedraw(struct game_data* game_data) {
 * OUTPUTS:     int
 */
 int GetPuntCardsToDraw(struct game_data* game_data) {
+	
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		return CpuPuntCardsToDrawDecision(game_data);
+	}
+	
 	char buf[256];
 	snprintf(buf, sizeof(buf), "How many cards do you want to draw? (1-%d): ", PUNT_MAX_CARDS);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
@@ -1433,6 +1462,15 @@ int GetPuntCardsToDraw(struct game_data* game_data) {
 * OUTPUTS:     int
 */
 int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
+
+	if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		int num = CpuFieldGoalCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
+		char buf[256];
+		snprintf(buf, sizeof(buf), "Redrawing %d cards ", num);
+		ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
+		return num;
+	}
 
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total Yards: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), FIELD_GOAL_REDRAW_MAX_CARDS);
@@ -1621,6 +1659,9 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 */
 int GetOnsideKickCardsToRedraw(struct game_data* game_data) {
 
+	if (game_data->one_player && game_data->team_in_possession == 2)
+		return CpuOnsideKickCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
+
 	char buf[256];
 	snprintf(buf, sizeof(buf), "Current total: %d  How many to redraw? (0-%d): ", TotalYardsOffence(game_data), ONSIDE_KICK_REDRAW_MAX_CARDS);
 	ConsoleShowGameScreen(game_data, buf, true, GAME_SPEED * 2);
@@ -1684,9 +1725,9 @@ void PlayPunt(struct game_data* game_data)
 {
 	ConsoleShowGameScreen(game_data, "Punting...", true, GAME_SPEED * 20); // announce punt
 
-	DrawCards(game_data, game_data->team_in_possession, GetPuntCardsToDraw(game_data), true);// draw 1-5 cards
+	DrawCards(game_data, game_data->team_in_possession, GetPuntCardsToDraw(game_data), true); // draw 1-6 cards
 
-	RedrawCards(game_data, game_data->team_in_possession, GetPuntCardsToRedraw(game_data));// redraw 0-2 cards, get player choice on high or low ones
+	RedrawCards(game_data, game_data->team_in_possession, GetPuntCardsToRedraw(game_data)); // redraw 0-2 cards, get player choice on high or low ones
 
 	int total_yards = TotalYardsOffence(game_data);
 	char buf[256];
@@ -1962,16 +2003,27 @@ bool PlayTimeout(struct game_data* game_data)
 int GetTimeoutTeam(struct game_data* game_data)
 {
 	int team = 0;
-	ConsoleShowGameScreen(game_data, "Which team called timeout? (1-2): ", true, GAME_SPEED * 2);
-	char input[16];
-	if (fgets(input, sizeof(input), stdin)) {
-		team = atoi(input);
+	if (game_data->one_player)
+	{
+		if (game_data->cpu_called_timeout)
+			team = 2;
+		else
+			team = 1;
+		game_data->cpu_called_timeout = false;
 	}
+	else
+	{
+		ConsoleShowGameScreen(game_data, "Which team called timeout? (1-2): ", true, GAME_SPEED * 2);
+		char input[16];
+		if (fgets(input, sizeof(input), stdin)) {
+			team = atoi(input);
+		}
 
-	if (team < 1)
-		team = 1;
-	else if (team > 2)
-		team = 2;
+		if (team < 1)
+			team = 1;
+		else if (team > 2)
+			team = 2;
+	}
 	return team;
 }
 
@@ -1984,10 +2036,23 @@ int GetTimeoutTeam(struct game_data* game_data)
 int GetPlayType(struct game_data* game_data)
 {
 	int play_type = 0;
-	ConsoleShowGameScreen(game_data, "Pick game type (1-5): ", true, GAME_SPEED * 2);
-	char input[16];
-	if (fgets(input, sizeof(input), stdin)) {
-		play_type = atoi(input);
+
+	if (game_data->one_player && CpuTimeoutDecision(game_data))
+	{
+		game_data->cpu_called_timeout = true;
+		play_type = PLAY_TYPE_TIMEOUT;
+	}
+	else if (game_data->one_player && game_data->team_in_possession == 2)
+	{
+		play_type = CpuPlayTypeDecision(game_data);
+	}
+	else
+	{
+		ConsoleShowGameScreen(game_data, "Pick game type (1-5): ", true, GAME_SPEED * 2);
+		char input[16];
+		if (fgets(input, sizeof(input), stdin)) {
+			play_type = atoi(input);
+		}
 	}
 	return play_type;
 }

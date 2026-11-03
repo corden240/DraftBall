@@ -382,6 +382,8 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 
 	game_data->two_min_drive_deficit_index = 0;
 	game_data->two_min_drive_yards_index = 0;
+
+	game_data->cpu_called_timeout = false;
 }
 
 /*

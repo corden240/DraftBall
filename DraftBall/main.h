@@ -91,6 +91,7 @@
 #define PASS_PLAY_MAX_CARDS_TO_DRAW (10)
 
 #define YARDS_PER_FIRST_DOWN (10)
+#define DOWNS_PER_FIRST_DOWN (4)
 
 #define FOULS_OFFSIDE_YARDS (5)
 #define FOULS_FALSE_START_YARDS (-5)
@@ -280,6 +281,8 @@ struct game_data {
 
 	int two_min_drive_deficit_index;
 	int two_min_drive_yards_index;
+
+	bool cpu_called_timeout;
 };
 
 struct season_data {
