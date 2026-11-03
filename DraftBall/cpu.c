@@ -298,7 +298,7 @@ bool CpuKneelDecision(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     bool
 */
-bool CpuGoFourthDown(struct game_data* game_data)
+bool CpuGoFourthDown(struct game_data* game_data) 	// TODO: improve this cpu decision???
 {
 	if (GetYardsToFirstDown(game_data) <= 2 && GetYardsToEndZone(game_data) < 70)
 		return true;
@@ -311,7 +311,7 @@ bool CpuGoFourthDown(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     bool
 */
-bool CpuPuntDecision(struct game_data* game_data)
+bool CpuPuntDecision(struct game_data* game_data) 	// TODO: improve this cpu decision???
 {
 	if (game_data->team_in_possession == 2)
 	{
@@ -332,7 +332,7 @@ bool CpuPuntDecision(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     bool
 */
-bool CpuFGDecision(struct game_data* game_data)
+bool CpuFGDecision(struct game_data* game_data) 	// TODO: improve this cpu decision???
 {
 	if (game_data->team_in_possession == 2)
 	{
