@@ -152,7 +152,7 @@ int (*DraftBallBalls[DRAFT_BALL_BALL_FRAMES])[DRAFT_BALL_BALL_WIDTH] =
 void ShowGameName(int frame_number)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	int buffer = 12;
+	int buffer = 6;
 	printf("\r\n\r\n");
 	for (int x = 0; x < GAME_BIT_FONT_HEIGHT; x++)
 	{
@@ -215,7 +215,7 @@ void ShowGameName(int frame_number)
 void ShowMenuTransitionGameName(int frame_number)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	int buffer = 12, height_buffer = (frame_number > 7) ? 1 : 8 - frame_number;
+	int buffer = 6, height_buffer = (frame_number > 10) ? 1 : 11 - frame_number;
 
 	for (int i = 0; i < height_buffer; i++)
 	{
@@ -292,7 +292,7 @@ void ShowMenuTransitionGameName(int frame_number)
 void ShowMenuTitle()
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	int buffer = 12;
+	int buffer = 6;
 	printf("\r\n");
 	for (int x = 0; x < GAME_BIT_FONT_HEIGHT; x++)
 	{
@@ -351,16 +351,16 @@ void ShowMenuTitle()
 * INPUTS:      menu choices
 * OUTPUTS:     none
 */
-void ShowMenuOptions(struct total_data* total_data, bool first_text)
+void ShowMenuOptions(bool first_text, int menu_selection)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	for (int i = 0; i < MENU_OPTIONS_NUMBER; i++)
 	{
-		printf("\r\n\r\n                                             ");
+		printf("\r\n\r\n                                       ");
 		if (i == 0)
 		{
 			printf("     ");
-			if (total_data->current_menu_selection == i)
+			if (menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if(first_text)
 				PrintTextWithDelays("Play Exhibition");
@@ -370,7 +370,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 1)
 		{
 			printf("       ");
-			if (total_data->current_menu_selection == i)
+			if (menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play Season");
@@ -380,7 +380,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 2)
 		{
 			printf("     ");
-			if (total_data->current_menu_selection == i)
+			if (menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Play 2 min drive");
@@ -390,7 +390,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 3)
 		{
 			printf("       ");
-			if (total_data->current_menu_selection == i)
+			if (menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("How to play");
@@ -400,7 +400,7 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 		else if (i == 4)
 		{
 			printf("          ");
-			if (total_data->current_menu_selection == i)
+			if (menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
 				PrintTextWithDelays("Quit");
@@ -417,10 +417,10 @@ void ShowMenuOptions(struct total_data* total_data, bool first_text)
 * INPUTS:      menu choices
 * OUTPUTS:     none
 */
-void ShowMenu(struct total_data* total_data, bool first_text)
+void ShowMenu(bool first_text, int menu_selection)
 {
 	ShowMenuTitle();
-	ShowMenuOptions(total_data, first_text);
+	ShowMenuOptions(first_text, menu_selection);
 }
 
 /*
@@ -432,11 +432,11 @@ void ShowMenu(struct total_data* total_data, bool first_text)
 void ShowLoadingStars(int frame_number)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int number_of_star_columns = 27;
 	printf("\r\n");
-
 	for (int i = 0; i < DRAFT_BALL_NUM_STAR_ROWS; i++)
 	{
-		for (int j = 0; j < 30; j++)
+		for (int j = 0; j < number_of_star_columns; j++)
 		{
 			if ((i % (DRAFT_BALL_TITLE_UNIQUE_ROWS * 2)) < DRAFT_BALL_TITLE_UNIQUE_ROWS)
 			{
@@ -519,10 +519,10 @@ void TransitionToMenuScreen()
 * INPUTS:      menu choices, first text
 * OUTPUTS:     none
 */
-void MenuScreen(struct total_data* total_data, bool first_text)
+void MenuScreen(bool first_text, int menu_selection)
 {
 	ResetScreen();
-	ShowMenu(total_data, first_text);
+	ShowMenu(first_text, menu_selection);
 }
 
 /*
@@ -531,9 +531,9 @@ void MenuScreen(struct total_data* total_data, bool first_text)
 * INPUTS:      none
 * OUTPUTS:     none
 */
-void Startup(struct total_Data* total_data) {
+void Startup() {
 	
 	LoadingScreen();
 	TransitionToMenuScreen();
-	MenuScreen(total_data, true);
+	MenuScreen(true, 0);
 }

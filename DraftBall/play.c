@@ -724,7 +724,7 @@ bool DrawPassCards(struct game_data* game_data)
 					card = 1;
 				game_data->o_cards_to_flash[card] = true;
 				ConsoleShowGameScreen(game_data, buffer, true, GAME_SPEED * 20);
-				ClearFlashCards(game_data); // TODO: could move this to below the next console show game screen
+				ClearFlashCards(game_data);
 				game_data->fumble = true;
 				ConsoleShowGameScreen(game_data, "Replacing card... ", true, GAME_SPEED * 20);
 				if (((game_data->o_cards[0] & VALUE) == ACE && (game_data->o_cards[0] & SUIT) == SPADES))
@@ -1122,7 +1122,6 @@ void PlayRun(struct game_data* game_data)
 
 			IntGroundingFoul(game_data);
 		}
-		// TODO: FOULS here is where intentional grounding is chosen, set foul flag, then resolved at the end of the play. Only if not already a flag on this play.
 	}
 	
 	MoveLineOfScrimmage(game_data, yards_gained);
@@ -1216,9 +1215,11 @@ int GetMatchupNumber(struct game_data* game_data)
 		return matchup;
 	}
 
+	game_data->show_qb_scramble_option = true;
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%s, pick matchup to play (1-5): ", GetTeamName(game_data, game_data->team_in_possession));
 	ConsoleShowGameScreen(game_data, buf, true, 0);
+	game_data->show_qb_scramble_option = false;
 
 	char input[16];
 	fgets(input, sizeof(input), stdin);
@@ -2162,7 +2163,9 @@ int GetPlayType(struct game_data* game_data)
 	}
 	else
 	{
+		game_data->show_play_types = true;
 		ConsoleShowGameScreen(game_data, "Pick game type (1-5): ", true, GAME_SPEED * 2);
+		game_data->show_play_types = false;
 		char input[16];
 		if (fgets(input, sizeof(input), stdin)) {
 			play_type = atoi(input);

@@ -12,13 +12,15 @@
 #define GAME_BIT_FONT_HEIGHT (7)
 #define DRAFT_BALL_TITLE_WIDTH (60)
 #define DRAFT_BALL_BALL_WIDTH (22)
-#define DRAFT_BALL_NUM_STAR_ROWS (5)
+#define DRAFT_BALL_NUM_STAR_ROWS (8)
 #define DRAFT_BALL_TITLE_UNIQUE_ROWS (2)
 
 #define MENU_OPTIONS_NUMBER (5)
 
 #define RULES_OPTIONS_NUMBER (7)
 #define EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER (7)
+
+#define SEASON_GAME_SETTINGS_OPTIONS_NUMBER (5)
 
 #define SETTINGS_OPTIONS_NUMBER (3)
 
@@ -36,7 +38,6 @@
 #define NUMBER_OF_TEAMS_PER_GAME (2)
 #define TIMEOUTS_PER_TEAM_PER_HALF (3)
 #define STARTING_LINE_OF_SCRIMMAGE (35)
-#define DEFAULT_PLAYS_PER_QUARTER (15) // TODO: search for PLAYS_PER_QUARTER all caps in all files to check not still used
 #define DEFAULT_PLAYS_PER_QUARTER (15)
 #define MIN_PLAYS_PER_QUARTER (5)
 #define MAX_PLAYS_PER_QUARTER (30)
@@ -52,8 +53,10 @@
 
 #define GAME_SPEED    (50) // must be divisible by 5
 #define ANIMATE_SPEED (50)
-#define WINDOW_WIDTH  (120)
-#define WINDOW_HEIGHT (50)
+#define WINDOW_WIDTH  (110)
+#define WINDOW_HEIGHT (30)
+#define WINDOW_SCALE_X (15) // change this to make a smaller screen overall
+#define WINDOW_SCALE_Y (WINDOW_SCALE_X * 2)
 
 #define END_ZONE_WIDTH (5)
 #define FIELD_WIDTH    (100)
@@ -155,6 +158,10 @@
 #define CONSOLE_BG_YELLOW    (0x60)
 #define CONSOLE_BG_WHITE     (0x70)
 #define CONSOLE_BG_GREY      (0x80)
+
+#define CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS (12)
+#define CONSOLE_TEXT_FIRST_DOWN (CONSOLE_TEXT_YELLOW)
+#define CONSOLE_BG_FIRST_DOWN (CONSOLE_BG_YELLOW)
 
 enum play_types {
 	PLAY_TYPE_NORMAL = 1,
@@ -283,26 +290,17 @@ struct game_data {
 	int two_min_drive_yards_index;
 
 	bool cpu_called_timeout;
+
+	bool show_play_types;
+	bool show_qb_scramble_option;
 };
 
 struct season_data {
-	int no_games;
-	int no_teams;
-	char team_names[64][64];
-	char team_wins[64][64];
-	char team_losses[64][64];
-	char team_draws[64][64];
+	int team_1_id;
+	int team_records[LEAGUE_TEAM_COUNT][WIN_LOSS_DRAW];
 
 	int current_game_mode;
 	bool fouls;
-	int plays_per_quarter;
-};
-
-struct total_data {
-	bool fouls;
-	int game_speed;
-	int current_game_mode;
-	int current_menu_selection;
 	int plays_per_quarter;
 };
 
@@ -316,11 +314,13 @@ struct card_name {
 	int val;
 	const char* name;
 };
+
 extern struct card_name card_names[];
 extern struct table_weight los_fouls_chance[];
 extern struct table_weight fifty_fifty_chance[];
 extern struct table_weight int_grounding_fouls_chance[];
 extern struct table_weight pass_interference_chance[];
+
 /* Prototypes */
 void ConsoleShowGameScreen(struct game_data* game_data, char txt[1000], bool text_delay, int pause);
 void TableWeightEnableAll(struct table_weight* table);

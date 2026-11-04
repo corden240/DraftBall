@@ -27,7 +27,7 @@ void PrintThreeTeamNames(HANDLE hConsole, int last_id, int current_id, int next_
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_data* total_data)
+void TwoMinDriveGameDataConstructor(struct game_data* game_data)
 {
 	game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	game_data->line_of_first_down = 0;
@@ -38,7 +38,7 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	game_data->team_2_score = 0;
 	game_data->quarter = NUMBER_OF_QUARTERS;
 	game_data->plays_remaining_in_quarter = TWO_MIN_DRIVE_PLAYS;
-	game_data->plays_per_quarter = total_data->plays_per_quarter;
+	game_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
 	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		game_data->shuffle_deck_needed[i] = 0;
 	}
@@ -98,8 +98,8 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 
 	ResetLineOfFirstDown(game_data);
 
-	game_data->fouls = total_data->fouls;
-	game_data->current_game_mode = total_data->current_game_mode;
+	game_data->fouls = true;
+	game_data->current_game_mode = 2;
 
 	/*game stats data*/
 	game_data->playoffs = false; // true if we are currently in the playoff part of the season, use to not add to record
@@ -145,6 +145,9 @@ void TwoMinDriveGameDataConstructor(struct game_data* game_data, struct total_da
 	game_data->two_min_drive_yards_index = 1;
 
 	game_data->cpu_called_timeout = false;
+
+	game_data->show_play_types = false;
+	game_data->show_qb_scramble_option = false;
 }
 
 /*
@@ -197,7 +200,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 	int team_2_current_id = GetTeam2CurrentID(game_data);
 	int team_2_next_id = GetTeam2NextID(game_data);
 
-	printf("\r\n\r\n                                        ");
+	printf("\r\n\r\n                                  ");
 	printf("            ");
 	if (first_text)
 		PrintTextWithDelays("Game Settings");
@@ -206,7 +209,7 @@ static void ShowTwoMinDriveGameSetupOptions(int current_menu_selection, bool fir
 
 	for (int i = 0; i < TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER; i++)
 	{
-		printf("\r\n\r\n                              ");
+		printf("\r\n\r\n                        ");
 		if (i == 0)
 		{
 			printf("                  ");
@@ -511,9 +514,9 @@ int SetupTwoMinDriveMenu(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     start / back
 */
-int SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data)
+int SetupTwoMinDrive(struct game_data* game_data)
 {
-	TwoMinDriveGameDataConstructor(game_data, total_data);
+	TwoMinDriveGameDataConstructor(game_data);
 
 	if (SetupTwoMinDriveMenu(game_data) == (TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER - 1))
 		return -1;

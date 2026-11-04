@@ -153,7 +153,7 @@ void ShowTopInfo(struct game_data* game_data)
 	   team 2 block: 1 space + pips. Total = 2 * BLOCKS_WIDTH - 1 */
 	const int BLOCKS_WIDTH = (TIMEOUTS_PER_TEAM_PER_HALF * 2) + 1;
 	int width = WINDOW_WIDTH;
-	int center = (width / 2) - 6;     /* index where middle should appear (0-based) */
+	int center = (width / 2);     /* index where middle should appear (0-based) */
 	if (center < 0) center = 0;
 
 	/* ---- Build the individual segments (local buffers, no accumulation) ---- */
@@ -266,7 +266,7 @@ void ShowTopInfo(struct game_data* game_data)
 
 	printf("\n\r\n\r          ");
 
-	if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_YELLOW) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_YELLOW))
+	if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_FIRST_DOWN) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_FIRST_DOWN))
 		SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREY);
 	else
 		SetConsoleTextAttribute(hConsole, (game_data->team_in_possession - 1) ? (game_data->team_2_colour << 4) : (game_data->team_1_colour << 4));
@@ -274,7 +274,7 @@ void ShowTopInfo(struct game_data* game_data)
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of scrimmage   ");
 
-	SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+	SetConsoleTextAttribute(hConsole, CONSOLE_BG_FIRST_DOWN);
 	printf(" ");// box = line of 1st down
 	SetConsoleTextAttribute(hConsole, COLOUR_BASE);
 	printf(" = Line of 1st down    ");
@@ -336,8 +336,6 @@ void DrawField(struct game_data* game_data)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-
-	char* plays[] = { "Play", "Punt", "FG", "Kneel", "Timeout" };
 	printf("\n\r");
 
 	PrintSideline();
@@ -353,13 +351,13 @@ void DrawField(struct game_data* game_data)
 			else {
 				if (i == game_data->line_of_scrimmage)
 				{
-					if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_YELLOW) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_YELLOW))
+					if ((game_data->team_in_possession == 1 && game_data->team_1_colour == CONSOLE_TEXT_FIRST_DOWN) || (game_data->team_in_possession == 2 && game_data->team_2_colour == CONSOLE_TEXT_FIRST_DOWN))
 						SetConsoleTextAttribute(hConsole, CONSOLE_BG_GREY);
 					else
 						SetConsoleTextAttribute(hConsole, (game_data->team_in_possession - 1) ? (game_data->team_2_colour << 4) : (game_data->team_1_colour << 4));
 				}
 				else if (i == game_data->line_of_first_down && game_data->play_type != PLAY_TYPE_PUNT && game_data->play_type != PLAY_TYPE_FIELD_GOAL && !game_data->kickoff_needed)
-					SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
+					SetConsoleTextAttribute(hConsole, CONSOLE_BG_FIRST_DOWN);
 				else
 					SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 
@@ -374,11 +372,7 @@ void DrawField(struct game_data* game_data)
 				SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 			}
 		}
-		if (j < (PITCH_WIDTH - 1))
-		{
-			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf(" %d %s ", j + 1, plays[j]);
-		}
+
 	}
 
 	PrintSideline();
@@ -409,6 +403,13 @@ void ShowGameInfo(struct game_data* game_data)
 	case 3: { printf("%drd & %d ", game_data->down, distance); break; }
 	case 4: { printf("%dth & %d ", game_data->down, distance); break; }
 	}
+	printf("\n\r\n\r");
+	if(game_data->show_play_types)
+		printf("                         1) Play   2) Punt   3) Field Goal   4) Kneel   5) Timeout        ");
+	else if (game_data->show_qb_scramble_option)
+		printf("                                                5) QB Scramble                            ");
+	else
+		printf("                                                                                          ");
 }
 
 /*
@@ -527,13 +528,13 @@ void ShowCards(struct game_data* game_data)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-	printf("\r\n                                 ");
-	printf("\r\n                                 ");
+	printf("\r\n                                       ");
+	printf("\r\n                                       ");
 
 	if (game_data->formation && !game_data->run_play && !game_data->pass_play)
 	{
 		if (game_data->show_O_D_Both == 0)
-			printf("                                 \r\n                                                                  ");
+			printf("                                 \r\n                                                             ");
 		else if (game_data->show_O_D_Both == 1)
 		{
 			ShowCardsInFormation(game_data, 1);	// send 1 for offence, 2 for defence
@@ -547,7 +548,7 @@ void ShowCards(struct game_data* game_data)
 		else if (game_data->show_O_D_Both == 3)
 		{
 			ShowCardsInFormation(game_data, 2);	// send 1 for offence, 2 for defence;
-			printf("\r\n                                 ");
+			printf("\r\n                                       ");
 			ShowCardsInFormation(game_data, 1);
 		}
 		else
@@ -564,7 +565,7 @@ void ShowCards(struct game_data* game_data)
 
 			printf("                        ");
 
-			printf("\r\n                                 ");
+			printf("\r\n                                       ");
 
 			if (game_data->o_cards[0])
 				PrintOCards(game_data);
@@ -577,7 +578,7 @@ void ShowCards(struct game_data* game_data)
 
 			printf("                        ");
 
-			printf("\r\n                                 ");
+			printf("\r\n                                       ");
 
 			if (game_data->d_cards[0])
 				PrintDCards(game_data);
@@ -602,14 +603,24 @@ void ShowText(struct game_data* game_data, char txt[1000], bool text_delay)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("\r\n\r\n                                                                                             ");
-	printf("\r                                 ");
-	if(game_data->flag_thrown)
+	printf("\r");
+	int textLength = 0;
+	while (textLength < MAX_STRING_LENGTH && txt[textLength] != '\0')
+		textLength++;
+
+	int padding = 0;
+	if (textLength < WINDOW_WIDTH)
+		padding = (WINDOW_WIDTH - textLength) / 2;
+
+	printf("\r%*s", padding, "");
+
+	if (game_data->flag_thrown)
 		SetConsoleTextAttribute(hConsole, CONSOLE_BG_YELLOW);
 
-	for (int i = 0; i < MAX_STRING_LENGTH && txt[i] != '\0'; i++)
+	for (int i = 0; i < textLength; i++)
 	{
 		printf("%c", txt[i]);
-		if(text_delay)
+		if (text_delay)
 			Sleep(GAME_SPEED / 5);
 	}
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);

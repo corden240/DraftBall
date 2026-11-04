@@ -5,11 +5,11 @@ const struct league_data default_league = {
     {
         //    Team name	  qb name                  RB1              RB2                 WR1             WR2           WR3           WR4              team colour    deck 
         {      "49ers",     "Purdy", {       "McCaffrey",          "Black"}, {        "Evans",       "Samuel",  "Stribling",     "Kittle"},       CONSOLE_TEXT_RED,   5},
-        {      "Bears",  "Williams", {           "Swift",       "Monangai"}, {       "Odunze",       "Burden",    "Raymond",   "Loveland"},    CONSOLE_TEXT_YELLOW,   5},
-        {    "Bengals",    "Burrow", {          "Browne",         "Perine"}, {        "Chase",      "Higgins",     "Meyers",    "Gesicki"},    CONSOLE_TEXT_YELLOW,   4},
+        {      "Bears",  "Williams", {           "Swift",       "Monangai"}, {       "Odunze",       "Burden",    "Raymond",   "Loveland"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   5},
+        {    "Bengals",    "Burrow", {          "Browne",         "Perine"}, {        "Chase",      "Higgins",     "Meyers",    "Gesicki"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   4},
         {      "Bills",     "Allen", {            "Cook",        "Johnson"}, {        "Moore",       "Shakir",    "Coleman",    "Kincaid"},      CONSOLE_TEXT_BLUE,   5},
-        {    "Broncos",       "Nix", {         "Dobbins",         "Harvey"}, {       "Waddle",       "Sutton",   "Franklin",       "Mims"},    CONSOLE_TEXT_YELLOW,   4},
-        {     "Browns",    "Watson", {         "Judkins",        "Sampson"}, {       "Boston",   "Concepcion",      "Jeudy",     "Fannin"},    CONSOLE_TEXT_YELLOW,   3},
+        {    "Broncos",       "Nix", {         "Dobbins",         "Harvey"}, {       "Waddle",       "Sutton",   "Franklin",       "Mims"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   4},
+        {     "Browns",    "Watson", {         "Judkins",        "Sampson"}, {       "Boston",   "Concepcion",      "Jeudy",     "Fannin"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   3},
         { "Buccaneers",  "Mayfield", {          "Irving",       "Gainwell"}, {       "Egbuka",       "Godwin",    "Johnson",      "Otton"},       CONSOLE_TEXT_RED,   3},
         {  "Cardinals",  "Brissett", {            "Love",       "Allgeier"}, {       "Wilson",       "Bourne",     "Virgil",    "McBride"},       CONSOLE_TEXT_RED,   2},
         {   "Chargers",   "Herbert", {         "Hampton",       "Mitchell"}, {     "McConkey",     "Johnston",     "Harris",      "Kolar"},    CONSOLE_TEXT_YELLOW,   1},

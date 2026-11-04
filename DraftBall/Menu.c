@@ -4,37 +4,37 @@
 #include <string.h>
 
 void ResetScreen();
-void MenuScreen();
+void MenuScreen(bool first_text, int menu_selection);
 
 /*
 * NAME:        MenuOutcome
 * DESCRIPTION: Gets which game type wants to be played
-* INPUTS:      total_data
+* INPUTS:      none
 * OUTPUTS:     int choice
 */
-int MenuOutcome(struct total_data* total_data) {
+int MenuOutcome(int menu_selection) {
 
 	bool game_chosen = false;
 	do {
-		MenuScreen(total_data, false);
+		MenuScreen(false, menu_selection);
 		int ch = getch();
 
 		if (ch == 0 || ch == 224) {   // extended key: read the scan code
 			ch = getch();
 			switch (ch) {
 			case 72: // up arrow
-				if (total_data->current_menu_selection > 0) {
-					total_data->current_menu_selection--;
+				if (menu_selection > 0) {
+					menu_selection--;
 				}
 				else
-					total_data->current_menu_selection = (MENU_OPTIONS_NUMBER - 1);
+					menu_selection = (MENU_OPTIONS_NUMBER - 1);
 				break;
 			case 80: // down arrow
-				if (total_data->current_menu_selection < (MENU_OPTIONS_NUMBER - 1)) {
-					total_data->current_menu_selection++;
+				if (menu_selection < (MENU_OPTIONS_NUMBER - 1)) {
+					menu_selection++;
 				}
 				else
-					total_data->current_menu_selection = 0;
+					menu_selection = 0;
 				break;
 			default:
 				break;
@@ -42,9 +42,9 @@ int MenuOutcome(struct total_data* total_data) {
 		}
 		else if (ch == 13) {// Enter key
 			game_chosen = true;
-			if (total_data->current_menu_selection == (MENU_OPTIONS_NUMBER - 1))
+			if (menu_selection == (MENU_OPTIONS_NUMBER - 1))
 				exit(-1);
-			return total_data->current_menu_selection;
+			return menu_selection;
 		}
 		else
 			;

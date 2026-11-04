@@ -11,32 +11,17 @@ void ResetScreen();
 void HideCursor();
 void UnHideCursor();
 void Startup();
-int MenuOutcome(struct total_data* menu);
+int MenuOutcome();
 void ExhibitionGameDataConstructor(struct game_data* game_data);
-int SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data);
+int SetupExhibitionGame(struct game_data* game_data);
 void PlayGame(struct game_data* game_data);
 void Settings();
-void SetupSeason(struct season_data* season_data, struct total_data* total_data);
+int SetupSeason(struct season_data* season_data);
 void PlaySeason(struct season_data* season_data);
 void TwoMinDriveGameDataConstructor(struct game_data* game_data);
 void SeasonDataConstructor(struct season_data* season_data);
-int SetupTwoMinDrive(struct game_data* game_data, struct total_data* total_data);
+int SetupTwoMinDrive(struct game_data* game_data);
 void HowToPlay();
-
-/*
-* NAME:        TotalDataConstructor
-* DESCRIPTION: starts all of total_data data to default settings
-* INPUTS:      game_data
-* OUTPUTS:     none
-*/
-void TotalDataConstructor(struct total_data* total_data)
-{
-	total_data->fouls = 0;
-	total_data->game_speed = 0;
-	total_data->current_game_mode = 0;
-	total_data->current_menu_selection = 0;
-	total_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
-}
 
 /*
 * NAME:        SetupWindow
@@ -47,8 +32,8 @@ void TotalDataConstructor(struct total_data* total_data)
 void SetupWindow()
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SMALL_RECT windowSize = { 0, 0, WINDOW_HEIGHT - 1, WINDOW_WIDTH - 1 };
-	COORD bufferSize = { WINDOW_HEIGHT , WINDOW_WIDTH };
+	SMALL_RECT windowSize = { 0, 0, WINDOW_WIDTH - 1, WINDOW_HEIGHT - 1 };
+	COORD bufferSize = { WINDOW_WIDTH, WINDOW_HEIGHT };
 
 	SetConsoleWindowInfo(hConsole, 1, &windowSize);
 	SetConsoleScreenBufferSize(hConsole, bufferSize);
@@ -57,8 +42,8 @@ void SetupWindow()
 	fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 	GetCurrentConsoleFontEx(hConsole, FALSE, &fontInfo);
 
-	fontInfo.dwFontSize.X = 12;
-	fontInfo.dwFontSize.Y = 24;
+	fontInfo.dwFontSize.X = WINDOW_SCALE_X;
+	fontInfo.dwFontSize.Y = WINDOW_SCALE_Y;
 	SetCurrentConsoleFontEx(hConsole, FALSE, &fontInfo);
 
 	HideCursor();
@@ -67,41 +52,36 @@ void SetupWindow()
 /*
 * NAME:        ExecuteMenuChoice
 * DESCRIPTION: play out each menu option
-* INPUTS:      total_data
+* INPUTS:      none
 * OUTPUTS:     none
 */
-void ExecuteMenuChoice(struct total_data* total_data)
+void ExecuteMenuChoice()
 {
+	int menu_outcome = 0;
 	do {
-		int menu_outcome = MenuOutcome(total_data);
+		menu_outcome = MenuOutcome(menu_outcome);
+		system("cls");
 
 		if (menu_outcome == 0) // play 1 game
 		{
-			total_data->current_game_mode = 0;
-			system("cls");
 			struct game_data game_data;
-			if (SetupExhibitionGame(&game_data, total_data) == 1)
+			if (SetupExhibitionGame(&game_data) == 1)
 				PlayGame(&game_data);
 		}
 		else if (menu_outcome == 1) // play season
 		{
-			total_data->current_game_mode = 1;
-			system("cls");
 			struct season_data season_data;	
-			SetupSeason(&season_data, total_data);
-			PlaySeason(&season_data);
+			if(SetupSeason(&season_data) == 1)
+				PlaySeason(&season_data);
 		}
-		else if (menu_outcome == 2) // play 2 min drive, down 6 points in the 4th? 2 timeouts, 5 plays, start at own 35?
+		else if (menu_outcome == 2) // play 2 min drive
 		{
-			total_data->current_game_mode = 2;
-			system("cls");
 			struct game_data game_data;	
-			if (SetupTwoMinDrive(&game_data, total_data) == 1)
+			if (SetupTwoMinDrive(&game_data) == 1)
 				PlayGame(&game_data);
 		}
 		else if (menu_outcome == 3) // how to play page
 		{
-			total_data->current_game_mode = 3;
 			HowToPlay();
 		}
 		system("cls");
@@ -118,9 +98,6 @@ void main()
 {
 	srand((unsigned)time(NULL));
 	SetupWindow();
-	struct total_data total_data;
-	TotalDataConstructor(&total_data);
-	Startup(&total_data);
-
-	ExecuteMenuChoice(&total_data);
+	Startup();
+	ExecuteMenuChoice();
 }

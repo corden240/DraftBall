@@ -267,7 +267,7 @@ void CoinToss(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     none
 */
-void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_data* total_data)
+void ExhibitionGameDataConstructor(struct game_data* game_data)
 {
 	game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
 	game_data->line_of_first_down = 0;
@@ -277,8 +277,8 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	game_data->team_1_score = 0;
 	game_data->team_2_score = 0;
 	game_data->quarter = 1;
-	game_data->plays_remaining_in_quarter = total_data->plays_per_quarter;
-	game_data->plays_per_quarter = total_data->plays_per_quarter;
+	game_data->plays_remaining_in_quarter = DEFAULT_PLAYS_PER_QUARTER;
+	game_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
 	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
 		game_data->shuffle_deck_needed[i] = 0;
 	}
@@ -335,8 +335,8 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	game_data->team_1_colour = CONSOLE_TEXT_WHITE;
 	game_data->team_2_colour = CONSOLE_TEXT_WHITE;
 
-	game_data->fouls = total_data->fouls;
-	game_data->current_game_mode = total_data->current_game_mode;
+	game_data->fouls = true;
+	game_data->current_game_mode = 0;
 
 	/*game stats data*/
 	game_data->playoffs = false; // true if we are currently in the playoff part of the season, use to not add to record
@@ -385,6 +385,9 @@ void ExhibitionGameDataConstructor(struct game_data* game_data, struct total_dat
 	game_data->two_min_drive_yards_index = 0;
 
 	game_data->cpu_called_timeout = false;
+
+	game_data->show_play_types = false;
+	game_data->show_qb_scramble_option = false;
 }
 
 /*
@@ -536,7 +539,7 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 	int team_2_current_id = GetTeam2CurrentID(game_data);
 	int team_2_next_id = GetTeam2NextID(game_data);
 
-	printf("\r\n\r\n                                        ");
+	printf("\r\n\r\n                                  ");
 	printf("            ");
 	if (first_text)
 		PrintTextWithDelays("Game Settings");
@@ -545,7 +548,7 @@ static void ShowExhibitionGameSetupOptions(int current_menu_selection, bool firs
 
 	for (int i = 0; i < EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER; i++)
 	{
-		printf("\r\n\r\n                              ");
+		printf("\r\n\r\n                        ");
 		if (i == 0)
 		{
 			printf("                  ");
@@ -877,9 +880,9 @@ void SetupTeamData(struct game_data* game_data)
 * INPUTS:      game_data
 * OUTPUTS:     start / back
 */
-int SetupExhibitionGame(struct game_data* game_data, struct total_data* total_data)
+int SetupExhibitionGame(struct game_data* game_data)
 {
-	ExhibitionGameDataConstructor(game_data, total_data);
+	ExhibitionGameDataConstructor(game_data);
 	
 	if (SetupExhibitionMenu(game_data) == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1))
 		return -1;
