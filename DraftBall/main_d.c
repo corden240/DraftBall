@@ -271,3 +271,13 @@ struct table_weight fifty_fifty_chance[] = {
 	{1,    1000, true},
 	{0, -1, false}
 };
+
+int schedule[SEASON_NUMBER_OF_GAMES][4] = {
+	// game 1 away      game 1 home      game 2 away         game 2 home
+	{       1,               2,               3,                  4     },           // week 1
+	{       1,               3,               2,                  4     },           // week 2
+	{       1,               4,               2,                  3     },           // week 3
+	{       2,               1,               4,                  3     },           // week 4
+	{       3,               1,               4,                  2     },           // week 5
+	{       4,               1,               3,                  2     },           // week 6
+};

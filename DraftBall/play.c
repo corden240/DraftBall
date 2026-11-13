@@ -1058,8 +1058,10 @@ void UpdateCarriesYardsStats(struct game_data* game_data, int yards_gained)
 {
 	if (game_data->matchup_number == 5)
 	{
-		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
-		game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
+		if (yards_gained > 0) {
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_CARRIES]++;
+			game_data->quarterback_stats[game_data->team_in_possession - 1][QB_RUNNING_YARDS] += yards_gained;
+		}
 	}
 	else
 	{

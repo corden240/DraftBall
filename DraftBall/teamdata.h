@@ -3,6 +3,8 @@
 #include "main.h"
 
 struct team_data {
+    int id;
+    int division;
     char name[64];
     char qb_name[64];
     char rb_names[2][64];
@@ -13,6 +15,14 @@ struct team_data {
 
 struct league_data {
     struct team_data teams[LEAGUE_TEAM_COUNT];
+};
+
+struct conference_data {
+    struct team_data teams[CONFERENCE_TEAM_COUNT];
+};
+
+struct division_data {
+    struct team_data teams[DIVISION_TEAM_COUNT];
 };
 
 extern const struct league_data default_league;

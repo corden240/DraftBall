@@ -113,7 +113,61 @@ void SeasonDataConstructor(struct season_data* season_data)
 	season_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
 	season_data->team_1_id = 0;
 
-	season_data->team_records[0][0] = 0;
+	for (int i = 0; i < LEAGUE_TEAM_COUNT; i++)
+	{
+		for (int j = 0; j < WIN_LOSS_DRAW; j++)
+		{
+			season_data->team_records[i][j] = 0;
+		}
+	}
+
+	int afc_teams = 0, nfc_teams = 0, afc_east_teams = 0, afc_north_teams = 0, afc_south_teams = 0, afc_west_teams = 0, nfc_east_teams = 0, nfc_north_teams = 0, nfc_south_teams = 0, nfc_west_teams = 0;
+	for (int i = 0; i < LEAGUE_TEAM_COUNT; i++)
+	{
+		const struct team_data* team = &default_league.teams[i];
+		if (team->division < 5) {
+			season_data->afc_team_ids[afc_teams] = team->id;
+			afc_teams++;
+		}
+		else {
+			season_data->nfc_team_ids[nfc_teams] = team->id;
+			nfc_teams++;
+		}
+
+		if (team->division == 1) {
+			season_data->afc_east_team_ids[afc_east_teams] = team->id;
+			afc_east_teams++;
+		}
+		else if (team->division == 2) {
+			season_data->afc_north_team_ids[afc_north_teams] = team->id;
+			afc_north_teams++;
+		}
+		else if (team->division == 3) {
+			season_data->afc_south_team_ids[afc_south_teams] = team->id;
+			afc_south_teams++;
+		}
+		else if (team->division == 4) {
+			season_data->afc_west_team_ids[afc_west_teams] = team->id;
+			afc_west_teams++;
+		}
+		else if (team->division == 5) {
+			season_data->nfc_east_team_ids[nfc_east_teams] = team->id;
+			nfc_east_teams++;
+		}
+		else if (team->division == 6) {
+			season_data->nfc_north_team_ids[nfc_north_teams] = team->id;
+			nfc_north_teams++;
+		}
+		else if (team->division == 7) {
+			season_data->nfc_south_team_ids[nfc_south_teams] = team->id;
+			nfc_south_teams++;
+		}
+		else if (team->division == 8) {
+			season_data->nfc_west_team_ids[nfc_west_teams] = team->id;
+			nfc_west_teams++;
+		}
+	}
+	season_data->week = 1;
 }
 
 /*
@@ -148,11 +202,11 @@ static void ShowSeasonGameSetupOptions(int current_menu_selection, bool first_te
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Team 1");
+				PrintTextWithDelays("Team");
 			else
-				printf("Team 1");
+				printf("Team");
 			SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-			printf("   ");
+			printf("     ");
 			PrintSeasonThreeTeamNames(hConsole, team_1_last_id, team_1_current_id, team_1_next_id);
 			printf("              ");
 		}
@@ -227,13 +281,13 @@ static void ShowSeasonGameSetupOptions(int current_menu_selection, bool first_te
 		}
 		else if (i == 3)
 		{
-			printf("                       ");
+			printf("                      ");
 			if (current_menu_selection == i)
 				SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 			if (first_text)
-				PrintTextWithDelays("Start game");
+				PrintTextWithDelays("Start season");
 			else
-				printf("Start game");
+				printf("Start season");
 		}
 		else if (i == 4)
 		{
@@ -348,6 +402,56 @@ int SetupSeasonMenu(struct season_data* season_data)
 }
 
 /*
+* NAME:        GetDivisionID
+* DESCRIPTION: returns division id from team id
+* INPUTS:      season_data, team id
+* OUTPUTS:     none
+*/
+int GetDivisionID(struct season_data* season_data, int team_id)
+{
+	int division_id = 0;
+	for (int i = 0; i < DIVISION_TEAM_COUNT; i++) {
+		if (season_data->afc_east_team_ids[i] == team_id) {
+			division_id = 0;
+		}
+		else if (season_data->afc_north_team_ids[i] == team_id) {
+			division_id = 1;
+		}
+		else if (season_data->afc_south_team_ids[i] == team_id) {
+			division_id = 2;
+		}
+		else if (season_data->afc_west_team_ids[i] == team_id) {
+			division_id = 3;
+		}
+		else if (season_data->nfc_east_team_ids[i] == team_id) {
+			division_id = 4;
+		}
+		else if (season_data->nfc_north_team_ids[i] == team_id) {
+			division_id = 5;
+		}
+		else if (season_data->nfc_south_team_ids[i] == team_id) {
+			division_id = 6;
+		}
+		else if (season_data->nfc_west_team_ids[i] == team_id) {
+			division_id = 7;
+		}
+	}
+	return division_id;
+}
+
+/*
+* NAME:        SetupSeasonData
+* DESCRIPTION: sets up remaining season data
+* INPUTS:      game_data
+* OUTPUTS:     none
+*/
+void SetupSeasonData(struct season_data* season_data)
+{
+	season_data->division_id = GetDivisionID(season_data, season_data->team_1_id);
+	return;
+}
+
+/*
 * NAME:        SetupSeason
 * DESCRIPTION: initialises season data
 * INPUTS:      game_data
@@ -359,6 +463,8 @@ int SetupSeason(struct season_data* season_data)
 	
 	if (SetupSeasonMenu(season_data) == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1))
 		return -1; 
+
+	SetupSeasonData(season_data);
 
 	return  1;
 }

@@ -4,6 +4,8 @@
 
 
 #define LEAGUE_TEAM_COUNT (32)
+#define CONFERENCE_TEAM_COUNT (16)
+#define DIVISION_TEAM_COUNT (4)
 #define TEAM_NAME_FIELD_WIDTH (12)
 
 #define DRAFT_BALL_BALL_FRAMES (9)
@@ -25,6 +27,10 @@
 #define SETTINGS_OPTIONS_NUMBER (3)
 
 #define GAME_STATS_NUMBER (3)
+
+#define SEASON_NUMBER_OF_GAMES (6)
+#define SEASON_PLAYOFF_NUMBER_OF_GAMES (3)
+#define	SEASON_MENU_OPTIONS_NUMBER (4)
 
 #define TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER (8)
 #define TWO_MIN_DRIVE_DEFICIT_0 (2)
@@ -297,11 +303,26 @@ struct game_data {
 
 struct season_data {
 	int team_1_id;
+	int division_id;
 	int team_records[LEAGUE_TEAM_COUNT][WIN_LOSS_DRAW];
+
+	int afc_team_ids[CONFERENCE_TEAM_COUNT];
+	int nfc_team_ids[CONFERENCE_TEAM_COUNT];
+
+	int afc_east_team_ids[DIVISION_TEAM_COUNT];    // 1 
+	int afc_north_team_ids[DIVISION_TEAM_COUNT];   // 2
+	int afc_south_team_ids[DIVISION_TEAM_COUNT];   // 3
+	int afc_west_team_ids[DIVISION_TEAM_COUNT];	   // 4
+	int nfc_east_team_ids[DIVISION_TEAM_COUNT];	   // 5
+	int nfc_north_team_ids[DIVISION_TEAM_COUNT];   // 6
+	int nfc_south_team_ids[DIVISION_TEAM_COUNT];   // 7
+	int nfc_west_team_ids[DIVISION_TEAM_COUNT];	   // 8
 
 	int current_game_mode;
 	bool fouls;
 	int plays_per_quarter;
+	int wildcard_round_needed;
+	int week;
 };
 
 struct table_weight {
@@ -331,3 +352,4 @@ extern struct table_weight shared_deck[];
 extern struct table_weight player_1_deck[];
 extern struct table_weight player_2_deck[];
 extern struct table_weight* player_decks[];
+extern int schedule[SEASON_NUMBER_OF_GAMES][4];
