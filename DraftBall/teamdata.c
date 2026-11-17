@@ -3,7 +3,7 @@
 
 const struct league_data default_league = {
     {
-        //id  division    Team name	    qb name                  RB1              RB2                 WR1             WR2           WR3           WR4                          team colour      deck 
+        //id  division    Team name	    qb name                  RB1              RB2                 WR1             WR2           WR3           WR4                          team colour      deck
         { 0,      8,        "49ers",     "Purdy", {       "McCaffrey",          "Black"}, {        "Evans",       "Samuel",  "Stribling",     "Kittle"},                     CONSOLE_TEXT_RED,   5},
         { 1,      6,        "Bears",  "Williams", {           "Swift",       "Monangai"}, {       "Odunze",       "Burden",    "Raymond",   "Loveland"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   5},
         { 2,      2,      "Bengals",    "Burrow", {          "Browne",         "Perine"}, {        "Chase",      "Higgins",     "Meyers",    "Gesicki"},    CONSOLE_AS_CLOSE_TO_ORANGE_AS_POS,   4},

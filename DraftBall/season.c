@@ -260,49 +260,94 @@ void ShowRegularSeasonMenuTop(bool first_text, struct season_data* season_data)
 	printf("\r\n");
 
 	const struct team_data* team1 = &default_league.teams[season_data->team_1_id];
-	bool show_game = true;
+
+	// Create array to hold teams and their records for sorting
+	struct {
+		const struct team_data* team;
+		float record;
+	} teams_in_division[LEAGUE_TEAM_COUNT];
+
+	int division_count = 0;
+
+	// Collect all teams in the same division with their records calculated
 	for (int i = 0; i < LEAGUE_TEAM_COUNT; i++)
 	{
 		const struct team_data* team = &default_league.teams[i];
 		if (team->division == team1->division)
 		{
-			printf("         ");
-			PrintSizedTeamName(team->id, (team->id == team1->id) ? true : false);
-			printf("   ");
-
 			int wins = season_data->team_records[team->id][WINS];
 			int losses = season_data->team_records[team->id][LOSSES];
-			int draws = season_data->team_records[team->id][DRAWS];
+
 			float record = 0;
 			if ((wins + losses) > 0)
-				record = (float)(season_data->team_records[team->id][WINS] / (season_data->team_records[team->id][WINS] + season_data->team_records[team->id][LOSSES]));
-			
-			printf("%2d -%2d", wins, losses);
-			if(draws > 0)
-				printf(" -%2d", draws);
-			else
-				printf("    ");
-			printf("  %.3f", record);
+				record = (float)(wins / (wins + losses));
 
-			if (show_game) {
-				int opp_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);
-				int home_or_away = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week);
-				const struct team_data* opponent = &default_league.teams[opp_id];
-				printf("           ");
-				if (home_or_away == 0) {				
-					PrintSizedTeamName(opp_id, false);
-					printf(" @ ");
-					PrintSizedTeamName(team1->id, true);
-				}
-				else {
-					PrintSizedTeamName(team1->id, true);
-					printf(" @ ");
-					PrintSizedTeamName(opp_id, false);
-				}
-				show_game = false;
-			}
-			printf("\r\n");
+			teams_in_division[division_count].team = team;
+			teams_in_division[division_count].record = record;
+			division_count++;
 		}
+	}
+
+	// Sort teams by record in descending order (highest first)
+	for (int i = 0; i < division_count - 1; i++)
+	{
+		for (int j = i + 1; j < division_count; j++)
+		{
+			if (teams_in_division[j].record > teams_in_division[i].record)
+			{
+				// Swap
+				const struct team_data* temp_team = teams_in_division[i].team;
+				float temp_record = teams_in_division[i].record;
+
+				teams_in_division[i].team = teams_in_division[j].team;
+				teams_in_division[i].record = teams_in_division[j].record;
+
+				teams_in_division[j].team = temp_team;
+				teams_in_division[j].record = temp_record;
+			}
+		}
+	}
+
+	// Print teams in sorted order
+	bool show_game = true;
+	for (int i = 0; i < division_count; i++)
+	{
+		const struct team_data* team = teams_in_division[i].team;
+
+		printf("         ");
+		PrintSizedTeamName(team->id, (team->id == team1->id) ? true : false);
+		printf("   ");
+
+		int wins = season_data->team_records[team->id][WINS];
+		int losses = season_data->team_records[team->id][LOSSES];
+		int draws = season_data->team_records[team->id][DRAWS];
+		float record = teams_in_division[i].record;
+
+		printf("%2d -%2d", wins, losses);
+		if (draws > 0)
+			printf(" -%2d", draws);
+		else
+			printf("    ");
+		printf("  %.3f", record);
+
+		if (show_game) {
+			int opp_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);
+			int home_or_away = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week);
+			const struct team_data* opponent = &default_league.teams[opp_id];
+			printf("           ");
+			if (home_or_away == 0) {
+				PrintSizedTeamName(opp_id, false);
+				printf(" @ ");
+				PrintSizedTeamName(team1->id, true);
+			}
+			else {
+				PrintSizedTeamName(team1->id, true);
+				printf(" @ ");
+				PrintSizedTeamName(opp_id, false);
+			}
+			show_game = false;
+		}
+		printf("\r\n");
 	}
 
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
@@ -420,6 +465,133 @@ int RegularSeasonMenuOutcome(struct season_data* season_data) {
 }
 
 /*
+* NAME:        ShowRegularSeasonLeaderboardMenu
+* DESCRIPTION: leaderboard
+* INPUTS:      current selection, season_data
+* OUTPUTS:     none
+*/
+static void ShowRegularSeasonLeaderboardMenu(struct season_data* season_data)
+{
+	system("cls");
+	ResetScreen();
+	ShowMenuTitle();
+
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	printf("                      ");
+	printf("AFC     W   L   D  Record              NFC     W   L   D  Record");
+	printf("\r\n");
+	bool show_game = true;
+	for (int i = 0; i < (LEAGUE_TEAM_COUNT / 2); i++)
+	{
+		printf("\r\n                ");
+		int afc_id = 0, nfc_id = 0;
+		for (int j = 0; j < LEAGUE_TEAM_COUNT; j++)
+		{
+			const struct team_data* team = &default_league.teams[j];
+			if (team->division < 5)
+			{
+				if (afc_id == i)
+				{
+					afc_id = j;
+					break;
+				}
+				afc_id++;
+			}
+		}
+
+		const struct team_data* afc_team = &default_league.teams[afc_id];
+		PrintSizedTeamName(afc_team->id, (afc_team->id == season_data->team_1_id) ? true : false);
+		printf("   ");
+
+		int wins = season_data->team_records[afc_team->id][WINS];
+		int losses = season_data->team_records[afc_team->id][LOSSES];
+		int draws = season_data->team_records[afc_team->id][DRAWS];
+		float record = 0;
+		if ((wins + losses) > 0)
+			record = (float)(season_data->team_records[afc_team->id][WINS] / (season_data->team_records[afc_team->id][WINS] + season_data->team_records[afc_team->id][LOSSES]));
+
+		printf("%2d -%2d", wins, losses);
+		if (draws > 0)
+			printf(" -%2d", draws);
+		else
+			printf("    ");
+		printf("  %.3f", record);
+
+		for (int j = 0; j < LEAGUE_TEAM_COUNT; j++)
+		{
+			const struct team_data* team = &default_league.teams[j];
+			if (team->division > 4)
+			{
+				if (nfc_id == i)
+				{
+					nfc_id = j;
+					break;
+				}
+				nfc_id++;
+			}
+		}
+
+		const struct team_data* nfc_team = &default_league.teams[nfc_id];
+
+		printf("         ");
+		PrintSizedTeamName(nfc_team->id, (nfc_team->id == season_data->team_1_id) ? true : false);
+		printf("   ");
+
+		wins = season_data->team_records[nfc_team->id][WINS];
+		losses = season_data->team_records[nfc_team->id][LOSSES];
+		draws = season_data->team_records[nfc_team->id][DRAWS];
+		record = 0;
+		if ((wins + losses) > 0)
+			record = (float)(season_data->team_records[nfc_team->id][WINS] / (season_data->team_records[nfc_team->id][WINS] + season_data->team_records[nfc_team->id][LOSSES]));
+
+		printf("%2d -%2d", wins, losses);
+		if (draws > 0)
+			printf(" -%2d", draws);
+		else
+			printf("    ");
+		printf("  %.3f", record);
+	}
+
+	printf("\r\n\r\n");
+	printf("                                                   ");
+	SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+	printf("Back");
+
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+}
+
+/*
+* NAME:        RegularSeasonLeaderboardMenu
+* DESCRIPTION: shows regular season leaderboard
+* INPUTS:      season_data
+* OUTPUTS:     void
+*/
+void RegularSeasonLeaderboardMenu(struct season_data* season_data)
+{
+	bool game_chosen = false;
+	do {
+		ShowRegularSeasonLeaderboardMenu(season_data);
+		int ch = getch();
+
+		if (ch == 0 || ch == 224) {   // extended key: read the scan code
+			ch = getch();
+			switch (ch) {
+			default:
+				break;
+			}
+		}
+		else if (ch == 13) {// Enter key
+			return;
+		}
+		else
+			;
+		// any other key: ignored, loop waits for another press
+	} while (!game_chosen);
+	return -1;
+}
+
+/*
 * NAME:        RegularSeasonMenu
 * DESCRIPTION: shows between game regular season menu
 * INPUTS:      season_data
@@ -432,13 +604,14 @@ int RegularSeasonMenu(struct season_data* season_data)
 	ShowRegularSeasonMenu(0, true, season_data);
 	do {
 		int selection = RegularSeasonMenuOutcome(season_data);
-		if (selection != (SEASON_MENU_OPTIONS_NUMBER - 2))
+		if (selection == 2)
+			RegularSeasonLeaderboardMenu(season_data);
+		else
 			return selection;
 		system("cls");
 	} while (1);
 	return -1;
 }
-
 
 /*
 * NAME:        PlayRegularSeason
@@ -452,20 +625,22 @@ int PlayRegularSeason(struct season_data* season_data)
 	{
 		int play_or_sim_or_quit = RegularSeasonMenu(season_data);
 
-		if (play_or_sim_or_quit == -1)
+		if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 1)) // "Quit"
 			return -1;
-
-		// show default screen between games with options like "Next game", Quit season (with an are you sure screen?)
-		// option "Show leaderboard" that shows, division, conference and league with playoff markers
-		// get menu choice from that default screen^ and if go to next game then:
-		
-		
-		
+		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 3)) // "Sim game"
+		{
+			SimRegularSeasonGame(season_data);
+		}
+		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 4)) // "Play game"
+		{
+			PlaySimRegularSeasonGame(season_data);
+		}
+	
 		// (SetupTeamData(season_data); or similar needs to happen before each game that is played)
 		// play next season game
 		// export game data back into season data
 
-		// simulate other games for this week
+		// simulate all other games for this week
 		season_data->week++;
 	}
 
