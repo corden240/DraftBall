@@ -10,6 +10,9 @@ void ShowMenuTitle();
 void PrintTextWithDelays(char txt[1000]);
 void ResetScreen();
 int GetDivisionID(struct season_data* season_data, int team_id);
+void PlayGame(struct game_data* game_data);
+void DisableTeamsDecks(struct game_data* game_data);
+void CoinToss(struct game_data* game_data);
 
 
 /*
@@ -614,6 +617,181 @@ int RegularSeasonMenu(struct season_data* season_data)
 }
 
 /*
+* NAME:        SetupTeamDataSeasonGame
+* DESCRIPTION: builds team names colours player names etc from season data
+* INPUTS:      season_data, game_data
+* OUTPUTS:     void
+*/
+void SetupTeamDataSeasonGame(struct season_data* season_data, struct game_data* game_data)
+{
+	int opp_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);
+	int home_or_away = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week);
+	game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+	game_data->line_of_first_down = 0;
+	game_data->down = 1;
+	game_data->team_in_possession = 0;
+	game_data->team_not_in_possession = 0;
+	game_data->team_1_score = 0;
+	game_data->team_2_score = 0;
+	game_data->quarter = 1;
+	game_data->plays_per_quarter = season_data->plays_per_quarter;
+	game_data->plays_remaining_in_quarter = game_data->plays_per_quarter;
+	for (int i = 0; i < NUMBER_OF_DECKS; i++) {
+		game_data->shuffle_deck_needed[i] = 0;
+	}
+	game_data->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+	game_data->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+	game_data->team_started_with_possession = 0;
+	game_data->team_1_direction = 1; // default direction
+	game_data->team_2_direction = 2; // default direction
+
+	for (int i = 0; i < CARDS_IN_A_DECK; i++) {
+		game_data->o_cards[i] = 0;
+		game_data->d_cards[i] = 0;
+	}
+
+	for (int i = 0; i < NORMAL_PLAY_CARDS_TO_DRAW; i++) {
+		game_data->o_cards_in_position[i] = 0;
+		game_data->d_cards_in_position[i] = 0;
+	}
+
+	game_data->kickoff_needed = true;
+	game_data->extra_point_needed = false;
+	game_data->play_type = 0;
+	game_data->formation = 0;
+	game_data->show_O_D_Both = 0;
+	game_data->matchup_number = 0;
+
+	game_data->pass_play = 0;
+	game_data->run_play = 0;
+
+	game_data->interception = false;
+	game_data->fumble = false;
+
+	game_data->fouls = season_data->fouls;
+	game_data->current_game_mode = 1;
+
+	/*game stats data*/
+	game_data->playoffs = season_data->playoffs; // true if we are currently in the playoff part of the season, use to not add to record
+	for (int i = 0; i < NUMBER_OF_TEAMS_PER_GAME; i++) {
+		for (int j = 0; j < NUMBER_OF_QUARTERS; j++) {
+			game_data->quarter_scores[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < NUMBER_OF_TEAMS_PER_GAME; i++) {
+		for (int j = 0; j < WIN_LOSS_DRAW; j++) {
+			if((i == 0 && home_or_away == 1) || (i == 1 && home_or_away == 0))
+				game_data->team_records[i][j] = season_data->team_records[season_data->team_1_id][j];
+			else 
+				game_data->team_records[i][j] = season_data->team_records[opp_id][j];
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_QB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_QUARTERBACK_STATS; j++) {
+			game_data->quarterback_stats[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_RUNNINGBACK_STATS; j++) {
+			game_data->runningback_stats[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME); i++) {
+		for (int j = 0; j < NUMBER_OF_RECEIVER_STATS; j++) {
+			game_data->receiver_stats[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->o_cards_to_flash[i] = false;
+	}
+	for (int i = 0; i < (CARDS_IN_A_DECK); i++) {
+		game_data->d_cards_to_flash[i] = false;
+	}
+
+	game_data->drive_over = false;
+	game_data->flag_thrown = false;
+
+	game_data->one_player = true;
+	game_data->two_player = false;
+
+	game_data->team_1_id = season_data->team_1_id;
+	game_data->team_2_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);
+
+	game_data->two_min_drive_deficit_index = 0;
+	game_data->two_min_drive_yards_index = 0;
+
+	game_data->cpu_called_timeout = false;
+
+	game_data->show_play_types = false;
+	game_data->show_qb_scramble_option = false;
+
+
+	const struct team_data* team_1;
+	const struct team_data* team_2;
+
+	if (home_or_away == 0) {
+		team_1 = &default_league.teams[opp_id];
+		team_2 = &default_league.teams[season_data->team_1_id];
+	}
+	else {
+		team_1 = &default_league.teams[season_data->team_1_id];
+		team_2 = &default_league.teams[opp_id];
+	}
+
+	snprintf(game_data->team_1_name, sizeof game_data->team_1_name,
+		"%s", team_1->name);
+	snprintf(game_data->team_2_name, sizeof game_data->team_2_name,
+		"%s", team_2->name);
+
+	snprintf(game_data->team_1_qb_names[0],
+		sizeof game_data->team_1_qb_names[0], "%s", team_1->qb_name);
+	snprintf(game_data->team_2_qb_names[0],
+		sizeof game_data->team_2_qb_names[0], "%s", team_2->qb_name);
+
+	for (int i = 0; i < NUMBER_OF_RB_NAMES_PER_TEAM; i++) {
+		snprintf(game_data->team_1_rb_names[i],
+			sizeof game_data->team_1_rb_names[i], "%s", team_1->rb_names[i]);
+		snprintf(game_data->team_2_rb_names[i],
+			sizeof game_data->team_2_rb_names[i], "%s", team_2->rb_names[i]);
+	}
+
+	for (int i = 0; i < NUMBER_OF_WR_NAMES_PER_TEAM; i++) {
+		snprintf(game_data->team_1_wr_names[i],
+			sizeof game_data->team_1_wr_names[i], "%s", team_1->wr_names[i]);
+		snprintf(game_data->team_2_wr_names[i],
+			sizeof game_data->team_2_wr_names[i], "%s", team_2->wr_names[i]);
+	}
+
+	game_data->team_1_colour = team_1->colour;
+	game_data->team_2_colour = team_2->colour;
+	game_data->players_named = true;
+
+	DisableTeamsDecks(game_data);
+}
+
+/*
+* NAME:        PlayRegularSeasonGame
+* DESCRIPTION: play out the next regular season game
+* INPUTS:      season data
+* OUTPUTS:     int
+*/
+void PlayRegularSeasonGame(struct season_data* season_data)
+{
+	struct game_data game_data;
+	
+	// setup game data with right teams etc from season data
+	SetupTeamDataSeasonGame(season_data, &game_data);
+
+	CoinToss(&game_data);
+
+	// play next season game
+	PlayGame(&game_data);
+
+	// export game data back into season data
+
+}
+
+/*
 * NAME:        PlayRegularSeason
 * DESCRIPTION: play out 6 regular season games
 * INPUTS:      season data
@@ -629,16 +807,12 @@ int PlayRegularSeason(struct season_data* season_data)
 			return -1;
 		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 3)) // "Sim game"
 		{
-			SimRegularSeasonGame(season_data);
+			//SimRegularSeasonGame(season_data);
 		}
 		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 4)) // "Play game"
 		{
-			PlaySimRegularSeasonGame(season_data);
+			PlayRegularSeasonGame(season_data);
 		}
-	
-		// (SetupTeamData(season_data); or similar needs to happen before each game that is played)
-		// play next season game
-		// export game data back into season data
 
 		// simulate all other games for this week
 		season_data->week++;

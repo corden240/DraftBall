@@ -277,7 +277,7 @@ struct game_data {
 	/*game stats data*/
 	bool playoffs; // true if we are currently in the playoff part of the season, use to not add to record
 	int quarter_scores[NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QUARTERS];
-	int team_records[NUMBER_OF_TEAMS_PER_GAME][WIN_LOSS_DRAW]; // dont print this if not in a season, only add to this in regular season, TODO: export this back out to season data at the end of a season game
+	int team_records[NUMBER_OF_TEAMS_PER_GAME][WIN_LOSS_DRAW]; // dont print this if not in a season, only add to this in regular season
 	int quarterback_stats[NUMBER_OF_QB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_QUARTERBACK_STATS];
 	int runningback_stats[NUMBER_OF_RB_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RUNNINGBACK_STATS];
 	int receiver_stats[NUMBER_OF_WR_NAMES_PER_TEAM * NUMBER_OF_TEAMS_PER_GAME][NUMBER_OF_RECEIVER_STATS];
@@ -323,6 +323,7 @@ struct season_data {
 	int plays_per_quarter;
 	int wildcard_round_needed;
 	int week;
+	bool playoffs;
 };
 
 struct table_weight {

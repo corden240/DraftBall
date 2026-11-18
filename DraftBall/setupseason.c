@@ -112,6 +112,7 @@ void SeasonDataConstructor(struct season_data* season_data)
 	season_data->current_game_mode = 1;
 	season_data->plays_per_quarter = DEFAULT_PLAYS_PER_QUARTER;
 	season_data->team_1_id = 0;
+	season_data->playoffs = false;
 
 	for (int i = 0; i < LEAGUE_TEAM_COUNT; i++)
 	{
