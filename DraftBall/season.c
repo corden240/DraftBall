@@ -713,6 +713,7 @@ void SetupTeamDataSeasonGame(struct season_data* season_data, struct game_data* 
 
 	game_data->one_player = true;
 	game_data->two_player = false;
+	game_data->one_player_team_controlled = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week) ? 1 : 2;
 
 	game_data->team_1_id = season_data->team_1_id;
 	game_data->team_2_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);

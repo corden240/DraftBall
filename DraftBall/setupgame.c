@@ -223,7 +223,8 @@ void CoinToss(struct game_data* game_data)
 
 	int team_that_won_cointoss = rand() % 2 + 1; // 1 or 2
 
-	if (game_data->one_player && team_that_won_cointoss == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && team_that_won_cointoss == 2)  // one player exhibition or 2 min drive 
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != team_that_won_cointoss)))  // if in season mode and team that won the toss is not the one that the player is controlling
 	{
 		CpuCoinTossDecision(game_data, team_that_won_cointoss);
 		return;
@@ -388,6 +389,8 @@ void ExhibitionGameDataConstructor(struct game_data* game_data)
 
 	game_data->show_play_types = false;
 	game_data->show_qb_scramble_option = false;
+
+	game_data->one_player_team_controlled = 1;
 }
 
 /*

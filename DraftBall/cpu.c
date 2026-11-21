@@ -251,18 +251,34 @@ bool CpuTimeoutDecision(struct game_data* game_data)
 	if (!game_data->one_player)
 		return false;
 
-	if (game_data->team_2_timeouts_remaining == 0)
+	if (((game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_2_timeouts_remaining == 0)
+		|| (game_data->current_game_mode == 1 && ((game_data->one_player_team_controlled == 1 && game_data->team_2_timeouts_remaining == 0)
+			|| (game_data->one_player_team_controlled == 2 && game_data->team_1_timeouts_remaining == 0))))
 		return false;
 
-	if (((game_data->team_1_score - game_data->team_2_score) > 0) && // behind in score
+	int cpu_score = 0;
+	int player_score = 0;
+
+	if (game_data->one_player_team_controlled == 1)
+	{
+		player_score = game_data->team_1_score;
+		cpu_score = game_data->team_2_score;
+	}
+	else
+	{
+		player_score = game_data->team_2_score;
+		cpu_score = game_data->team_1_score;
+	}
+
+	if (((player_score - cpu_score) > 0) && // behind in score
 		((game_data->quarter == 2) || (game_data->quarter == 4)) &&  // 2nd or 4th quarter
 		(game_data->plays_remaining_in_quarter < 3))				 // 2 or less plays left
 		return true;
 
-	if (((game_data->team_2_score - game_data->team_1_score) > 0) && // ahead in score
+	if (((cpu_score - player_score) > 0) && // ahead in score
 		((game_data->quarter == 2)) && 								 // 2nd quarter
 		(game_data->plays_remaining_in_quarter < 3) && 				 // 2 or less plays left
-		game_data->team_in_possession == 2)							 // we have the ball
+		(game_data->one_player_team_controlled != game_data->team_in_possession))	 // we have the ball
 		return true;
 
 	return false;
@@ -276,13 +292,30 @@ bool CpuTimeoutDecision(struct game_data* game_data)
 */
 bool CpuKneelDecision(struct game_data* game_data)
 {
-	if (game_data->team_2_score > game_data->team_1_score) // if winning
+	int cpu_score = 0;
+	int player_score = 0;
+	int player_timeouts_remaining = 0;
+
+	if (game_data->one_player_team_controlled == 1)
+	{
+		player_score = game_data->team_1_score;
+		player_timeouts_remaining = game_data->team_1_timeouts_remaining;
+		cpu_score = game_data->team_2_score;
+	}
+	else
+	{
+		player_score = game_data->team_2_score;
+		player_timeouts_remaining = game_data->team_2_timeouts_remaining;
+		cpu_score = game_data->team_1_score;
+	}
+
+	if (cpu_score > player_score) // if winning
 	{
 		if ((game_data->quarter == 2) || (game_data->quarter == 4)) // if in quarter 2 or 4
 		{
-			if (game_data->team_in_possession == 2) // cpu has possession
+			if (game_data->one_player_team_controlled != game_data->team_in_possession) // cpu has possession
 			{
-				if ((game_data->plays_remaining_in_quarter + game_data->team_1_timeouts_remaining) <= (DOWNS_PER_FIRST_DOWN - game_data->down + 1)) // can kneel away all plays left
+				if ((game_data->plays_remaining_in_quarter + player_timeouts_remaining) <= (DOWNS_PER_FIRST_DOWN - game_data->down + 1)) // can kneel away all plays left
 				{
 					return true;
 				}
@@ -313,14 +346,11 @@ bool CpuGoFourthDown(struct game_data* game_data) 	// TODO: improve this cpu dec
 */
 bool CpuPuntDecision(struct game_data* game_data) 	// TODO: improve this cpu decision???
 {
-	if (game_data->team_in_possession == 2)
+	if (game_data->down == 4)
 	{
-		if (game_data->down == 4)
+		if (!CpuGoFourthDown(game_data))
 		{
-			if (!CpuGoFourthDown(game_data))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
@@ -334,16 +364,13 @@ bool CpuPuntDecision(struct game_data* game_data) 	// TODO: improve this cpu dec
 */
 bool CpuFGDecision(struct game_data* game_data) 	// TODO: improve this cpu decision???
 {
-	if (game_data->team_in_possession == 2)
+	if (game_data->down == 4)
 	{
-		if (game_data->down == 4)
+		if (GetYardsToEndZone(game_data) < 35)
 		{
-			if (GetYardsToEndZone(game_data) < 35)
+			if (!CpuGoFourthDown(game_data))
 			{
-				if (!CpuGoFourthDown(game_data))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}
@@ -468,4 +495,17 @@ bool CpuDrawPassCardDecision(struct game_data* game_data, int o_yards, int d_yar
 		return true;
 
 	return false;
+}
+
+/*
+* NAME:        Cpu1or2PointConversionDecision
+* DESCRIPTION: cpu chooses decision
+* INPUTS:      game_data
+* OUTPUTS:     void
+*/
+int Cpu1or2PointConversionDecision(struct game_data* game_data)
+{
+	// TODO: improve this cpu decision???
+
+	return 1;
 }

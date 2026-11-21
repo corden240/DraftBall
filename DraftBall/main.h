@@ -299,6 +299,8 @@ struct game_data {
 
 	bool show_play_types;
 	bool show_qb_scramble_option;
+
+	int one_player_team_controlled;
 };
 
 struct season_data {

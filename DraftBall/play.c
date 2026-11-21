@@ -41,7 +41,7 @@ void CpuCardsInOffenceFormationDecision(struct game_data* game_data);
 void CpuCardsInDefenceFormationDecision(struct game_data* game_data);
 int CpuMatchupNumberDecision(struct game_data* game_data);
 bool CpuDrawPassCardDecision(struct game_data* game_data, int o_yards, int d_yards, int cards);
-
+int Cpu1or2PointConversionDecision(struct game_data* game_data);
 
 /*
 * NAME:        GetRBID
@@ -269,7 +269,8 @@ void DrawCards(struct game_data* game_data, int team_to_draw, int num, bool shar
 			hand[start + i] = DrawOneCard(game_data, player_1_deck);
 		else
 			hand[start + i] = DrawOneCard(game_data, player_2_deck);
-		if (!(game_data->one_player && team_to_draw == 2))
+		if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && team_to_draw != 2)
+			|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == team_to_draw)))
 			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
 	}
 }
@@ -286,7 +287,8 @@ void RedrawCards(struct game_data* game_data, int team_to_draw, int num)
 		return;
 	int hilo = 0;
 
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		hilo = CpuCardsToRedrawHiLoDecision(game_data, TotalYardsOffence(game_data), num);
 		ConsoleShowGameScreen(game_data, "Replacing cards", true, GAME_SPEED * 2);
@@ -667,7 +669,8 @@ bool DrawPassCards(struct game_data* game_data)
 	{
 		if (i > 0)
 		{
-			if (game_data->one_player && game_data->team_in_possession == 2)
+			if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+				|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 			{
 				if (!CpuDrawPassCardDecision(game_data, TotalYardsOffence(game_data), TotalYardsDefence(game_data), i))
 					break;
@@ -1187,7 +1190,8 @@ void PlayTwoPointConversion(struct game_data* game_data)
 */
 int GetFormation(struct game_data* game_data)
 {
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 		return CpuFormationDecision(game_data);
 
 	ConsoleShowGameScreen(game_data, "Pick formation (RB-WR) 2:2 or 1:3 or 0:4 (1-3): ", true, GAME_SPEED * 10);
@@ -1208,7 +1212,8 @@ int GetFormation(struct game_data* game_data)
 */
 int GetMatchupNumber(struct game_data* game_data)
 {
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		int matchup = CpuMatchupNumberDecision(game_data);
 		char buf[256];
@@ -1239,11 +1244,13 @@ int GetMatchupNumber(struct game_data* game_data)
 */
 void PutCardsInFormation(struct game_data* game_data, int offence_or_defence)
 {
-	if (game_data->one_player && game_data->team_in_possession == 2 && offence_or_defence == 1)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2 && offence_or_defence == 1)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession) && offence_or_defence == 1))
 	{
 		CpuCardsInOffenceFormationDecision(game_data);
 	}
-	else if (game_data->one_player && game_data->team_in_possession == 1 && offence_or_defence == 2)
+	else if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 1 && offence_or_defence == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == game_data->team_in_possession) && offence_or_defence == 2))
 	{
 		CpuCardsInDefenceFormationDecision(game_data);
 	}
@@ -1433,7 +1440,8 @@ bool LosFouls(struct game_data* game_data)
 */
 void PlayNormal(struct game_data* game_data)
 {
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		;
 	}
@@ -1452,12 +1460,14 @@ void PlayNormal(struct game_data* game_data)
 	game_data->formation = GetFormation(game_data); // O: pick layout/formation/personnel
 	game_data->show_O_D_Both = 1;
 
-	if (!(game_data->one_player && game_data->team_in_possession == 2))
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 1)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == game_data->team_in_possession)))		
 		ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 10); // show formation with blanks ready for cards to be put in
 	PutCardsInFormation(game_data, 1); // Offence place cards in positions, send 1 for offence	
 	game_data->show_O_D_Both = 0; // Cover offence cards
 	
-	if (game_data->one_player && game_data->team_in_possession == 1)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 1)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == game_data->team_in_possession)))
 	{
 		;
 	}
@@ -1514,7 +1524,8 @@ void PlayNormal(struct game_data* game_data)
 */
 int GetPuntCardsToRedraw(struct game_data* game_data) {
 
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		int num = CpuPuntCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
 		char buf[256];
@@ -1549,7 +1560,8 @@ int GetPuntCardsToRedraw(struct game_data* game_data) {
 */
 int GetPuntCardsToDraw(struct game_data* game_data) {
 	
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		return CpuPuntCardsToDrawDecision(game_data);
 	}
@@ -1580,7 +1592,8 @@ int GetPuntCardsToDraw(struct game_data* game_data) {
 */
 int GetFieldGoalCardsToRedraw(struct game_data* game_data) {
 
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		int num = CpuFieldGoalCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
 		char buf[256];
@@ -1776,7 +1789,8 @@ const char* GetTargetPlayerName(struct game_data* game_data)
 */
 int GetOnsideKickCardsToRedraw(struct game_data* game_data) {
 
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 		return CpuOnsideKickCardsToRedrawDecision(game_data, TotalYardsOffence(game_data));
 
 	char buf[256];
@@ -2123,9 +2137,9 @@ int GetTimeoutTeam(struct game_data* game_data)
 	if (game_data->one_player)
 	{
 		if (game_data->cpu_called_timeout)
-			team = 2;
+			team = (game_data->one_player_team_controlled - 1) ? 1 : 2;
 		else
-			team = 1;
+			team = game_data->one_player_team_controlled;
 		game_data->cpu_called_timeout = false;
 	}
 	else
@@ -2159,7 +2173,8 @@ int GetPlayType(struct game_data* game_data)
 		game_data->cpu_called_timeout = true;
 		play_type = PLAY_TYPE_TIMEOUT;
 	}
-	else if (game_data->one_player && game_data->team_in_possession == 2)
+	else if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 	{
 		play_type = CpuPlayTypeDecision(game_data);
 	}
@@ -2400,6 +2415,12 @@ void AwardSafety(struct game_data* game_data)
 */
 int GetOneOrTwoPointConversion(struct game_data* game_data)
 {
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
+	{
+		return Cpu1or2PointConversionDecision(game_data);
+	}
+
 	int points = 1;
 	ConsoleShowGameScreen(game_data, "Extra point attempt (1-2): ", true, GAME_SPEED * 2);
 	char input[16];
@@ -2419,7 +2440,8 @@ int GetOneOrTwoPointConversion(struct game_data* game_data)
 */
 int GetKickoffOrOnsideKick(struct game_data* game_data)
 {
-	if (game_data->one_player && game_data->team_in_possession == 2)
+	if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && game_data->team_in_possession == 2)
+		|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled != game_data->team_in_possession)))
 		return CpuPuntOrOnsideKickDecision(game_data);
 
 	int play = 1;
