@@ -637,6 +637,7 @@ void PassInterferenceFoul(struct game_data* game_data)
 				yards = 0;
 			
 			MoveLineOfScrimmage(game_data, yards);
+			ResetLineOfFirstDown(game_data);
 
 			if (TouchdownScored(game_data))
 			{

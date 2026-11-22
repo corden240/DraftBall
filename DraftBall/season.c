@@ -778,20 +778,37 @@ void SetupTeamDataSeasonGame(struct season_data* season_data, struct game_data* 
 */
 void ExportGameData(struct season_data* season_data, struct game_data* game_data)
 {
+	int home_or_away = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week);
 	if (game_data->team_1_score > game_data->team_2_score)
 	{
-		season_data->team_records[game_data->team_1_id][WINS]++; // add to team 1s wins and team 2s losses
-		season_data->team_records[game_data->team_2_id][LOSSES]++;
+		if (home_or_away == 1)
+		{
+			season_data->team_records[season_data->team_1_id][WINS]++;
+			season_data->team_records[GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week)][LOSSES]++;
+		}
+		else
+		{
+			season_data->team_records[season_data->team_1_id][LOSSES]++;
+			season_data->team_records[GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week)][WINS]++;
+		}
 	}
 	else if (game_data->team_2_score > game_data->team_1_score)
 	{
-		season_data->team_records[game_data->team_2_id][WINS]++; // add to team 2s wins and team 1s losses
-		season_data->team_records[game_data->team_1_id][LOSSES]++;
+		if (home_or_away == 0)
+		{
+			season_data->team_records[season_data->team_1_id][WINS]++;
+			season_data->team_records[GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week)][LOSSES]++;
+		}
+		else
+		{
+			season_data->team_records[season_data->team_1_id][LOSSES]++;
+			season_data->team_records[GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week)][WINS]++;
+		}
 	}
 	else
 	{
-		season_data->team_records[game_data->team_1_id][DRAWS]++; // add to both teams draws
-		season_data->team_records[game_data->team_2_id][DRAWS]++;
+		season_data->team_records[season_data->team_1_id][DRAWS]++; // add to both teams draws
+		season_data->team_records[GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week)][DRAWS]++;
 	}
 }
 
@@ -818,6 +835,26 @@ void PlayRegularSeasonGame(struct season_data* season_data)
 }
 
 /*
+* NAME:        SimRegularSeasonGame
+* DESCRIPTION: sim the next regular season game
+* INPUTS:      season data
+* OUTPUTS:     int
+*/
+void SimRegularSeasonGame(struct season_data* season_data)
+{
+	struct game_data game_data;
+
+	// setup game data with right teams etc from season data
+	SetupTeamDataSeasonGame(season_data, &game_data);
+
+	// play next season game
+	// SimGame(&game_data);
+
+	// export game data back into season data
+	ExportGameData(season_data, &game_data);
+}
+
+/*
 * NAME:        PlayRegularSeason
 * DESCRIPTION: play out 6 regular season games
 * INPUTS:      season data
@@ -833,7 +870,7 @@ int PlayRegularSeason(struct season_data* season_data)
 			return -1;
 		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 3)) // "Sim game"
 		{
-			//SimRegularSeasonGame(season_data);
+			SimRegularSeasonGame(season_data);
 		}
 		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 4)) // "Play game"
 		{
