@@ -269,8 +269,8 @@ void DrawCards(struct game_data* game_data, int team_to_draw, int num, bool shar
 			hand[start + i] = DrawOneCard(game_data, player_1_deck);
 		else
 			hand[start + i] = DrawOneCard(game_data, player_2_deck);
-		if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && team_to_draw != 2)
-			|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == team_to_draw)))
+		if ((game_data->one_player && (game_data->current_game_mode == 0 || game_data->current_game_mode == 2) && (team_to_draw != 2 || game_data->play_type != PLAY_TYPE_NORMAL || game_data->pass_play || game_data->run_play))
+			|| (game_data->current_game_mode == 1 && (game_data->one_player_team_controlled == team_to_draw || (game_data->play_type != PLAY_TYPE_NORMAL || game_data->pass_play || game_data->run_play))))
 			ConsoleShowGameScreen(game_data, 0, true, GAME_SPEED * 8); // show cards drawn
 	}
 }
@@ -1661,7 +1661,7 @@ void PlayPuntReturn(struct game_data* game_data)
 	// if the kick is received in the endzone, the receiver can declare a touchback
 	if (game_data->line_of_scrimmage <= END_ZONE_WIDTH || game_data->line_of_scrimmage >= (END_ZONE_WIDTH + FIELD_WIDTH))
 	{
-		if (TouchBack(game_data))
+		//if (TouchBack(game_data))
 		{
 			ResetLineOfScrimmage(game_data);
 			ResetLineOfFirstDown(game_data);
@@ -1839,6 +1839,7 @@ void PlayOnsideKick(struct game_data* game_data)
 		ConsoleShowGameScreen(game_data, buf2, true, GAME_SPEED * 20);
 		ConsoleShowGameScreen(game_data, "Receiving team take over", true, GAME_SPEED * 20);
 	}
+
 	MoveLineOfScrimmage(game_data, ONSIDE_KICK_YARDS);
 	if (total != ONSIDE_KICK_TARGET_TOTAL)
 		SwitchPossession(game_data);
@@ -2687,10 +2688,25 @@ void EndOfQuarter(struct game_data* game_data)
 	}
 	else if (game_data->quarter == 2)
 	{
+		game_data->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+		game_data->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
+
 		game_data->team_in_possession = (game_data->team_started_with_possession - 1) ? 2 : 1; // team that started 1st half in possession needs ball to kickoff to the other team.
 		game_data->team_not_in_possession = (game_data->team_started_with_possession - 1) ? 1 : 2; // other team is receiving
 
-		game_data->kickoff_needed;
+		// set line of scrimmage correctly for second half restart
+		if ((game_data->team_in_possession == 1 && game_data->team_1_direction == 1) || (game_data->team_in_possession == 2 && game_data->team_2_direction == 1))
+		{
+			game_data->line_of_scrimmage = STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+			game_data->line_of_first_down = game_data->line_of_scrimmage + YARDS_PER_FIRST_DOWN;
+		}
+		else
+		{
+			game_data->line_of_scrimmage = FIELD_WIDTH - STARTING_LINE_OF_SCRIMMAGE + END_ZONE_WIDTH;
+			game_data->line_of_first_down = game_data->line_of_scrimmage - YARDS_PER_FIRST_DOWN;
+		}
+		
+		game_data->kickoff_needed = true;
 
 		char buf2[256];
 		snprintf(buf2, sizeof(buf2), "The %s will receive the ball to start the second half.",(game_data->team_started_with_possession - 1) ? game_data->team_1_name : game_data->team_2_name);
@@ -2759,19 +2775,6 @@ void PlayGame(struct game_data* game_data)
 	{
 		for (game_data->plays_remaining_in_quarter; game_data->plays_remaining_in_quarter > 0 || game_data->extra_point_needed; game_data->plays_remaining_in_quarter--, game_data->down++)
 		{
-			if (game_data->quarter == 1 || game_data->quarter == 3)
-			{
-				if (game_data->plays_remaining_in_quarter == game_data->plays_per_quarter) {
-					game_data->team_1_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
-					game_data->team_2_timeouts_remaining = TIMEOUTS_PER_TEAM_PER_HALF;
-				}
-
-				if (game_data->quarter == 3)
-				{
-					game_data->team_not_in_possession = game_data->team_in_possession;
-					game_data->team_in_possession = game_data->team_started_with_possession - 1 ? game_data->team_started_with_possession - 1 : game_data->team_started_with_possession + 1;
-				}
-			}
 			DoPlay(game_data);
 			if (!game_data->extra_point_needed &&
 				(game_data->drive_over ||

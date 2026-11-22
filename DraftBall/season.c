@@ -771,6 +771,31 @@ void SetupTeamDataSeasonGame(struct season_data* season_data, struct game_data* 
 }
 
 /*
+* NAME:        ExportGameData
+* DESCRIPTION: export game data to season data
+* INPUTS:      season data, game data
+* OUTPUTS:     void
+*/
+void ExportGameData(struct season_data* season_data, struct game_data* game_data)
+{
+	if (game_data->team_1_score > game_data->team_2_score)
+	{
+		season_data->team_records[game_data->team_1_id][WINS]++; // add to team 1s wins and team 2s losses
+		season_data->team_records[game_data->team_2_id][LOSSES]++;
+	}
+	else if (game_data->team_2_score > game_data->team_1_score)
+	{
+		season_data->team_records[game_data->team_2_id][WINS]++; // add to team 2s wins and team 1s losses
+		season_data->team_records[game_data->team_1_id][LOSSES]++;
+	}
+	else
+	{
+		season_data->team_records[game_data->team_1_id][DRAWS]++; // add to both teams draws
+		season_data->team_records[game_data->team_2_id][DRAWS]++;
+	}
+}
+
+/*
 * NAME:        PlayRegularSeasonGame
 * DESCRIPTION: play out the next regular season game
 * INPUTS:      season data
@@ -789,7 +814,7 @@ void PlayRegularSeasonGame(struct season_data* season_data)
 	PlayGame(&game_data);
 
 	// export game data back into season data
-
+	ExportGameData(season_data, &game_data); 
 }
 
 /*
