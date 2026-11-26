@@ -105,7 +105,7 @@ static void ShowTimeoutBlocks(HANDLE hConsole, int remaining, int pips_before_na
 *              max_len - maximum number of characters to keep
 * OUTPUTS:     length of the string written to dst
 */
-static int TruncateKeepRight(char* dst, size_t dst_size, const char* src, int max_len)
+int TruncateKeepRight(char* dst, size_t dst_size, const char* src, int max_len)
 {
 	size_t src_len = strlen(src);
 	if (max_len <= 0) {

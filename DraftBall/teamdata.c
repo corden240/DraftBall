@@ -14,7 +14,7 @@ const struct league_data default_league = {
         { 7,      8,    "Cardinals",  "Brissett", {            "Love",       "Allgeier"}, {       "Wilson",       "Bourne",     "Virgil",    "McBride"},                     CONSOLE_TEXT_RED,   2},
         { 8,      4,     "Chargers",   "Herbert", {         "Hampton",       "Mitchell"}, {     "McConkey",     "Johnston",     "Harris",      "Kolar"},                  CONSOLE_TEXT_YELLOW,   1},
         { 9,      4,       "Chiefs",   "Mahomes", {          "Walker",        "Johnson"}, {         "Rice",       "Worthy",   "Thornton",      "Kelce"},                     CONSOLE_TEXT_RED,   5},
-        {10,      3,        "Colts",     "Jones", {          "Taylor",        "McGowan"}, {       "Pierce",        "Downs",      "Allen",     "Warren"},                    CONSOLE_TEXT_BLUE,   1},
+        {10,      3,        "Colts","Richardson", {          "Taylor",        "McGowan"}, {       "Pierce",    "Treadwell",      "Dulin",     "Warren"},                    CONSOLE_TEXT_BLUE,   1},
         {11,      5,   "Commanders",   "Damiels", { "Croskey-Merritt",          "White"}, {     "McLaurin",        "Diggs",   "Williams",    "Okonkwo"},                     CONSOLE_TEXT_RED,   1},
         {12,      5,      "Cowboys",  "Prescott", {        "Williams",          "Davis"}, {         "Lamb",      "Pickens",   "Flournoy",     "Turpin"},                    CONSOLE_TEXT_BLUE,   1},
         {13,      1,     "Dolphins",    "Willis", {          "Achane",         "Gordon"}, {   "Washington",      "Douglas",       "Bell",    "Dulcich"},               CONSOLE_TEXT_LIGHTBLUE,   1},

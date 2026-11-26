@@ -835,26 +835,6 @@ void PlayRegularSeasonGame(struct season_data* season_data)
 }
 
 /*
-* NAME:        SimRegularSeasonGame
-* DESCRIPTION: sim the next regular season game
-* INPUTS:      season data
-* OUTPUTS:     int
-*/
-void SimRegularSeasonGame(struct season_data* season_data)
-{
-	struct game_data game_data;
-
-	// setup game data with right teams etc from season data
-	SetupTeamDataSeasonGame(season_data, &game_data);
-
-	// play next season game
-	// SimGame(&game_data);
-
-	// export game data back into season data
-	ExportGameData(season_data, &game_data);
-}
-
-/*
 * NAME:        PlayRegularSeason
 * DESCRIPTION: play out 6 regular season games
 * INPUTS:      season data

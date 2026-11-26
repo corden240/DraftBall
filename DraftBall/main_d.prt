@@ -1,3 +1,4 @@
+int two_min_drive_yard_options[];
 struct table_weight player_1_deck[];
 struct table_weight player_2_deck[];
 struct table_weight* player_decks[];
@@ -6,5 +7,6 @@ struct table_weight los_fouls_chance[];
 struct table_weight fifty_fifty_chance[];
 struct table_weight int_grounding_fouls_chance[];
 struct table_weight pass_interference_chance[];
-int two_min_drive_yard_options[];
+struct table_weight sim_game_points_to_add[];
+int team_ratings_to_pcchance[];
 int schedule[SEASON_NUMBER_OF_GAMES][4];

@@ -19,7 +19,6 @@ void ResetForKickoff(struct game_data* game_data);
 void SwitchEnds(struct game_data* game_data);
 int GetDirectionOfPlay(struct game_data* game_data);
 const char* GetTeamName(struct game_data* game_data, int team);
-int GetDirectionOfPlay(struct game_data* game_data);
 const char* GetTargetPlayerName(struct game_data* game_data);
 bool GetTableValOnOff(struct table_weight* table, int val);
 const char* GetQBName(struct game_data* game_data);

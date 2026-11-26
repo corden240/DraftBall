@@ -152,6 +152,7 @@
     <ClCompile Include="setupgame.c" />
     <ClCompile Include="setupseason.c" />
     <ClCompile Include="setuptwomindrive.c" />
+    <ClCompile Include="simgame.c" />
     <ClCompile Include="startup.c" />
     <ClCompile Include="teamdata.c" />
   </ItemGroup>
