@@ -13,6 +13,8 @@ int GetDivisionID(struct season_data* season_data, int team_id);
 void PlayGame(struct game_data* game_data);
 void DisableTeamsDecks(struct game_data* game_data);
 void CoinToss(struct game_data* game_data);
+void SimRegularSeasonGame(struct season_data* season_data);
+void SimRestOfLeagueGames(struct season_data* season_data);
 
 
 /*
@@ -280,10 +282,12 @@ void ShowRegularSeasonMenuTop(bool first_text, struct season_data* season_data)
 		{
 			int wins = season_data->team_records[team->id][WINS];
 			int losses = season_data->team_records[team->id][LOSSES];
+			int draws = season_data->team_records[team->id][DRAWS];
 
-			float record = 0;
-			if ((wins + losses) > 0)
-				record = (float)(wins / (wins + losses));
+			int games = wins + losses + draws;
+			float record = games > 0
+				? ((float)wins + 0.5f * (float)draws) / (float)games
+				: 0.0f;
 
 			teams_in_division[division_count].team = team;
 			teams_in_division[division_count].record = record;
@@ -475,92 +479,119 @@ int RegularSeasonMenuOutcome(struct season_data* season_data) {
 */
 static void ShowRegularSeasonLeaderboardMenu(struct season_data* season_data)
 {
+	struct standings_entry {
+		const struct team_data* team;
+		float record;
+	} afc[CONFERENCE_TEAM_COUNT], nfc[CONFERENCE_TEAM_COUNT];
+
+	int afc_count = 0;
+	int nfc_count = 0;
+
+	for (int i = 0; i < LEAGUE_TEAM_COUNT; i++)
+	{
+		const struct team_data* team = &default_league.teams[i];
+		int wins = season_data->team_records[team->id][WINS];
+		int losses = season_data->team_records[team->id][LOSSES];
+		int draws = season_data->team_records[team->id][DRAWS];
+		int games = wins + losses + draws;
+
+		struct standings_entry entry = {
+			team,
+			games > 0
+				? ((float)wins + 0.5f * (float)draws) / (float)games
+				: 0.0f
+		};
+
+		if (team->division < 5)
+			afc[afc_count++] = entry;
+		else if (team->division > 4)
+			nfc[nfc_count++] = entry;
+	}
+
+	/* Stable insertion sort: highest record first. */
+	for (int i = 1; i < afc_count; i++)
+	{
+		struct standings_entry entry = afc[i];
+		int j = i;
+		while (j > 0 && afc[j - 1].record < entry.record)
+		{
+			afc[j] = afc[j - 1];
+			j--;
+		}
+		afc[j] = entry;
+	}
+
+	for (int i = 1; i < nfc_count; i++)
+	{
+		struct standings_entry entry = nfc[i];
+		int j = i;
+		while (j > 0 && nfc[j - 1].record < entry.record)
+		{
+			nfc[j] = nfc[j - 1];
+			j--;
+		}
+		nfc[j] = entry;
+	}
+
 	system("cls");
 	ResetScreen();
 	ShowMenuTitle();
 
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
-	printf("                      ");
-	printf("AFC     W   L   D  Record              NFC     W   L   D  Record");
-	printf("\r\n");
-	bool show_game = true;
-	for (int i = 0; i < (LEAGUE_TEAM_COUNT / 2); i++)
+	printf("                      AFC     W   L   D  Record              NFC     W   L   D  Record\r\n");
+
+	for (int i = 0; i < afc_count || i < nfc_count; i++)
 	{
+		if (i == CONFERENCE_TEAM_COUNT / 2)
+		{
+			printf("\r\n                ----------");
+			for (int space = 0; space < 29; space++)
+				putchar(' ');
+			printf("----------");
+		}
+
 		printf("\r\n                ");
-		int afc_id = 0, nfc_id = 0;
-		for (int j = 0; j < LEAGUE_TEAM_COUNT; j++)
+
+		if (i < afc_count)
 		{
-			const struct team_data* team = &default_league.teams[j];
-			if (team->division < 5)
-			{
-				if (afc_id == i)
-				{
-					afc_id = j;
-					break;
-				}
-				afc_id++;
-			}
+			const struct team_data* team = afc[i].team;
+			int wins = season_data->team_records[team->id][WINS];
+			int losses = season_data->team_records[team->id][LOSSES];
+			int draws = season_data->team_records[team->id][DRAWS];
+
+			PrintSizedTeamName(team->id, team->id == season_data->team_1_id);
+			printf("   %2d -%2d", wins, losses);
+			if (draws > 0)
+				printf(" -%2d", draws);
+			else
+				printf("    ");
+			printf("  %.3f", afc[i].record);
 		}
-
-		const struct team_data* afc_team = &default_league.teams[afc_id];
-		PrintSizedTeamName(afc_team->id, (afc_team->id == season_data->team_1_id) ? true : false);
-		printf("   ");
-
-		int wins = season_data->team_records[afc_team->id][WINS];
-		int losses = season_data->team_records[afc_team->id][LOSSES];
-		int draws = season_data->team_records[afc_team->id][DRAWS];
-		float record = 0;
-		if ((wins + losses) > 0)
-			record = (float)(season_data->team_records[afc_team->id][WINS] / (season_data->team_records[afc_team->id][WINS] + season_data->team_records[afc_team->id][LOSSES]));
-
-		printf("%2d -%2d", wins, losses);
-		if (draws > 0)
-			printf(" -%2d", draws);
-		else
-			printf("    ");
-		printf("  %.3f", record);
-
-		for (int j = 0; j < LEAGUE_TEAM_COUNT; j++)
-		{
-			const struct team_data* team = &default_league.teams[j];
-			if (team->division > 4)
-			{
-				if (nfc_id == i)
-				{
-					nfc_id = j;
-					break;
-				}
-				nfc_id++;
-			}
-		}
-
-		const struct team_data* nfc_team = &default_league.teams[nfc_id];
 
 		printf("         ");
-		PrintSizedTeamName(nfc_team->id, (nfc_team->id == season_data->team_1_id) ? true : false);
-		printf("   ");
 
-		wins = season_data->team_records[nfc_team->id][WINS];
-		losses = season_data->team_records[nfc_team->id][LOSSES];
-		draws = season_data->team_records[nfc_team->id][DRAWS];
-		record = 0;
-		if ((wins + losses) > 0)
-			record = (float)(season_data->team_records[nfc_team->id][WINS] / (season_data->team_records[nfc_team->id][WINS] + season_data->team_records[nfc_team->id][LOSSES]));
+		if (i < nfc_count)
+		{
+			const struct team_data* team = nfc[i].team;
+			int wins = season_data->team_records[team->id][WINS];
+			int losses = season_data->team_records[team->id][LOSSES];
+			int draws = season_data->team_records[team->id][DRAWS];
 
-		printf("%2d -%2d", wins, losses);
-		if (draws > 0)
-			printf(" -%2d", draws);
-		else
-			printf("    ");
-		printf("  %.3f", record);
+			PrintSizedTeamName(team->id, team->id == season_data->team_1_id);
+			printf("   %2d -%2d", wins, losses);
+			if (draws > 0)
+				printf(" -%2d", draws);
+			else
+				printf("    ");
+			printf("  %.3f", nfc[i].record);
+		}
 	}
 
-	printf("\r\n\r\n");
+	printf("\r\n");
 	printf("                                                   ");
 	SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 	printf("Back");
-
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 }
 
@@ -857,12 +888,12 @@ int PlayRegularSeason(struct season_data* season_data)
 			PlayRegularSeasonGame(season_data);
 		}
 
-		// simulate all other games for this week
+		SimRestOfLeagueGames(season_data); // simulate all other games for this week
 		season_data->week++;
 	}
 
-	// show end of season screen? 
-	// if not made post season "Quit" otherwise "Play post season"
+	// EndOfRegularSeasonMenu(); // show end of season screen? 
+	// if not made post season "Sim post season" otherwise "Play post season"
 }
 
 /*

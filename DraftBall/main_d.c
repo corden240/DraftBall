@@ -282,7 +282,7 @@ struct table_weight sim_game_points_to_add[] = {
 };
 
 // chance in 1,000 for team ratings (1-5) to pick if that team scores in a sim game
-int team_ratings_to_pcchance[] = { 0, 60, 80, 100, 120, 140 };
+int team_ratings_to_pcchance[] = { 0, 100, 130, 160, 190, 210 };
 
 int schedule[SEASON_NUMBER_OF_GAMES][4] = {
 	// game 1 away      game 1 home      game 2 away         game 2 home

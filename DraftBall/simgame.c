@@ -208,15 +208,21 @@ void SimGame(struct game_data* game_data)
 			// show sim screen, pause for 1s?
 		}
 	}
-	ShowSeasonSimScreen(game_data, 100000, 0);
-	// show sim screen and wait for press to continue, printf("Continue");
+	game_data->quarter--;
+	ShowSeasonSimScreen(game_data, 0, 0);
+	printf("\n\r\n\r\n\r\n\r                                                   ");
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE);
+	printf("Continue");
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	int ch = getch();
 }
 
 /*
 * NAME:        SimRegularSeasonGame
 * DESCRIPTION: sim the next regular season game
 * INPUTS:      season data
-* OUTPUTS:     int
+* OUTPUTS:     void
 */
 void SimRegularSeasonGame(struct season_data* season_data)
 {
