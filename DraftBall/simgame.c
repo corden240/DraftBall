@@ -175,7 +175,10 @@ void SimGame(struct game_data* game_data)
 	int team2rating = GetTeamRating(game_data->team_2_id);
 	int team_with_ball = 1;
 
-	for (game_data->quarter; game_data->quarter <= NUMBER_OF_QUARTERS; game_data->quarter++)
+	for (game_data->quarter;
+		game_data->quarter <= NUMBER_OF_QUARTERS ||
+		(game_data->playoffs && game_data->team_1_score == game_data->team_2_score);
+		game_data->quarter++)
 	{
 		for (int plays_per_quarter_in_sim = SIM_PLAYS_PER_QUARTER; plays_per_quarter_in_sim > 0; plays_per_quarter_in_sim--)
 		{
@@ -204,8 +207,7 @@ void SimGame(struct game_data* game_data)
 				else
 					team_with_ball = 1;
 			}
-			ShowSeasonSimScreen(game_data, 600, plays_per_quarter_in_sim);
-			// show sim screen, pause for 1s?
+			ShowSeasonSimScreen(game_data, 2, plays_per_quarter_in_sim); // TODO: set back to 400
 		}
 	}
 	game_data->quarter--;

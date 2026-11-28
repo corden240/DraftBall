@@ -339,7 +339,7 @@ void ShowRegularSeasonMenuTop(bool first_text, struct season_data* season_data)
 			printf("    ");
 		printf("  %.3f", record);
 
-		if (show_game) {
+		if (show_game && season_data->week >= 1 && season_data->week <= SEASON_NUMBER_OF_GAMES) {
 			int opp_id = GetOpponentTeamId(season_data, season_data->team_1_id, season_data->week);
 			int home_or_away = GetHomeOrAway(season_data, season_data->team_1_id, season_data->week);
 			const struct team_data* opponent = &default_league.teams[opp_id];
@@ -431,7 +431,7 @@ void ShowEndOfRegularSeasonMenuBottom(int current_menu_selection, bool first_tex
 
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 	printf("       ");
-	if (current_menu_selection == 2)
+	if (current_menu_selection == 1)
 		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 	if (first_text)
 		PrintTextWithDelays("Leaderboard");
@@ -441,7 +441,7 @@ void ShowEndOfRegularSeasonMenuBottom(int current_menu_selection, bool first_tex
 	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
 
 	printf("       ");
-	if (current_menu_selection == 3)
+	if (current_menu_selection == 2)
 		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
 	if (first_text)
 		PrintTextWithDelays("Quit");
@@ -1018,8 +1018,7 @@ int PlayRegularSeason(struct season_data* season_data)
 		season_data->week++;
 	}
 
-	if (EndOfRegularSeasonMenu(season_data) == 0) // show end of season screen? 
-		PlayPostSeason(season_data);
+	return EndOfRegularSeasonMenu(season_data) == 0 ? 0 : -1;
 }
 
 /*
@@ -1030,8 +1029,8 @@ int PlayRegularSeason(struct season_data* season_data)
 */
 void PlaySeason(struct season_data* season_data)
 {
-	if (PlayRegularSeason(season_data) == -1)
+	if (PlayRegularSeason(season_data) != 0)
 		return;
-		
+
 	PlayPostSeason(season_data);
 }

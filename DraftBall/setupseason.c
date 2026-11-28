@@ -462,7 +462,7 @@ int SetupSeason(struct season_data* season_data)
 {
 	SeasonDataConstructor(season_data);
 	
-	if (SetupSeasonMenu(season_data) == (EXHIBITION_GAME_SETTINGS_OPTIONS_NUMBER - 1))
+	if (SetupSeasonMenu(season_data) == (SEASON_GAME_SETTINGS_OPTIONS_NUMBER - 1))
 		return -1; 
 
 	SetupSeasonData(season_data);

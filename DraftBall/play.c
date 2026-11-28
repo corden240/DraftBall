@@ -2717,7 +2717,9 @@ void EndOfQuarter(struct game_data* game_data)
 		TableWeightEnableAll(player_2_deck);
 		TableWeightEnableAll(shared_deck);
 	}
-	if (game_data->quarter < NUMBER_OF_QUARTERS)
+	if (game_data->quarter < NUMBER_OF_QUARTERS ||
+		(game_data->current_game_mode == 1 && game_data->playoffs &&
+		 game_data->team_1_score == game_data->team_2_score))
 		game_data->plays_remaining_in_quarter = game_data->plays_per_quarter;
 }
 
@@ -2770,7 +2772,11 @@ void EndOfGame(struct game_data* game_data)
 */
 void PlayGame(struct game_data* game_data)
 {
-	for (game_data->quarter; game_data->quarter <= NUMBER_OF_QUARTERS; game_data->quarter++)
+	for (game_data->quarter;
+		game_data->quarter <= NUMBER_OF_QUARTERS ||
+		(game_data->current_game_mode == 1 && game_data->playoffs &&
+		 game_data->team_1_score == game_data->team_2_score);
+		game_data->quarter++)
 	{
 		for (game_data->plays_remaining_in_quarter; game_data->plays_remaining_in_quarter > 0 || game_data->extra_point_needed; game_data->plays_remaining_in_quarter--, game_data->down++)
 		{

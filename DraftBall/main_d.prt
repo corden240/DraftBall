@@ -8,5 +8,5 @@ struct table_weight fifty_fifty_chance[];
 struct table_weight int_grounding_fouls_chance[];
 struct table_weight pass_interference_chance[];
 struct table_weight sim_game_points_to_add[];
-int team_ratings_to_pcchance[];
+extern int team_ratings_to_pcchance[];
 int schedule[SEASON_NUMBER_OF_GAMES][4];

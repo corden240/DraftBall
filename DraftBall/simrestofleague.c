@@ -7,6 +7,9 @@
 #include "teamdata.h"
 #include "main_d.prt"
 
+bool PcChance(int chance);
+int GetTeamRating(int teamid);
+
 
 /*
 * NAME:        SetupTeamDataSeasonGameOtherTeam
@@ -21,6 +24,7 @@ void SetupTeamDataSeasonGameOtherTeam(struct season_data* season_data, struct ga
 	game_data->team_1_score = 0;
 	game_data->team_2_score = 0;
 	game_data->quarter = 1;
+	game_data->playoffs = season_data->playoffs;
 
 
 	const struct team_data* team_1;
@@ -47,7 +51,10 @@ void SimGameOtherTeam(struct game_data* game_data)
 	int team2rating = GetTeamRating(game_data->team_2_id);
 	int team_with_ball = 1;
 
-	for (game_data->quarter; game_data->quarter <= NUMBER_OF_QUARTERS; game_data->quarter++)
+	for (game_data->quarter;
+		game_data->quarter <= NUMBER_OF_QUARTERS ||
+		(game_data->playoffs && game_data->team_1_score == game_data->team_2_score);
+		game_data->quarter++)
 	{
 		for (int plays_per_quarter_in_sim = SIM_PLAYS_PER_QUARTER; plays_per_quarter_in_sim > 0; plays_per_quarter_in_sim--)
 		{
