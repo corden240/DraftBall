@@ -29,8 +29,9 @@
 #define GAME_STATS_NUMBER (3)
 
 #define SEASON_NUMBER_OF_GAMES (6)
-#define SEASON_PLAYOFF_NUMBER_OF_GAMES (3)
+#define SEASON_PLAYOFF_NUMBER_OF_GAMES (4)
 #define	SEASON_MENU_OPTIONS_NUMBER (4)
+#define	END_OF_SEASON_MENU_OPTIONS_NUMBER (3)
 
 #define TWO_MIN_DRIVE_SETTINGS_OPTIONS_NUMBER (8)
 #define TWO_MIN_DRIVE_DEFICIT_0 (2)
@@ -326,7 +327,6 @@ struct season_data {
 	int current_game_mode;
 	bool fouls;
 	int plays_per_quarter;
-	int wildcard_round_needed;
 	int week;
 	bool playoffs;
 };

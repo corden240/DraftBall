@@ -1036,10 +1036,9 @@ int RunPlayYardsGained(struct game_data* game_data)
 
 	if (difference < 0)
 	{
-		if (difference % 4 == 0)
-			yards_gained = difference / 4;
-		else
-			yards_gained = (difference - (4 - (difference % 4))) / 4; // rounding up
+		yards_gained = difference / 4;
+		if (difference % 4 != 0)
+			yards_gained--; // round fractional yards lost away from zero
 	}
 	else
 	{
@@ -2630,7 +2629,7 @@ void ExecutePlay(struct game_data* game_data)
 		}
 		}
 		if (retry)
-			ConsoleShowGameScreen(game_data, "Invalid play type. Please pick a number between 1 and 5.", true, GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
+			ConsoleShowGameScreen(game_data, "Invalid play type.", true, GAME_SPEED * 20); // (you cannot timeout unless 2 plays have already happened this quarter and you have 1 remaining)
 		if (retry || !game_data->play_type)
 			game_data->play_type = GetPlayType(game_data); // player picks what to do: normal play, punt, field goal, kneel, timeout
 	} while (retry);

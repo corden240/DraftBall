@@ -15,6 +15,8 @@ void DisableTeamsDecks(struct game_data* game_data);
 void CoinToss(struct game_data* game_data);
 void SimRegularSeasonGame(struct season_data* season_data);
 void SimRestOfLeagueGames(struct season_data* season_data);
+void PlayPostSeason(struct season_data* season_data);
+
 
 
 /*
@@ -410,6 +412,46 @@ void ShowRegularSeasonMenuBottom(int current_menu_selection, bool first_text, st
 }
 
 /*
+* NAME:        ShowEndOfRegularSeasonMenuBottom
+* DESCRIPTION:
+* INPUTS:      current selection, delay or not, season_data
+* OUTPUTS:     none
+*/
+void ShowEndOfRegularSeasonMenuBottom(int current_menu_selection, bool first_text, struct season_data* season_data)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	printf("\r\n\r\n\r\n\r\n");
+	printf("                       ");
+	if (current_menu_selection == 0)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+	if (first_text)
+		PrintTextWithDelays("Play post season");
+	else
+		printf("Play post season");
+
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+	printf("       ");
+	if (current_menu_selection == 2)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+	if (first_text)
+		PrintTextWithDelays("Leaderboard");
+	else
+		printf("Leaderboard");
+
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+
+	printf("       ");
+	if (current_menu_selection == 3)
+		SetConsoleTextAttribute(hConsole, CONSOLE_BG_WHITE | CONSOLE_TEXT_GREEN);
+	if (first_text)
+		PrintTextWithDelays("Quit");
+	else
+		printf("Quit");
+
+	SetConsoleTextAttribute(hConsole, CONSOLE_TEXT_WHITE);
+}
+
+/*
 * NAME:        ShowRegularSeasonMenu
 * DESCRIPTION: game menu options
 * INPUTS:      current selection, delay or not, season_data
@@ -426,6 +468,25 @@ static void ShowRegularSeasonMenu(int current_menu_selection, bool first_text, s
 	ShowRegularSeasonMenuTop(first_text, season_data);
 	
 	ShowRegularSeasonMenuBottom(current_menu_selection, first_text, season_data);
+}
+
+/*
+* NAME:        ShowEndOfRegularSeasonMenu
+* DESCRIPTION: game menu options
+* INPUTS:      current selection, delay or not, season_data
+* OUTPUTS:     none
+*/
+static void ShowEndOfRegularSeasonMenu(int current_menu_selection, bool first_text, struct season_data* season_data)
+{
+	ResetScreen();
+	ShowMenuTitle();
+
+	printf("\r\n\r\n");
+	printf("\r\n\r\n");
+
+	ShowRegularSeasonMenuTop(first_text, season_data);
+
+	ShowEndOfRegularSeasonMenuBottom(current_menu_selection, first_text, season_data);
 }
 
 /*
@@ -455,6 +516,49 @@ int RegularSeasonMenuOutcome(struct season_data* season_data) {
 				break;
 			case 77: // right arrow
 				if(current_menu_selection < (SEASON_MENU_OPTIONS_NUMBER - 1))
+					current_menu_selection++;
+				break;
+			default:
+				break;
+			}
+		}
+		else if (ch == 13) {// Enter key
+			return current_menu_selection;
+		}
+		else
+			;
+		// any other key: ignored, loop waits for another press
+	} while (!game_chosen);
+	return -1;
+}
+
+/*
+* NAME:        EndOfRegularSeasonMenuOutcome
+* DESCRIPTION: Gets which entry picked
+* INPUTS:      season_data
+* OUTPUTS:     menu selection
+*/
+int EndOfRegularSeasonMenuOutcome(struct season_data* season_data) {
+
+	bool game_chosen = false;
+	int current_menu_selection = 0;
+	do {
+		ShowEndOfRegularSeasonMenu(current_menu_selection, false, season_data);
+		int ch = getch();
+
+		if (ch == 0 || ch == 224) {   // extended key: read the scan code
+			ch = getch();
+			switch (ch) {
+			case 72: // up arrow
+				break;
+			case 80: // down arrow
+				break;
+			case 75: // left arrow
+				if (current_menu_selection > 0)
+					current_menu_selection--;
+				break;
+			case 77: // right arrow
+				if (current_menu_selection < (END_OF_SEASON_MENU_OPTIONS_NUMBER - 1))
 					current_menu_selection++;
 				break;
 			default:
@@ -866,6 +970,28 @@ void PlayRegularSeasonGame(struct season_data* season_data)
 }
 
 /*
+* NAME:        EndOfRegularSeasonMenu
+* DESCRIPTION: shows between game regular season menu
+* INPUTS:      season_data
+* OUTPUTS:     play, sim or quit
+*/
+int EndOfRegularSeasonMenu(struct season_data* season_data)
+{
+	system("cls");
+	ShowMenuTitle();
+	ShowEndOfRegularSeasonMenu(0, true, season_data);
+	do {
+		int selection = EndOfRegularSeasonMenuOutcome(season_data);
+		if (selection == 1)
+			RegularSeasonLeaderboardMenu(season_data);
+		else
+			return selection;
+		system("cls");
+	} while (1);
+	return -1;
+}
+
+/*
 * NAME:        PlayRegularSeason
 * DESCRIPTION: play out 6 regular season games
 * INPUTS:      season data
@@ -886,42 +1012,14 @@ int PlayRegularSeason(struct season_data* season_data)
 		else if (play_or_sim_or_quit == (SEASON_MENU_OPTIONS_NUMBER - 4)) // "Play game"
 		{
 			PlayRegularSeasonGame(season_data);
-		}
+		}	
 
 		SimRestOfLeagueGames(season_data); // simulate all other games for this week
 		season_data->week++;
 	}
 
-	// EndOfRegularSeasonMenu(); // show end of season screen? 
-	// if not made post season "Sim post season" otherwise "Play post season"
-}
-
-/*
-* NAME:        PlayPostSeason
-* DESCRIPTION: play out post season games
-* INPUTS:      season data
-* OUTPUTS:     none
-*/
-void PlayPostSeason(struct season_data* season_data)
-{
-	for (int post_season_game_no = 1; post_season_game_no <= (SEASON_PLAYOFF_NUMBER_OF_GAMES + season_data->wildcard_round_needed); post_season_game_no++)
-	{
-		
-		// Show default screen between games (shows playoff bracket) with options like "Next game", Quit season (with an are you sure screen?)
-		// Option "Show leaderboard" that shows 2 conferences
-		// Get menu choice from that default screen^ and if go to next game then:
-
-
-
-		// (SetupTeamData(season_data); or similar needs to happen before each game that is played)
-		// play next season game
-		// export game data back into season data
-
-		// simulate other games for this week
-	}
-
-	// show end of season screen? one to be photographable to show total season overall outcome
-	// "Quit"
+	if (EndOfRegularSeasonMenu(season_data) == 0) // show end of season screen? 
+		PlayPostSeason(season_data);
 }
 
 /*

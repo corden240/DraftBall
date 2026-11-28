@@ -147,6 +147,7 @@
     <ClCompile Include="main_d.c" />
     <ClCompile Include="menu.c" />
     <ClCompile Include="play.c" />
+    <ClCompile Include="postseason.c" />
     <ClCompile Include="rng.c" />
     <ClCompile Include="season.c" />
     <ClCompile Include="setupgame.c" />
